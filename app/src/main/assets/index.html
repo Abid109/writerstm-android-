@@ -50,6 +50,19 @@
         #videoContainer:-webkit-full-screen { width: 100vw; height: 100vh; background: black; }
         #videoContainer:-ms-fullscreen { width: 100vw; height: 100vh; background: black; }
         #videoContainer:fullscreen { width: 100vw; height: 100vh; background: black; }
+        
+        /* Fallback Fullscreen for WebViews (APKs) */
+        .webview-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 99999 !important;
+            background: black !important;
+        }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen">
@@ -904,54 +917,55 @@
         });
 
         fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                if (videoContainer.requestFullscreen) {
-                    videoContainer.requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                    });
-                } else if (videoContainer.webkitRequestFullscreen) { /* Safari */
-                    videoContainer.webkitRequestFullscreen();
-                } else if (videoContainer.msRequestFullscreen) { /* IE11 */
-                    videoContainer.msRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) { /* Safari */
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) { /* IE11 */
-                    document.msExitFullscreen();
-                }
-            }
-        });
-
-        // Listen for fullscreen changes to attempt rotation
-        document.addEventListener('fullscreenchange', async () => {
-            if (document.fullscreenElement) {
+            const isCurrentlyFullscreen = videoContainer.classList.contains('webview-fullscreen') || document.fullscreenElement;
+            
+            if (!isCurrentlyFullscreen) {
+                // 1. Apply CSS Fullscreen (Guaranteed to work in APK WebViews)
+                videoContainer.classList.add('webview-fullscreen');
                 fullscreenBtn.innerHTML = `<i class="ph ph-corners-in text-base"></i> <span class="hidden sm:inline">Exit</span>`;
                 
-                // Attempt to force landscape orientation if supported (Mobile)
-                if (screen.orientation && screen.orientation.lock) {
-                    try {
-                        await screen.orientation.lock('landscape');
-                    } catch (error) {
-                        console.warn("Screen orientation lock failed or not supported:", error);
+                // 2. Try Native Fullscreen (For standard browsers)
+                try {
+                    if (videoContainer.requestFullscreen) {
+                        videoContainer.requestFullscreen().catch(err => console.warn(err));
+                    } else if (videoContainer.webkitRequestFullscreen) {
+                        videoContainer.webkitRequestFullscreen();
                     }
+                } catch(e) {}
+                
+                // 3. Try to lock orientation to landscape (Browser only)
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(() => {});
                 }
             } else {
+                // 1. Remove CSS Fullscreen
+                videoContainer.classList.remove('webview-fullscreen');
                 fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
                 
-                // Unlock orientation when exiting fullscreen
-                if (screen.orientation && screen.orientation.unlock) {
-                    try {
-                        screen.orientation.unlock();
-                    } catch (error) {
-                        // ignore
+                // 2. Exit Native Fullscreen
+                try {
+                    if (document.fullscreenElement && document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
                     }
+                } catch(e) {}
+                
+                // 3. Unlock orientation
+                if (screen.orientation && screen.orientation.unlock) {
+                    try { screen.orientation.unlock(); } catch(e) {}
                 }
             }
         });
 
+        // Listen for native fullscreen changes (like pressing ESC on a keyboard) to sync our button UI
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                // If exited natively, ensure our CSS class is also removed
+                videoContainer.classList.remove('webview-fullscreen');
+                fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
+            }
+        });
 
         function getStreamUrl() {
             const server = serverSelect.value;
