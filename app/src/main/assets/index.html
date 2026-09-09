@@ -30,6 +30,26 @@
         
         /* Global Focus Styles for TV Remotes / Keyboard Navigation */
         *:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; }
+        
+        .click-shield {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
+            transition: opacity 0.3s;
+        }
+        .click-shield:hover i { transform: scale(1.1); color: #dc2626; }
+        .click-shield.resolved { display: none; }
+        
+        /* Ensure iframe fills container in fullscreen */
+        #videoContainer:-webkit-full-screen { width: 100vw; height: 100vh; background: black; }
+        #videoContainer:-ms-fullscreen { width: 100vw; height: 100vh; background: black; }
+        #videoContainer:fullscreen { width: 100vw; height: 100vh; background: black; }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen">
@@ -147,7 +167,7 @@
             <div class="flex-1 relative flex flex-col">
                 
                 <!-- Player Controls Bar -->
-                <div class="p-3 sm:p-4 bg-zinc-950 border-b border-zinc-900 flex flex-wrap gap-4 items-center justify-between">
+                <div class="p-3 sm:p-4 bg-zinc-950 border-b border-zinc-900 flex flex-wrap gap-4 items-center justify-between z-20">
                     
                     <!-- Server & Audio Selection -->
                     <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
@@ -166,6 +186,18 @@
                             </select>
                         </div>
 
+                        <div class="h-6 w-px bg-zinc-800 hidden sm:block"></div>
+
+                        <div class="flex items-center gap-2">
+                            <button id="adBlockToggle" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors" title="Enable aggressive popup blocking">
+                                <i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline">Ad-Shield</span>
+                            </button>
+                            
+                            <button id="fullscreenBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-white border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors">
+                                <i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>
+                            </button>
+                        </div>
+                        
                         <div class="h-6 w-px bg-zinc-800 hidden sm:block"></div>
 
                         <!-- Audio Sub/Dub Toggle -->
@@ -193,10 +225,19 @@
                     </div>
                 </div>
 
-                <!-- Video Frame -->
-                <div class="flex-1 w-full relative bg-black">
-                    <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden" allowfullscreen allow="autoplay; fullscreen"></iframe>
-                    <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black">
+                <!-- Video Frame Container (Target for Fullscreen) -->
+                <div id="videoContainer" class="flex-1 w-full relative bg-black flex flex-col">
+                    
+                    <!-- Ad-Block Click Shield -->
+                    <div id="clickShield" class="click-shield flex flex-col gap-2">
+                         <i class="ph-fill ph-play-circle text-6xl text-white/80 transition-transform duration-300"></i>
+                         <p class="text-white/80 text-sm font-medium bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">Click to bypass initial ads & play</p>
+                    </div>
+
+                    <!-- We use sandbox attributes dynamically based on ad-block settings -->
+                    <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
+                    
+                    <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
                         <i class="ph ph-circle-notch animate-spin text-5xl text-red-600 mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"></i>
                         <p class="text-zinc-500 text-sm">Loading media engine...</p>
                     </div>
@@ -265,6 +306,13 @@
         const modalTitle = document.getElementById('modalTitle');
         const modalBookmarkBtn = document.getElementById('modalBookmarkBtn');
         const streamStatus = document.getElementById('streamStatus');
+        
+        const videoContainer = document.getElementById('videoContainer');
+        const clickShield = document.getElementById('clickShield');
+        const adBlockToggle = document.getElementById('adBlockToggle');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        
+        let isAdShieldActive = true; // Default to on
         
         const serverSelect = document.getElementById('serverSelect');
         const audioSubBtn = document.getElementById('audio-sub');
@@ -829,6 +877,82 @@
             loadEpisodes(currentMediaId, currentSeason);
         });
 
+        clickShield.addEventListener('click', (e) => {
+            // The user clicked the shield. We hide it, allowing the next click to hit the iframe.
+            // This absorbs the initial transparent overlay that many servers use to trigger a popup.
+            e.preventDefault();
+            clickShield.classList.add('resolved');
+            
+            // Try to force focus onto the iframe
+            setTimeout(() => {
+                videoFrame.focus();
+            }, 100);
+        });
+
+        adBlockToggle.addEventListener('click', () => {
+            isAdShieldActive = !isAdShieldActive;
+            
+            if(isAdShieldActive) {
+                adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors";
+                adBlockToggle.innerHTML = `<i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline">Ad-Shield On</span>`;
+            } else {
+                adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors";
+                adBlockToggle.innerHTML = `<i class="ph ph-shield text-base"></i> <span class="hidden sm:inline">Ad-Shield Off</span>`;
+            }
+            
+            updateStreamIframe(); // Reload frame with new settings
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                if (videoContainer.requestFullscreen) {
+                    videoContainer.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else if (videoContainer.webkitRequestFullscreen) { /* Safari */
+                    videoContainer.webkitRequestFullscreen();
+                } else if (videoContainer.msRequestFullscreen) { /* IE11 */
+                    videoContainer.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+            }
+        });
+
+        // Listen for fullscreen changes to attempt rotation
+        document.addEventListener('fullscreenchange', async () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = `<i class="ph ph-corners-in text-base"></i> <span class="hidden sm:inline">Exit</span>`;
+                
+                // Attempt to force landscape orientation if supported (Mobile)
+                if (screen.orientation && screen.orientation.lock) {
+                    try {
+                        await screen.orientation.lock('landscape');
+                    } catch (error) {
+                        console.warn("Screen orientation lock failed or not supported:", error);
+                    }
+                }
+            } else {
+                fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
+                
+                // Unlock orientation when exiting fullscreen
+                if (screen.orientation && screen.orientation.unlock) {
+                    try {
+                        screen.orientation.unlock();
+                    } catch (error) {
+                        // ignore
+                    }
+                }
+            }
+        });
+
+
         function getStreamUrl() {
             const server = serverSelect.value;
             const lang = dubLangSelect.value;
@@ -871,6 +995,17 @@
             
             videoFrame.classList.add('hidden');
             playerLoader.classList.remove('hidden');
+            
+            clickShield.classList.remove('resolved');
+            
+            // Note: Sandboxing can break legitimate video players on some servers.
+            // We allow scripts (required for video players) and same-origin, 
+            // but block popups (allow-popups is omitted) and top navigation.
+            if(isAdShieldActive) {
+                videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+            } else {
+                videoFrame.removeAttribute('sandbox'); // Remove sandbox completely if off
+            }
             
             streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Connecting to stream...`;
             streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
