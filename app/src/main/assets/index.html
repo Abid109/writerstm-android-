@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Writerstm.stream</title>
-    <!-- FIX: Removed 'defer' attribute to ensure synchronous loading of CSS engine -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -63,6 +62,23 @@
             z-index: 99999 !important;
             background: black !important;
         }
+        
+        /* Force landscape visually if device is held in portrait and manifest is locked */
+        @media (orientation: portrait) {
+            .webview-fullscreen.force-landscape {
+                /* When in portrait mode, we need to swap width and height */
+                /* to make the video display sideways across the screen. */
+                top: 50% !important;
+                left: 50% !important;
+                width: 100vh !important;
+                height: 100vw !important;
+                /* Translate back to center and rotate 90 degrees */
+                transform: translate(-50%, -50%) rotate(90deg) !important;
+            }
+        }
+
+        #floatingExitBtn { display: none; }
+        .webview-fullscreen #floatingExitBtn { display: flex !important; }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen">
@@ -241,6 +257,11 @@
                 <!-- Video Frame Container (Target for Fullscreen) -->
                 <div id="videoContainer" class="flex-1 w-full relative bg-black flex flex-col">
                     
+                    <!-- Floating Exit Button for Fake Fullscreen -->
+                    <button id="floatingExitBtn" class="absolute top-6 right-6 z-[999999] bg-black/70 text-white w-12 h-12 rounded-full hover:bg-black/90 transition-colors backdrop-blur-md border border-zinc-700 items-center justify-center cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+                        <i class="ph ph-corners-in text-2xl"></i>
+                    </button>
+
                     <!-- Ad-Block Click Shield -->
                     <div id="clickShield" class="click-shield flex flex-col gap-2">
                          <i class="ph-fill ph-play-circle text-6xl text-white/80 transition-transform duration-300"></i>
@@ -324,6 +345,7 @@
         const clickShield = document.getElementById('clickShield');
         const adBlockToggle = document.getElementById('adBlockToggle');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const floatingExitBtn = document.getElementById('floatingExitBtn');
         
         let isAdShieldActive = true; // Default to on
         
@@ -800,6 +822,10 @@
             playerModal.classList.add('hidden');
             videoFrame.src = '';
             currentMediaObj = null;
+            
+            // Safety: Ensure fake fullscreen is disabled if modal is closed
+            videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
+            fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
         });
 
         async function loadTvDetails(id) {
@@ -920,8 +946,8 @@
             const isCurrentlyFullscreen = videoContainer.classList.contains('webview-fullscreen') || document.fullscreenElement;
             
             if (!isCurrentlyFullscreen) {
-                // 1. Apply CSS Fullscreen (Guaranteed to work in APK WebViews)
-                videoContainer.classList.add('webview-fullscreen');
+                // 1. Apply CSS Fullscreen and CSS Visual Rotation Fallback
+                videoContainer.classList.add('webview-fullscreen', 'force-landscape');
                 fullscreenBtn.innerHTML = `<i class="ph ph-corners-in text-base"></i> <span class="hidden sm:inline">Exit</span>`;
                 
                 // 2. Try Native Fullscreen (For standard browsers)
@@ -939,7 +965,7 @@
                 }
             } else {
                 // 1. Remove CSS Fullscreen
-                videoContainer.classList.remove('webview-fullscreen');
+                videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
                 fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
                 
                 // 2. Exit Native Fullscreen
@@ -957,12 +983,17 @@
                 }
             }
         });
+        
+        // Link the floating exit button to the same logic
+        floatingExitBtn.addEventListener('click', () => {
+            fullscreenBtn.click();
+        });
 
         // Listen for native fullscreen changes (like pressing ESC on a keyboard) to sync our button UI
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement) {
                 // If exited natively, ensure our CSS class is also removed
-                videoContainer.classList.remove('webview-fullscreen');
+                videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
                 fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
             }
         });
