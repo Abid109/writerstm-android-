@@ -9,7 +9,8 @@
         android:label="Writerstm.stream"
         android:supportsRtl="true"
         android:theme="@style/Theme.Writerstm"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:icon="@drawable/ic_launcher">
 
         <activity
             android:name=".MainActivity"
