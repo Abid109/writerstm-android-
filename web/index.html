@@ -106,6 +106,23 @@
             scrollbar-width: thin;
             scrollbar-color: #dc2626 #000;
         }
+
+        /* ===== SEARCH BAR VISIBILITY FIX (Tailwind-CDN independent) ===== */
+        #desktopSearchWrap { flex: 1 1 0%; max-width: 28rem; margin-left: 2rem; margin-right: 2rem; }
+        #desktopSearchWrap input, #mobileSearchBar input {
+            width: 100%; background: #18181b; border: 1px solid #27272a; color: #fff;
+            border-radius: 9999px; padding: 8px 16px 8px 40px; font-size: 14px; outline: none;
+        }
+        #desktopSearchWrap input:focus, #mobileSearchBar input:focus { border-color: #dc2626; }
+        #desktopSearchWrap input::placeholder, #mobileSearchBar input::placeholder { color: #71717a; }
+        @media (min-width: 768px) {
+            #desktopSearchWrap { display: block !important; }
+            #mobileSearchBar { display: none !important; }
+        }
+        @media (max-width: 767.98px) {
+            #desktopSearchWrap { display: none !important; }
+            #mobileSearchBar { display: block !important; }
+        }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen">
@@ -123,7 +140,7 @@
                 </div>
                 
                 <!-- Desktop Search -->
-                <div class="hidden md:block flex-1 max-w-md mx-8">
+                <div id="desktopSearchWrap" class="hidden md:block flex-1 max-w-md mx-8">
                     <div class="relative">
                         <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
                         <input type="text" id="searchInput" placeholder="Search movies..." class="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full focus:ring-2 focus:ring-red-600 focus:border-red-600 block pl-10 p-2 transition-all outline-none placeholder-zinc-500">
@@ -140,7 +157,7 @@
     </nav>
 
     <!-- Mobile Search -->
-    <div class="md:hidden p-4 bg-black border-b border-zinc-900">
+    <div id="mobileSearchBar" class="md:hidden p-4 bg-black border-b border-zinc-900">
         <div class="relative">
             <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
             <input type="text" id="mobileSearchInput" placeholder="Search movies..." class="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full focus:ring-2 focus:ring-red-600 focus:border-red-600 block pl-10 p-2 transition-all outline-none placeholder-zinc-500">
