@@ -1272,10 +1272,3 @@
     </script>
 </body>
 </html>
-```eof
-
-### Edits made:
-1. **CSP Head Tag:** Added `<meta http-equiv="Content-Security-Policy">` blocking dangerous `object` embeds and enforcing a secure base URI.
-2. **Global Redirect/Popup Script:** Added a script hook that actively blocks untrusted third-party popups via `window.open` and tracks user clicking intent to block malicious cross-origin iframe redirects (`beforeunload` hijacking). 
-3. **Hardened Sandbox:** Changed the iframe sandbox applied by the `Ad-Shield` toggle. It now completely omits `allow-top-navigation`, `allow-popups`, and `allow-downloads`. Thus, even if a sketchy third-party stream attempts to auto-download an `.exe` or take over the parent window, the browser will forcefully block it.
-4. **Toast Notification:** Added a small popup notification on-load reassuring users that the shield is active.
