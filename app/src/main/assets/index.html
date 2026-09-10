@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- SECURITY & MALWARE PROTECTION LAYER -->
-    <!-- Blocks dangerous object embeds (Flash/Java malware), restricts base URI changes, and forces secure connections -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; object-src 'none'; base-uri 'self';">
     
     <title>Writerstm.stream - External Player & 1DM Supported</title>
@@ -14,28 +13,31 @@
     
     <script>
         // MALWARE & REDIRECT SHIELD
-        // Prevents third-party scripts from unexpectedly opening popups or hijacking the main window
         const originalWindowOpen = window.open;
         window.open = function(url, windowName, windowFeatures) {
             console.warn("Writerstm Security Shield blocked an unauthorized popup attempt to:", url);
-            return null; // Neutralize popup
+            return null; 
         };
 
-        // Prevent unauthorized auto-redirects (drive-by hijack attempts)
         let isUserIntentionalClick = false;
         window.addEventListener('mousedown', () => { isUserIntentionalClick = true; setTimeout(() => isUserIntentionalClick = false, 1500); });
         window.addEventListener('keydown', () => { isUserIntentionalClick = true; setTimeout(() => isUserIntentionalClick = false, 1500); });
         
         window.addEventListener('beforeunload', (e) => {
-            // If the user didn't click/type recently and an iframe is active, it might be a malicious redirect attempt
             if (!isUserIntentionalClick && document.activeElement && document.activeElement.tagName === 'IFRAME') {
                 e.preventDefault();
                 e.returnValue = 'Warning: A third-party stream attempted to redirect you. Stay safe!';
                 return e.returnValue;
             }
         });
+
+        // Global Error Handler to prevent silent blank screens
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error("Global script error:", message, "at line:", lineno);
+            // We don't block the whole screen, but log it so other scripts might still run
+            return false; 
+        };
     </script>
-    <!-- END SECURITY LAYER -->
 
     <style>
         body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: #000; color: #fff; }
@@ -100,7 +102,6 @@
         #floatingExitBtn { display: none; }
         .webview-fullscreen #floatingExitBtn { display: flex !important; }
 
-        /* Scraper Container specific styles */
         #scraperContainer {
             scrollbar-width: thin;
             scrollbar-color: #dc2626 #000;
@@ -272,7 +273,6 @@
 
                     <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
                     
-                    <!-- Reusable UI Container for scrapers (Torrentio & Direct Http) -->
                     <div id="scraperContainer" class="absolute inset-0 z-10 hidden bg-black p-4 overflow-y-auto"></div>
 
                     <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
@@ -316,78 +316,93 @@
         let currentAudioType = 'sub';
         let currentDirectUrl = null; 
 
-        const mediaGrid = document.getElementById('mediaGrid');
-        const mainLoader = document.getElementById('mainLoader');
-        const searchInput = document.getElementById('searchInput');
-        const mobileSearchInput = document.getElementById('mobileSearchInput');
+        // DOM Elements mapping safely
+        const $ = (id) => document.getElementById(id);
+        const mediaGrid = $('mediaGrid');
+        const mainLoader = $('mainLoader');
+        const searchInput = $('searchInput');
+        const mobileSearchInput = $('mobileSearchInput');
         const tabBtns = document.querySelectorAll('.tab-btn');
-        const categoryFilter = document.getElementById('categoryFilter');
-        const genreFilter = document.getElementById('genreFilter');
-        const sectionTitle = document.getElementById('sectionTitle');
-        const viewWatchlistBtn = document.getElementById('viewWatchlistBtn');
-        const clearWatchlistBtn = document.getElementById('clearWatchlistBtn');
+        const categoryFilter = $('categoryFilter');
+        const genreFilter = $('genreFilter');
+        const sectionTitle = $('sectionTitle');
+        const viewWatchlistBtn = $('viewWatchlistBtn');
+        const clearWatchlistBtn = $('clearWatchlistBtn');
         
-        const pagination = document.getElementById('pagination');
-        const prevPageBtn = document.getElementById('prevPageBtn');
-        const nextPageBtn = document.getElementById('nextPageBtn');
-        const pageIndicator = document.getElementById('pageIndicator');
+        const pagination = $('pagination');
+        const prevPageBtn = $('prevPageBtn');
+        const nextPageBtn = $('nextPageBtn');
+        const pageIndicator = $('pageIndicator');
 
-        const playerModal = document.getElementById('playerModal');
-        const closeModalBtn = document.getElementById('closeModal');
-        const videoFrame = document.getElementById('videoFrame');
-        const playerLoader = document.getElementById('playerLoader');
-        const loaderMessage = document.getElementById('loaderMessage');
-        const scraperContainer = document.getElementById('scraperContainer');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalBookmarkBtn = document.getElementById('modalBookmarkBtn');
-        const streamStatus = document.getElementById('streamStatus');
+        const playerModal = $('playerModal');
+        const closeModalBtn = $('closeModal');
+        const videoFrame = $('videoFrame');
+        const playerLoader = $('playerLoader');
+        const loaderMessage = $('loaderMessage');
+        const scraperContainer = $('scraperContainer');
+        const modalTitle = $('modalTitle');
+        const modalBookmarkBtn = $('modalBookmarkBtn');
+        const streamStatus = $('streamStatus');
         
-        const videoContainer = document.getElementById('videoContainer');
-        const clickShield = document.getElementById('clickShield');
-        const adBlockToggle = document.getElementById('adBlockToggle');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const externalPlayerBtn = document.getElementById('externalPlayerBtn');
-        const floatingExitBtn = document.getElementById('floatingExitBtn');
+        const videoContainer = $('videoContainer');
+        const clickShield = $('clickShield');
+        const adBlockToggle = $('adBlockToggle');
+        const fullscreenBtn = $('fullscreenBtn');
+        const externalPlayerBtn = $('externalPlayerBtn');
+        const floatingExitBtn = $('floatingExitBtn');
         
-        // Defaults to True - Keeps malware and redirects firmly blocked
         let isAdShieldActive = true; 
         
-        const serverSelect = document.getElementById('serverSelect');
-        const audioSubBtn = document.getElementById('audio-sub');
-        const audioDubBtn = document.getElementById('audio-dub');
-        const dubLangSelect = document.getElementById('dub-lang-select');
+        const serverSelect = $('serverSelect');
+        const audioSubBtn = $('audio-sub');
+        const audioDubBtn = $('audio-dub');
+        const dubLangSelect = $('dub-lang-select');
         
-        const tvSidebar = document.getElementById('tvSidebar');
-        const seasonSelect = document.getElementById('seasonSelect');
-        const episodeList = document.getElementById('episodeList');
+        const tvSidebar = $('tvSidebar');
+        const seasonSelect = $('seasonSelect');
+        const episodeList = $('episodeList');
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadWatchlist();
-            loadGenres();
-            fetchMedia();
-            
-            if(localStorage.getItem('writerstm_preferred_server')) {
-                serverSelect.value = localStorage.getItem('writerstm_preferred_server');
-            }
-            
-            // Notify user of protection
-            setTimeout(() => {
-                showToast("🛡️ Security Shield Active: Blocking Malware & Popups", 4000);
-            }, 1500);
-        });
-        
-        serverSelect.addEventListener('change', (e) => {
-            localStorage.setItem('writerstm_preferred_server', e.target.value);
-            currentDirectUrl = null; 
-            updateStreamIframe();
-        });
-
+        // Safe storage check to prevent fatal SecurityErrors in restricted webviews
         function safeStorageAccess() {
             try {
                 localStorage.setItem('__test__', '__test__');
                 localStorage.removeItem('__test__');
                 return true;
             } catch(e) { return false; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                loadWatchlist();
+                loadGenres();
+                fetchMedia();
+                
+                if(safeStorageAccess()) {
+                    const pref = localStorage.getItem('writerstm_preferred_server');
+                    if (pref && serverSelect) {
+                        serverSelect.value = pref;
+                    }
+                }
+                
+                setTimeout(() => {
+                    showToast("🛡️ Security Shield Active: Blocking Malware & Popups", 4000);
+                }, 1500);
+            } catch (err) {
+                console.error("Initialization Error:", err);
+                if (mediaGrid) {
+                    mediaGrid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10 bg-red-950/20 rounded-xl border border-red-900"><i class="ph-fill ph-warning-circle text-4xl mb-3 block mx-auto"></i><p class="font-semibold text-lg">Failed to initialize application.</p><p class="text-sm mt-2 opacity-80">This might be due to strict browser privacy settings or a blocked script.</p></div>`;
+                }
+            }
+        });
+        
+        if (serverSelect) {
+            serverSelect.addEventListener('change', (e) => {
+                if (safeStorageAccess()) {
+                    localStorage.setItem('writerstm_preferred_server', e.target.value);
+                }
+                currentDirectUrl = null; 
+                updateStreamIframe();
+            });
         }
         
         function loadWatchlist() {
@@ -427,6 +442,7 @@
         }
         
         function updateWatchlistUI() {
+            if (!viewWatchlistBtn) return;
             const count = watchlist.length;
             viewWatchlistBtn.innerHTML = `
                 <i class="ph-fill ph-bookmarks text-xl ${isWatchlistView ? 'text-red-600 drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]' : ''}"></i>
@@ -434,34 +450,41 @@
             `;
         }
         
-        viewWatchlistBtn.addEventListener('click', () => {
-            isWatchlistView = !isWatchlistView;
-            if(isWatchlistView) {
-                tabBtns.forEach(b => {
-                    b.classList.remove('bg-red-600', 'text-white', 'shadow-sm');
-                    b.classList.add('text-zinc-400');
-                });
-                categoryFilter.disabled = true; genreFilter.disabled = true;
-                categoryFilter.classList.add('opacity-50'); genreFilter.classList.add('opacity-50');
-                sectionTitle.textContent = "My Watchlist";
-                clearWatchlistBtn.classList.remove('hidden'); pagination.classList.add('hidden');
-                renderGrid(watchlist);
-            } else {
-                categoryFilter.disabled = false; genreFilter.disabled = false;
-                categoryFilter.classList.remove('opacity-50'); genreFilter.classList.remove('opacity-50');
-                clearWatchlistBtn.classList.add('hidden');
-                document.querySelector(`[data-type="${currentType}"]`).click();
-            }
-            updateWatchlistUI();
-        });
+        if (viewWatchlistBtn) {
+            viewWatchlistBtn.addEventListener('click', () => {
+                isWatchlistView = !isWatchlistView;
+                if(isWatchlistView) {
+                    tabBtns.forEach(b => {
+                        b.classList.remove('bg-red-600', 'text-white', 'shadow-sm');
+                        b.classList.add('text-zinc-400');
+                    });
+                    if (categoryFilter) { categoryFilter.disabled = true; categoryFilter.classList.add('opacity-50'); }
+                    if (genreFilter) { genreFilter.disabled = true; genreFilter.classList.add('opacity-50'); }
+                    if (sectionTitle) sectionTitle.textContent = "My Watchlist";
+                    if (clearWatchlistBtn) clearWatchlistBtn.classList.remove('hidden');
+                    if (pagination) pagination.classList.add('hidden');
+                    renderGrid(watchlist);
+                } else {
+                    if (categoryFilter) { categoryFilter.disabled = false; categoryFilter.classList.remove('opacity-50'); }
+                    if (genreFilter) { genreFilter.disabled = false; genreFilter.classList.remove('opacity-50'); }
+                    if (clearWatchlistBtn) clearWatchlistBtn.classList.add('hidden');
+                    const activeTab = document.querySelector(`[data-type="${currentType}"]`);
+                    if(activeTab) activeTab.click();
+                }
+                updateWatchlistUI();
+            });
+        }
         
-        clearWatchlistBtn.addEventListener('click', () => {
-            if(confirm("Are you sure you want to clear your watchlist?")) {
-                watchlist = []; saveWatchlist(); renderGrid(watchlist); updateWatchlistUI();
-            }
-        });
+        if (clearWatchlistBtn) {
+            clearWatchlistBtn.addEventListener('click', () => {
+                if(confirm("Are you sure you want to clear your watchlist?")) {
+                    watchlist = []; saveWatchlist(); renderGrid(watchlist); updateWatchlistUI();
+                }
+            });
+        }
 
         async function loadGenres() {
+            if (!genreFilter) return;
             if(currentType === 'archive') {
                 populateGenreSelect([
                     {id: "collection:PublicDomainFilms", name: "Public Domain Films"},
@@ -485,11 +508,12 @@
                     const res = await fetch(`https://api.themoviedb.org/3/genre/${currentType}/list?api_key=${TMDB_API_KEY}`);
                     const data = await res.json();
                     if(data && data.genres) populateGenreSelect(data.genres);
-                } catch(e) { console.error(e); }
+                } catch(e) { console.error("Failed to load genres:", e); }
             }
         }
         
         function populateGenreSelect(genres) {
+            if (!genreFilter) return;
             genreFilter.innerHTML = '<option value="">All Genres</option>';
             genres.forEach(g => {
                 const opt = document.createElement('option');
@@ -501,7 +525,7 @@
 
         tabBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                if(isWatchlistView) viewWatchlistBtn.click();
+                if(isWatchlistView && viewWatchlistBtn) viewWatchlistBtn.click();
                 tabBtns.forEach(b => { b.classList.remove('bg-red-600', 'text-white', 'shadow-sm'); b.classList.add('text-zinc-400'); });
                 e.target.classList.remove('text-zinc-400'); e.target.classList.add('bg-red-600', 'text-white', 'shadow-sm');
                 
@@ -510,38 +534,39 @@
                 if(currentType === 'tv') ph = "Search TV series...";
                 if(currentType === 'anime') ph = "Search anime...";
                 if(currentType === 'archive') ph = "Search public domain films...";
-                searchInput.placeholder = ph; mobileSearchInput.placeholder = ph;
+                if (searchInput) { searchInput.placeholder = ph; searchInput.value = ''; }
+                if (mobileSearchInput) { mobileSearchInput.placeholder = ph; mobileSearchInput.value = ''; }
 
-                currentQuery = ''; searchInput.value = ''; mobileSearchInput.value = '';
+                currentQuery = ''; 
                 currentGenre = ''; currentPage = 1;
                 loadGenres(); fetchMedia();
             });
         });
 
-        categoryFilter.addEventListener('change', (e) => { currentCategory = e.target.value; currentPage = 1; fetchMedia(); });
-        genreFilter.addEventListener('change', (e) => { currentGenre = e.target.value; currentPage = 1; fetchMedia(); });
+        if (categoryFilter) categoryFilter.addEventListener('change', (e) => { currentCategory = e.target.value; currentPage = 1; fetchMedia(); });
+        if (genreFilter) genreFilter.addEventListener('change', (e) => { currentGenre = e.target.value; currentPage = 1; fetchMedia(); });
 
         const handleSearch = (e) => {
             if(e.key === 'Enter') {
                 currentQuery = e.target.value; currentPage = 1;
-                if(isWatchlistView) viewWatchlistBtn.click(); else fetchMedia();
+                if(isWatchlistView && viewWatchlistBtn) viewWatchlistBtn.click(); else fetchMedia();
             }
         };
-        searchInput.addEventListener('keypress', handleSearch);
-        mobileSearchInput.addEventListener('keypress', handleSearch);
+        if (searchInput) searchInput.addEventListener('keypress', handleSearch);
+        if (mobileSearchInput) mobileSearchInput.addEventListener('keypress', handleSearch);
         
-        prevPageBtn.addEventListener('click', () => { if(currentPage > 1) { currentPage--; fetchMedia(); } });
-        nextPageBtn.addEventListener('click', () => { currentPage++; fetchMedia(); });
+        if (prevPageBtn) prevPageBtn.addEventListener('click', () => { if(currentPage > 1) { currentPage--; fetchMedia(); } });
+        if (nextPageBtn) nextPageBtn.addEventListener('click', () => { currentPage++; fetchMedia(); });
 
         function updateSectionTitle() {
-            if(isWatchlistView) return;
+            if(isWatchlistView || !sectionTitle) return;
             let title = '';
             if(currentQuery) title = `Search results for "${currentQuery}"`;
             else {
-                let catText = categoryFilter.options[categoryFilter.selectedIndex].text;
+                let catText = categoryFilter && categoryFilter.options.length > 0 ? categoryFilter.options[categoryFilter.selectedIndex].text : '';
                 let typeText = currentType === 'tv' ? 'TV Series' : currentType === 'anime' ? 'Anime' : currentType === 'archive' ? 'Public Domain Films' : 'Movies';
                 title = `${catText} ${typeText}`;
-                if(currentGenre && genreFilter.selectedIndex > 0) {
+                if(currentGenre && genreFilter && genreFilter.selectedIndex > 0) {
                     let genText = genreFilter.options[genreFilter.selectedIndex].text;
                     title = `${genText} ${typeText} - ${catText}`;
                 }
@@ -550,8 +575,10 @@
         }
 
         async function fetchMedia() {
-            if(isWatchlistView) return;
-            mediaGrid.innerHTML = ''; mainLoader.classList.remove('hidden'); pagination.classList.add('hidden');
+            if(isWatchlistView || !mediaGrid) return;
+            mediaGrid.innerHTML = ''; 
+            if (mainLoader) mainLoader.classList.remove('hidden'); 
+            if (pagination) pagination.classList.add('hidden');
             updateSectionTitle();
             
             let url = '';
@@ -594,17 +621,18 @@
                     totalPages = data.total_pages || 1;
                 }
                 
-                mainLoader.classList.add('hidden');
+                if (mainLoader) mainLoader.classList.add('hidden');
                 renderGrid(results, true);
                 
-                if(totalPages > 1 && !isWatchlistView) {
+                if(totalPages > 1 && !isWatchlistView && pagination) {
                     pagination.classList.remove('hidden');
-                    pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
-                    prevPageBtn.disabled = currentPage === 1;
-                    nextPageBtn.disabled = currentPage >= totalPages;
+                    if (pageIndicator) pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+                    if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+                    if (nextPageBtn) nextPageBtn.disabled = currentPage >= totalPages;
                 }
             } catch (error) {
-                console.error("Fetch error", error); mainLoader.classList.add('hidden');
+                console.error("Fetch error", error); 
+                if (mainLoader) mainLoader.classList.add('hidden');
                 mediaGrid.innerHTML = `<p class="col-span-full text-center text-red-500 py-10"><i class="ph-fill ph-warning-circle text-2xl mb-2"></i><br>Error loading media. Please try again.</p>`;
             }
         }
@@ -634,8 +662,13 @@
         }
 
         function renderGrid(items, needsFormatting = false) {
+            if (!mediaGrid) return;
             mediaGrid.innerHTML = '';
             if (!items || items.length === 0) { mediaGrid.innerHTML = `<p class="col-span-full text-center text-zinc-500 py-10">No results found.</p>`; return; }
+            
+            // Fragment for better performance
+            const fragment = document.createDocumentFragment();
+
             items.forEach(rawItem => {
                 const item = needsFormatting ? formatMediaItem(rawItem) : rawItem;
                 if(!item.poster) return;
@@ -669,18 +702,21 @@
                     </div>
                 `;
                 const btn = card.querySelector('.grid-bookmark');
-                btn.onclick = (e) => toggleBookmark(item, e);
-                btn.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.stopPropagation(); toggleBookmark(item, e); } });
-                mediaGrid.appendChild(card);
+                if (btn) {
+                    btn.onclick = (e) => toggleBookmark(item, e);
+                    btn.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.stopPropagation(); toggleBookmark(item, e); } });
+                }
+                fragment.appendChild(card);
             });
+            mediaGrid.appendChild(fragment);
         }
         
         function updateModalBookmarkBtn() {
-            if(!currentMediaObj) return;
+            if(!currentMediaObj || !modalBookmarkBtn) return;
             if(watchlist.some(w => w.id === currentMediaObj.id && w.type === currentMediaObj.type)) modalBookmarkBtn.classList.add('active');
             else modalBookmarkBtn.classList.remove('active');
         }
-        modalBookmarkBtn.onclick = () => { if(currentMediaObj) toggleBookmark(currentMediaObj); };
+        if (modalBookmarkBtn) modalBookmarkBtn.onclick = () => { if(currentMediaObj) toggleBookmark(currentMediaObj); };
 
         async function getTmdbIdForAnime(animeTitle) {
             try {
@@ -693,7 +729,7 @@
         }
 
         async function playArchiveItem(item) {
-            streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Finding direct video file...`;
+            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Finding direct video file...`;
             try {
                 const res = await fetch(`https://archive.org/metadata/${encodeURIComponent(item.id)}`);
                 const meta = await res.json();
@@ -705,25 +741,30 @@
                 currentMediaId = item.id;
                 updateStreamIframe();
             } catch (e) {
-                playerLoader.classList.add('hidden');
-                streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No direct video found</span>`;
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No direct video found</span>`;
             }
         }
 
         async function openPlayer(item) {
+            if (!playerModal) return;
             currentMediaObj = item; updateModalBookmarkBtn(); currentDirectUrl = null;
-            modalTitle.textContent = item.title;
-            playerModal.classList.remove('hidden'); videoFrame.classList.add('hidden');
-            scraperContainer.classList.add('hidden');
+            if (modalTitle) modalTitle.textContent = item.title;
             
-            // clear custom direct msg
+            playerModal.classList.remove('hidden'); 
+            if (videoFrame) videoFrame.classList.add('hidden');
+            if (scraperContainer) scraperContainer.classList.add('hidden');
+            
             const dMsg = document.getElementById('directPlayMsg');
             if (dMsg) dMsg.remove();
             
-            playerLoader.classList.remove('hidden'); tvSidebar.classList.add('hidden');
-            loaderMessage.textContent = "Loading media engine...";
-            streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Connecting to stream...`;
-            streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
+            if (playerLoader) playerLoader.classList.remove('hidden'); 
+            if (tvSidebar) tvSidebar.classList.add('hidden');
+            if (loaderMessage) loaderMessage.textContent = "Loading media engine...";
+            if (streamStatus) {
+                streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Connecting to stream...`;
+                streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
+            }
 
             if (item.type === 'archive') { await playArchiveItem(item); return; }
 
@@ -734,42 +775,50 @@
                 const tmdbId = await getTmdbIdForAnime(item.title);
                 if (tmdbId) { currentMediaId = tmdbId; actualType = 'tv'; } 
                 else {
-                    streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Stream not found</span>`;
-                    playerLoader.classList.add('hidden'); return;
+                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Stream not found</span>`;
+                    if (playerLoader) playerLoader.classList.add('hidden'); return;
                 }
             }
 
             if (actualType === 'tv') {
-                tvSidebar.classList.remove('hidden'); tvSidebar.classList.add('flex');
+                if (tvSidebar) { tvSidebar.classList.remove('hidden'); tvSidebar.classList.add('flex'); }
                 await loadTvDetails(currentMediaId);
             } else { updateStreamIframe(); }
         }
 
-        closeModalBtn.addEventListener('click', () => {
-            playerModal.classList.add('hidden'); videoFrame.src = ''; currentMediaObj = null; currentDirectUrl = null;
-            videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
-            fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
-            const dMsg = document.getElementById('directPlayMsg');
-            if (dMsg) dMsg.remove();
-        });
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => {
+                if (playerModal) playerModal.classList.add('hidden'); 
+                if (videoFrame) videoFrame.src = ''; 
+                currentMediaObj = null; currentDirectUrl = null;
+                
+                if (videoContainer) videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
+                if (fullscreenBtn) fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
+                
+                const dMsg = document.getElementById('directPlayMsg');
+                if (dMsg) dMsg.remove();
+            });
+        }
 
         async function loadTvDetails(id) {
             try {
                 const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
                 const data = await res.json();
+                if (!seasonSelect) return;
                 seasonSelect.innerHTML = '';
                 const seasons = data.seasons.filter(s => s.season_number > 0);
                 seasons.forEach(s => {
                     const opt = document.createElement('option'); opt.value = s.season_number; opt.textContent = `Season ${s.season_number}`; seasonSelect.appendChild(opt);
                 });
                 if(seasons.length > 0) { currentSeason = seasons[0].season_number; await loadEpisodes(id, currentSeason); }
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Error loading TV details:", e); }
         }
 
         async function loadEpisodes(id, seasonNumber) {
             try {
                 const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${seasonNumber}?api_key=${TMDB_API_KEY}`);
                 const data = await res.json();
+                if (!episodeList) return;
                 episodeList.innerHTML = '';
                 data.episodes.forEach(ep => {
                     const btn = document.createElement('button');
@@ -790,71 +839,83 @@
                     episodeList.appendChild(btn);
                 });
                 currentEpisode = 1; updateStreamIframe();
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Error loading episodes:", e); }
         }
 
-        audioSubBtn.addEventListener('click', () => {
-            currentAudioType = 'sub';
-            audioSubBtn.classList.add('bg-red-600', 'text-white'); audioSubBtn.classList.remove('text-zinc-400');
-            audioDubBtn.classList.remove('bg-red-600', 'text-white'); audioDubBtn.classList.add('text-zinc-400');
-            dubLangSelect.classList.add('hidden'); updateStreamIframe();
-        });
-        audioDubBtn.addEventListener('click', () => {
-            currentAudioType = 'dub';
-            audioDubBtn.classList.add('bg-red-600', 'text-white'); audioDubBtn.classList.remove('text-zinc-400');
-            audioSubBtn.classList.remove('bg-red-600', 'text-white'); audioSubBtn.classList.add('text-zinc-400');
-            dubLangSelect.classList.remove('hidden'); updateStreamIframe();
-        });
-        dubLangSelect.addEventListener('change', () => { if(currentAudioType === 'dub') updateStreamIframe(); });
-        seasonSelect.addEventListener('change', (e) => { currentSeason = e.target.value; currentDirectUrl = null; loadEpisodes(currentMediaId, currentSeason); });
+        if (audioSubBtn && audioDubBtn && dubLangSelect) {
+            audioSubBtn.addEventListener('click', () => {
+                currentAudioType = 'sub';
+                audioSubBtn.classList.add('bg-red-600', 'text-white'); audioSubBtn.classList.remove('text-zinc-400');
+                audioDubBtn.classList.remove('bg-red-600', 'text-white'); audioDubBtn.classList.add('text-zinc-400');
+                dubLangSelect.classList.add('hidden'); updateStreamIframe();
+            });
+            audioDubBtn.addEventListener('click', () => {
+                currentAudioType = 'dub';
+                audioDubBtn.classList.add('bg-red-600', 'text-white'); audioDubBtn.classList.remove('text-zinc-400');
+                audioSubBtn.classList.remove('bg-red-600', 'text-white'); audioSubBtn.classList.add('text-zinc-400');
+                dubLangSelect.classList.remove('hidden'); updateStreamIframe();
+            });
+            dubLangSelect.addEventListener('change', () => { if(currentAudioType === 'dub') updateStreamIframe(); });
+        }
+        
+        if (seasonSelect) seasonSelect.addEventListener('change', (e) => { currentSeason = e.target.value; currentDirectUrl = null; loadEpisodes(currentMediaId, currentSeason); });
 
-        clickShield.addEventListener('click', (e) => {
-            e.preventDefault(); clickShield.classList.add('resolved');
-            setTimeout(() => { videoFrame.focus(); }, 100);
-        });
+        if (clickShield && videoFrame) {
+            clickShield.addEventListener('click', (e) => {
+                e.preventDefault(); clickShield.classList.add('resolved');
+                setTimeout(() => { videoFrame.focus(); }, 100);
+            });
+        }
 
-        adBlockToggle.addEventListener('click', () => {
-            isAdShieldActive = !isAdShieldActive;
-            if(isAdShieldActive) {
-                adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors";
-                adBlockToggle.innerHTML = `<i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline">Ad-Shield On</span>`;
-                showToast("🛡️ Strict Sandbox Enabled: Blocking popups and downloads");
-            } else {
-                adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors";
-                adBlockToggle.innerHTML = `<i class="ph ph-shield text-base"></i> <span class="hidden sm:inline">Ad-Shield Off</span>`;
-                showToast("⚠️ Security reduced. Popups may occur.", 3000);
-            }
-            updateStreamIframe(); 
-        });
+        if (adBlockToggle) {
+            adBlockToggle.addEventListener('click', () => {
+                isAdShieldActive = !isAdShieldActive;
+                if(isAdShieldActive) {
+                    adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors";
+                    adBlockToggle.innerHTML = `<i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline">Ad-Shield On</span>`;
+                    showToast("🛡️ Strict Sandbox Enabled: Blocking popups and downloads");
+                } else {
+                    adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors";
+                    adBlockToggle.innerHTML = `<i class="ph ph-shield text-base"></i> <span class="hidden sm:inline">Ad-Shield Off</span>`;
+                    showToast("⚠️ Security reduced. Popups may occur.", 3000);
+                }
+                updateStreamIframe(); 
+            });
+        }
 
-        fullscreenBtn.addEventListener('click', () => {
-            const isFullscreen = videoContainer.classList.contains('webview-fullscreen') || document.fullscreenElement;
-            if (!isFullscreen) {
-                videoContainer.classList.add('webview-fullscreen', 'force-landscape');
-                fullscreenBtn.innerHTML = `<i class="ph ph-corners-in text-base"></i> <span class="hidden sm:inline">Exit</span>`;
-                try {
-                    if (videoContainer.requestFullscreen) videoContainer.requestFullscreen().catch(err => console.warn(err));
-                    else if (videoContainer.webkitRequestFullscreen) videoContainer.webkitRequestFullscreen();
-                } catch(e) {}
-                if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
-            } else {
-                videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
-                fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
-                try {
-                    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
-                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                } catch(e) {}
-                if (screen.orientation && screen.orientation.unlock) try { screen.orientation.unlock(); } catch(e) {}
-            }
-        });
-        floatingExitBtn.addEventListener('click', () => { fullscreenBtn.click(); });
+        if (fullscreenBtn && videoContainer) {
+            fullscreenBtn.addEventListener('click', () => {
+                const isFullscreen = videoContainer.classList.contains('webview-fullscreen') || document.fullscreenElement;
+                if (!isFullscreen) {
+                    videoContainer.classList.add('webview-fullscreen', 'force-landscape');
+                    fullscreenBtn.innerHTML = `<i class="ph ph-corners-in text-base"></i> <span class="hidden sm:inline">Exit</span>`;
+                    try {
+                        if (videoContainer.requestFullscreen) videoContainer.requestFullscreen().catch(err => console.warn(err));
+                        else if (videoContainer.webkitRequestFullscreen) videoContainer.webkitRequestFullscreen();
+                    } catch(e) {}
+                    if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+                } else {
+                    videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
+                    fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
+                    try {
+                        if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+                        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                    } catch(e) {}
+                    if (screen.orientation && screen.orientation.unlock) try { screen.orientation.unlock(); } catch(e) {}
+                }
+            });
+        }
+        
+        if (floatingExitBtn && fullscreenBtn) floatingExitBtn.addEventListener('click', () => { fullscreenBtn.click(); });
+        
         document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
+            if (!document.fullscreenElement && videoContainer && fullscreenBtn) {
                 videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
                 fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
             }
         });
 
+        // Toast Notification System
         const toastEl = document.createElement('div');
         toastEl.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#18181b;color:#fff;padding:10px 18px;border-radius:9999px;border:1px solid #3f3f46;font-size:13px;z-index:100000;display:none;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6);";
         document.body.appendChild(toastEl);
@@ -864,6 +925,7 @@
             clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.style.display = 'none', ms);
         }
 
+        // External Player & Clipboard Logic
         function copyToClipboard(text) {
             if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).catch(() => {});
             const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
@@ -914,13 +976,15 @@
 
         function copyStreamLink() { copyToClipboard(getStreamUrl()); showToast('Stream link copied to clipboard.'); }
 
-        externalPlayerBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!currentMediaId && !currentDirectUrl) { showToast('Load a stream first.'); return; }
-            if (extMenu.style.display === 'block') { hideExtMenu(); return; }
-            const r = externalPlayerBtn.getBoundingClientRect(); extMenu.style.display = 'block';
-            extMenu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 216)) + 'px'; extMenu.style.top = (r.bottom + 8) + 'px';
-        });
+        if (externalPlayerBtn) {
+            externalPlayerBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!currentMediaId && !currentDirectUrl) { showToast('Load a stream first.'); return; }
+                if (extMenu.style.display === 'block') { hideExtMenu(); return; }
+                const r = externalPlayerBtn.getBoundingClientRect(); extMenu.style.display = 'block';
+                extMenu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 216)) + 'px'; extMenu.style.top = (r.bottom + 8) + 'px';
+            });
+        }
 
         extMenu.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-act]'); if (!btn) return; hideExtMenu();
@@ -938,11 +1002,11 @@
         }
 
         async function loadTorrentioStreams() {
-            videoFrame.classList.add('hidden');
-            scraperContainer.classList.remove('hidden');
-            playerLoader.classList.remove('hidden');
-            loaderMessage.textContent = "Scraping Torrents & 1DM Links...";
-            streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Fetching Torrents...`;
+            if (videoFrame) videoFrame.classList.add('hidden');
+            if (scraperContainer) scraperContainer.classList.remove('hidden');
+            if (playerLoader) playerLoader.classList.remove('hidden');
+            if (loaderMessage) loaderMessage.textContent = "Scraping Torrents & 1DM Links...";
+            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Fetching Torrents...`;
 
             try {
                 const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
@@ -958,15 +1022,15 @@
                 const res = await fetch(url);
                 const data = await res.json();
 
-                playerLoader.classList.add('hidden');
+                if (playerLoader) playerLoader.classList.add('hidden');
 
                 if(!data.streams || data.streams.length === 0) {
-                    scraperContainer.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-zinc-500"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>No streams found on Torrentio.</p></div>';
-                    streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No torrents available</span>`;
+                    if (scraperContainer) scraperContainer.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-zinc-500"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>No streams found on Torrentio.</p></div>';
+                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No torrents available</span>`;
                     return;
                 }
 
-                streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-400">Select a link to play or send to 1DM</span>`;
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-400">Select a link to play or send to 1DM</span>`;
                 
                 let html = `
                     <div class="mb-4 bg-zinc-900 border border-zinc-800 p-4 rounded-lg flex items-start gap-3">
@@ -1000,21 +1064,21 @@
                     `;
                 });
                 html += '</div>';
-                scraperContainer.innerHTML = html;
+                if (scraperContainer) scraperContainer.innerHTML = html;
 
             } catch(e) {
-                playerLoader.classList.add('hidden');
-                scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error fetching Torrentio: ${e.message}</p></div>`;
-                streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Torrentio failed</span>`;
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error fetching Torrentio: ${e.message}</p></div>`;
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Torrentio failed</span>`;
             }
         }
 
         async function loadDirectStreams() {
-            videoFrame.classList.add('hidden');
-            scraperContainer.classList.remove('hidden');
-            playerLoader.classList.remove('hidden');
-            loaderMessage.textContent = "Scraping All External Streams...";
-            streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Fetching Links...`;
+            if (videoFrame) videoFrame.classList.add('hidden');
+            if (scraperContainer) scraperContainer.classList.remove('hidden');
+            if (playerLoader) playerLoader.classList.remove('hidden');
+            if (loaderMessage) loaderMessage.textContent = "Scraping All External Streams...";
+            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Fetching Links...`;
 
             try {
                 const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
@@ -1023,7 +1087,6 @@
 
                 if(!imdbId) throw new Error("No IMDB ID found for this title.");
 
-                // Multiple HTTP Scraper Endpoints
                 const endpoints = [
                     `https://shluflix.elfhosted.com/stream/${actualType}/${imdbId}${isTv ? ':'+currentSeason+':'+currentEpisode : ''}.json`,
                     `https://mediafusion.elfhosted.com/stream/${actualType}/${imdbId}${isTv ? ':'+currentSeason+':'+currentEpisode : ''}.json`,
@@ -1033,7 +1096,6 @@
                 let httpStreams = [];
                 let magnetStreams = [];
 
-                // 1. Fetch HTTP streams in parallel
                 try {
                     const requests = endpoints.map(url => fetch(url).then(r => r.json()).catch(() => null));
                     const results = await Promise.all(requests);
@@ -1046,7 +1108,6 @@
                     });
                 } catch(e) { console.log('HTTP Scrapers failed'); }
 
-                // 2. Fetch Torrent streams (Torrentio) to guarantee availability
                 try {
                     const torUrl = isTv ? `https://torrentio.strem.fun/stream/series/${imdbId}:${currentSeason}:${currentEpisode}.json` : `https://torrentio.strem.fun/stream/movie/${imdbId}.json`;
                     const torRes = await fetch(torUrl);
@@ -1055,24 +1116,23 @@
                         torData.streams.forEach(s => {
                             const isMagnet = !!s.infoHash || (s.url && s.url.startsWith('magnet'));
                             if (isMagnet) {
-                                // Keep only the top 15 highest-seeded torrents to avoid UI clutter
                                 if (magnetStreams.length < 15) magnetStreams.push(s);
                             } else if (s.url) {
-                                httpStreams.push(s); // Add debrid/http links if any exist in Torrentio
+                                httpStreams.push(s); 
                             }
                         });
                     }
                 } catch(e) { console.log('Torrentio fallback failed'); }
 
-                playerLoader.classList.add('hidden');
+                if (playerLoader) playerLoader.classList.add('hidden');
 
                 if(httpStreams.length === 0 && magnetStreams.length === 0) {
-                    scraperContainer.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>No direct or torrent streams found. Try standard iframes (Server 1-9).</p></div>';
-                    streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No external streams available</span>`;
+                    if (scraperContainer) scraperContainer.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>No direct or torrent streams found. Try standard iframes (Server 1-9).</p></div>';
+                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No external streams available</span>`;
                     return;
                 }
 
-                streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-blue-500"></i> <span class="text-blue-400">Select a link for your External Player</span>`;
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-blue-500"></i> <span class="text-blue-400">Select a link for your External Player</span>`;
                 
                 let html = `
                     <div class="mb-4 bg-zinc-900 border border-zinc-800 p-4 rounded-lg flex items-start gap-3 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
@@ -1132,12 +1192,12 @@
                     html += `</div>`;
                 }
 
-                scraperContainer.innerHTML = html;
+                if (scraperContainer) scraperContainer.innerHTML = html;
 
             } catch(e) {
-                playerLoader.classList.add('hidden');
-                scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error scraping links: ${e.message}</p></div>`;
-                streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Scraping failed</span>`;
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error scraping links: ${e.message}</p></div>`;
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Scraping failed</span>`;
             }
         }
 
@@ -1147,15 +1207,15 @@
                 window.location.href = link; 
             } else {
                 currentDirectUrl = link;
-                scraperContainer.classList.add('hidden');
+                if (scraperContainer) scraperContainer.classList.add('hidden');
                 updateStreamIframe(); 
             }
         }
 
         window.handleDirectClick = function(link) {
             currentDirectUrl = link;
-            scraperContainer.classList.add('hidden');
-            videoFrame.classList.add('hidden');
+            if (scraperContainer) scraperContainer.classList.add('hidden');
+            if (videoFrame) videoFrame.classList.add('hidden');
             
             const existingMsg = document.getElementById('directPlayMsg');
             if(existingMsg) existingMsg.remove();
@@ -1168,7 +1228,7 @@
                 <h3 class="text-xl sm:text-2xl font-bold text-white mb-2">Stream Selected Successfully!</h3>
                 <p class="text-zinc-400 text-sm sm:text-base mb-8 max-w-md">Click the <strong>External</strong> button below (or on the top bar) to open this video natively in VLC or MX Player.</p>
                 <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4">
-                    <button onclick="externalPlayerBtn.click()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transition-colors">
+                    <button onclick="document.getElementById('externalPlayerBtn')?.click()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transition-colors">
                         <i class="ph-fill ph-arrow-square-out text-xl"></i> Open External Player
                     </button>
                     <button onclick="currentDirectUrl = null; updateStreamIframe()" class="w-full sm:w-auto px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg border border-zinc-700 flex items-center justify-center gap-2 transition-colors">
@@ -1176,16 +1236,18 @@
                     </button>
                 </div>
             `;
-            videoContainer.appendChild(msgDiv);
+            if (videoContainer) videoContainer.appendChild(msgDiv);
             
-            streamStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Direct Stream Locked &mdash; Ready for External Player`;
-            streamStatus.className = "flex items-center gap-1.5 text-blue-400 font-medium text-xs";
+            if (streamStatus) {
+                streamStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Direct Stream Locked &mdash; Ready for External Player`;
+                streamStatus.className = "flex items-center gap-1.5 text-blue-400 font-medium text-xs";
+            }
         }
 
         function getStreamUrl() {
             if (currentDirectUrl) return currentDirectUrl; 
-            const server = serverSelect.value;
-            const lang = dubLangSelect.value;
+            const server = serverSelect ? serverSelect.value : 'vidsrc_to';
+            const lang = dubLangSelect ? dubLangSelect.value : 'en';
             const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
             
             let url = "";
@@ -1212,61 +1274,59 @@
             const dMsg = document.getElementById('directPlayMsg');
             if (dMsg) dMsg.remove();
             
-            // Handle specialized scrapers
-            if (serverSelect.value === 'torrentio' && !currentDirectUrl) {
+            const server = serverSelect ? serverSelect.value : '';
+
+            if (server === 'torrentio' && !currentDirectUrl) {
                 loadTorrentioStreams();
                 return;
-            } else if (serverSelect.value === 'direct_ext') {
+            } else if (server === 'direct_ext') {
                 if (!currentDirectUrl) {
                     loadDirectStreams();
                     return;
                 } else {
-                    // Re-render the splash screen if we already have the URL
                     handleDirectClick(currentDirectUrl);
                     return;
                 }
             } else {
-                scraperContainer.classList.add('hidden');
+                if (scraperContainer) scraperContainer.classList.add('hidden');
             }
             
-            videoFrame.classList.add('hidden');
-            playerLoader.classList.remove('hidden');
-            loaderMessage.textContent = "Loading media engine...";
+            if (videoFrame) videoFrame.classList.add('hidden');
+            if (playerLoader) playerLoader.classList.remove('hidden');
+            if (loaderMessage) loaderMessage.textContent = "Loading media engine...";
             
-            clickShield.classList.remove('resolved');
-            if (currentDirectUrl) clickShield.classList.add('resolved'); 
-            
-            // SECURITY: The iframe sandbox is configured to block malicious activities.
-            // allow-scripts: Required for video player to work.
-            // allow-same-origin: Required for player to fetch the video file.
-            // allow-presentation: Allows fullscreen.
-            // OMITTED allow-top-navigation: Prevents redirecting the main site.
-            // OMITTED allow-popups: Prevents hidden pop-unders and ad tabs.
-            // OMITTED allow-downloads: Prevents downloading malware zips/exes.
-            if(isAdShieldActive) {
-                videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
-            } else { 
-                // Only remove if toggled off by user (not recommended)
-                videoFrame.removeAttribute('sandbox'); 
+            if (clickShield) {
+                clickShield.classList.remove('resolved');
+                if (currentDirectUrl) clickShield.classList.add('resolved'); 
             }
             
-            streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Connecting to stream...`;
-            streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
+            if (videoFrame) {
+                if(isAdShieldActive) {
+                    videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
+                } else { 
+                    videoFrame.removeAttribute('sandbox'); 
+                }
+                videoFrame.src = getStreamUrl();
+            }
             
-            videoFrame.src = getStreamUrl();
-
+            if (streamStatus) {
+                streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Connecting to stream...`;
+                streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
+            }
+            
             setTimeout(() => {
-                // Safety check if they switched servers rapidly
-                if(serverSelect.value === 'torrentio' && !currentDirectUrl) return; 
-                if(serverSelect.value === 'direct_ext') return;
+                if(serverSelect && serverSelect.value === 'torrentio' && !currentDirectUrl) return; 
+                if(serverSelect && serverSelect.value === 'direct_ext') return;
 
-                playerLoader.classList.add('hidden');
-                videoFrame.classList.remove('hidden');
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (videoFrame) videoFrame.classList.remove('hidden');
 
-                streamStatus.innerHTML = currentDirectUrl
-                    ? `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Direct video loaded &mdash; External player fully supported`
-                    : `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Stream Connected & Secure <span class="text-zinc-500 text-[10px] ml-1 font-normal">(Use player gear icon for specific audio/subs)</span>`;
-                streamStatus.className = "flex items-center gap-1.5 text-green-400 font-medium text-xs";
+                if (streamStatus) {
+                    streamStatus.innerHTML = currentDirectUrl
+                        ? `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Direct video loaded &mdash; External player fully supported`
+                        : `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Stream Connected & Secure <span class="text-zinc-500 text-[10px] ml-1 font-normal">(Use player gear icon for specific audio/subs)</span>`;
+                    streamStatus.className = "flex items-center gap-1.5 text-green-400 font-medium text-xs";
+                }
             }, 1800);
         }
     </script>
