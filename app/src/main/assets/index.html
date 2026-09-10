@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- SECURITY & MALWARE PROTECTION LAYER -->
-    <!-- Blocks dangerous object embeds (Flash/Java malware), restricts base URI changes, and forces secure connections -->
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; object-src 'none'; base-uri 'self';">
+    <!-- Blocks dangerous object embeds, restricts script/style sources, and forces secure connections -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; connect-src 'self' https:; frame-src 'self' https:; object-src 'none'; base-uri 'self'; upgrade-insecure-requests;">
     
     <title>Writerstm.stream - External Player & 1DM Supported</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- DOMPurify for Local XSS Protection -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     
     <script>
         // MALWARE & REDIRECT SHIELD
@@ -361,6 +363,14 @@
         const seasonSelect = document.getElementById('seasonSelect');
         const episodeList = document.getElementById('episodeList');
 
+        // Helper function for local XSS protection via DOMPurify
+        const sanitizeSafeStr = (dirtyStr) => {
+            if (typeof DOMPurify !== 'undefined' && dirtyStr) {
+                return DOMPurify.sanitize(dirtyStr, { ALLOWED_TAGS: [] });
+            }
+            return dirtyStr;
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             loadWatchlist();
             loadGenres();
@@ -639,6 +649,13 @@
             items.forEach(rawItem => {
                 const item = needsFormatting ? formatMediaItem(rawItem) : rawItem;
                 if(!item.poster) return;
+                
+                // DOMPurify XSS Sanitize injected properties before HTML rendering
+                const safeTitle = sanitizeSafeStr(item.title);
+                const safePoster = sanitizeSafeStr(item.poster);
+                const safeRating = sanitizeSafeStr(item.rating);
+                const safeYear = sanitizeSafeStr(item.year);
+                
                 const isSaved = watchlist.some(w => w.id === item.id && w.type === item.type);
                 const card = document.createElement('div');
                 card.className = "group cursor-pointer flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-red-600 focus-visible:ring-offset-4 focus-visible:ring-offset-black transition-shadow";
@@ -648,13 +665,13 @@
 
                 card.innerHTML = `
                     <div class="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 group-hover:border-red-600 transition-colors">
-                        <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                        <img src="${safePoster}" alt="${safeTitle}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
                             <i class="ph-fill ph-play-circle text-5xl sm:text-6xl text-red-600 drop-shadow-[0_0_10px_rgba(220,38,38,0.8)] mb-2"></i>
                         </div>
                         <div class="absolute top-2 w-full px-2 flex justify-between items-start pointer-events-none">
                             <div class="bg-black/80 backdrop-blur border border-zinc-800 text-white text-xs sm:text-sm font-bold px-2 py-1 rounded-md flex items-center gap-1">
-                                <i class="ph-fill ph-star text-red-500"></i> ${item.rating}
+                                <i class="ph-fill ph-star text-red-500"></i> ${safeRating}
                             </div>
                             <button class="grid-bookmark bookmark-btn pointer-events-auto p-2 sm:p-2.5 bg-black/80 border border-zinc-800 rounded-md text-zinc-400 hover:text-white ${isSaved ? 'active' : ''}" data-id="${item.id}" tabindex="0">
                                 <i class="ph ph-bookmark text-sm sm:text-base"></i>
@@ -664,8 +681,8 @@
                         ${item.type === 'archive' ? `<div class="absolute bottom-2 left-2 bg-green-600 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded uppercase">Direct</div>` : ''}
                     </div>
                     <div class="px-1">
-                        <h3 class="font-semibold text-sm sm:text-base text-white line-clamp-1 group-hover:text-red-400">${item.title}</h3>
-                        <p class="text-xs sm:text-sm text-zinc-500">${item.year} &bull; ${item.type === 'movie' ? 'Movie' : item.type === 'archive' ? 'Public Domain' : 'TV Series'}</p>
+                        <h3 class="font-semibold text-sm sm:text-base text-white line-clamp-1 group-hover:text-red-400">${safeTitle}</h3>
+                        <p class="text-xs sm:text-sm text-zinc-500">${safeYear} &bull; ${item.type === 'movie' ? 'Movie' : item.type === 'archive' ? 'Public Domain' : 'TV Series'}</p>
                     </div>
                 `;
                 const btn = card.querySelector('.grid-bookmark');
@@ -712,7 +729,7 @@
 
         async function openPlayer(item) {
             currentMediaObj = item; updateModalBookmarkBtn(); currentDirectUrl = null;
-            modalTitle.textContent = item.title;
+            modalTitle.textContent = item.title; // Secure: Uses textContent
             playerModal.classList.remove('hidden'); videoFrame.classList.add('hidden');
             scraperContainer.classList.add('hidden');
             
@@ -774,7 +791,10 @@
                 data.episodes.forEach(ep => {
                     const btn = document.createElement('button');
                     btn.className = "w-full text-left px-4 py-3 rounded-lg text-sm sm:text-base transition-colors text-zinc-400 hover:bg-zinc-900 hover:text-white border border-transparent hover:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600";
-                    btn.innerHTML = `<span class="font-mono text-zinc-500 mr-2">${ep.episode_number}.</span> ${ep.name}`;
+                    
+                    const safeEpName = sanitizeSafeStr(ep.name); // DOMPurify applied here
+                    btn.innerHTML = `<span class="font-mono text-zinc-500 mr-2">${ep.episode_number}.</span> ${safeEpName}`;
+                    
                     if(ep.episode_number === 1) {
                         btn.classList.add('bg-red-600', 'text-white', 'border-red-500'); btn.classList.remove('text-zinc-400', 'border-transparent', 'hover:border-zinc-800', 'hover:bg-zinc-900');
                     }
@@ -986,13 +1006,16 @@
                     const isMagnet = !!stream.infoHash;
                     const link = stream.url || `magnet:?xt=urn:btih:${stream.infoHash}`;
                     const titleParts = (stream.title || '').split('\n');
-                    const quality = titleParts[0] || 'Unknown';
-                    const sizeOrDetails = titleParts.slice(1).join(' &bull; ');
+                    
+                    // XSS Protection via DOMPurify applied here for externally scraped payload data
+                    const safeName = sanitizeSafeStr(stream.name || 'Torrentio');
+                    const safeQuality = sanitizeSafeStr(titleParts[0] || 'Unknown');
+                    const safeSizeOrDetails = sanitizeSafeStr(titleParts.slice(1).join(' &bull; '));
 
                     html += `
                         <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', ${isMagnet})" class="flex flex-col text-left p-4 bg-zinc-900 border border-zinc-800 hover:border-red-500 hover:bg-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-600">
-                            <span class="text-sm font-bold text-white break-words">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
-                            <span class="text-xs text-zinc-400 mt-2 line-clamp-2">${sizeOrDetails}</span>
+                            <span class="text-sm font-bold text-white break-words">${safeName} &mdash; ${safeQuality}</span>
+                            <span class="text-xs text-zinc-400 mt-2 line-clamp-2">${safeSizeOrDetails}</span>
                             <span class="text-xs font-semibold mt-3 flex items-center gap-1.5 ${isMagnet ? 'text-blue-400' : 'text-green-400'}">
                                 ${isMagnet ? '<i class="ph-fill ph-magnet text-base"></i> Open Magnet in 1DM' : '<i class="ph-fill ph-link text-base"></i> Direct Play Stream'}
                             </span>
@@ -1004,7 +1027,7 @@
 
             } catch(e) {
                 playerLoader.classList.add('hidden');
-                scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error fetching Torrentio: ${e.message}</p></div>`;
+                scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error fetching Torrentio: ${sanitizeSafeStr(e.message)}</p></div>`;
                 streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Torrentio failed</span>`;
             }
         }
@@ -1094,12 +1117,15 @@
                     `;
                     httpStreams.forEach((stream) => {
                         const titleParts = (stream.title || stream.name || 'Direct Stream').split('\n');
-                        const quality = titleParts[0] || 'Unknown';
-                        const details = titleParts.slice(1).join(' &bull; ') || 'HTTP Stream';
+                        
+                        const safeName = sanitizeSafeStr(stream.name || 'Server');
+                        const safeQuality = sanitizeSafeStr(titleParts[0] || 'Unknown');
+                        const safeDetails = sanitizeSafeStr(titleParts.slice(1).join(' &bull; ') || 'HTTP Stream');
+                        
                         html += `
                             <button onclick="handleDirectClick('${stream.url.replace(/'/g, "\\'")}')" class="flex flex-col text-left p-4 bg-zinc-900 border border-zinc-800 hover:border-blue-500 hover:bg-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600">
-                                <span class="text-sm font-bold text-white break-words">${stream.name || 'Server'} &mdash; ${quality}</span>
-                                <span class="text-xs text-zinc-400 mt-2 line-clamp-2">${details}</span>
+                                <span class="text-sm font-bold text-white break-words">${safeName} &mdash; ${safeQuality}</span>
+                                <span class="text-xs text-zinc-400 mt-2 line-clamp-2">${safeDetails}</span>
                                 <span class="text-xs font-semibold mt-3 flex items-center gap-1.5 text-blue-400">
                                     <i class="ph-fill ph-play-circle text-base"></i> Select for VLC/MX
                                 </span>
@@ -1117,12 +1143,15 @@
                     magnetStreams.forEach(stream => {
                         const link = stream.url || `magnet:?xt=urn:btih:${stream.infoHash}`;
                         const titleParts = (stream.title || '').split('\n');
-                        const quality = titleParts[0] || 'Unknown';
-                        const details = titleParts.slice(1).join(' &bull; ');
+                        
+                        const safeName = sanitizeSafeStr(stream.name || 'Torrentio');
+                        const safeQuality = sanitizeSafeStr(titleParts[0] || 'Unknown');
+                        const safeDetails = sanitizeSafeStr(titleParts.slice(1).join(' &bull; '));
+                        
                         html += `
                             <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="flex flex-col text-left p-4 bg-zinc-900 border border-zinc-800 hover:border-purple-500 hover:bg-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-600">
-                                <span class="text-sm font-bold text-white break-words">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
-                                <span class="text-xs text-zinc-400 mt-2 line-clamp-2">${details}</span>
+                                <span class="text-sm font-bold text-white break-words">${safeName} &mdash; ${safeQuality}</span>
+                                <span class="text-xs text-zinc-400 mt-2 line-clamp-2">${safeDetails}</span>
                                 <span class="text-xs font-semibold mt-3 flex items-center gap-1.5 text-purple-400">
                                     <i class="ph-fill ph-magnet text-base"></i> Stream via 1DM
                                 </span>
@@ -1136,7 +1165,7 @@
 
             } catch(e) {
                 playerLoader.classList.add('hidden');
-                scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error scraping links: ${e.message}</p></div>`;
+                scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error scraping links: ${sanitizeSafeStr(e.message)}</p></div>`;
                 streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Scraping failed</span>`;
             }
         }
