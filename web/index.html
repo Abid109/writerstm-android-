@@ -131,7 +131,6 @@
             #mobileSearchBar { display: block !important; }
         }
 
-        /* Fixed scraper open state to allow full scrolling */
         #videoContainer.scraper-open { aspect-ratio: auto !important; height: auto !important; min-height: 50vh; max-height: none !important; }
 
         @keyframes fadeInApp {
@@ -261,7 +260,6 @@
                 </div>
             </div>
 
-            <!-- Modified container to handle overflow better -->
             <div class="flex flex-col overflow-y-auto bg-black flex-1">
                 <div class="relative flex flex-col min-h-min">
                     <div class="p-2 bg-zinc-950 border-b border-zinc-900 flex flex-wrap items-center gap-2 z-20 sticky top-0">
@@ -283,8 +281,9 @@
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <button id="adBlockToggle" class="flex items-center gap-1 px-2 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors" title="Enable Malware, Redirect & Popup Protection">
-                                    <i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline">Ad-Shield</span>
+                                <!-- Ad-Shield Button updated to default OFF state -->
+                                <button id="adBlockToggle" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors" title="Enable Malware, Redirect & Popup Protection">
+                                    <i class="ph ph-shield text-base"></i> <span class="hidden sm:inline">Ad-Shield Off</span>
                                 </button>
                                 
                                 <button id="externalPlayerBtn" class="flex items-center gap-1 px-2 py-1.5 bg-blue-900/40 text-blue-400 border border-blue-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-blue-900/60 transition-colors" title="Open stream in VLC / MX Player">
@@ -316,7 +315,6 @@
                         </div>
                     </div>
 
-                    <!-- Modified video container to allow scraper content to expand -->
                     <div id="videoContainer" class="w-full aspect-video relative bg-black flex flex-col shrink-0">
                         <button id="floatingExitBtn" class="absolute top-6 right-6 z-[999999] bg-black/70 text-white w-12 h-12 rounded-full hover:bg-black/90 transition-colors backdrop-blur-md border border-zinc-700 items-center justify-center cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.8)]">
                             <i class="ph ph-corners-in text-2xl"></i>
@@ -329,7 +327,6 @@
 
                         <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
                         
-                        <!-- Moved scraperContainer out of the absolute positioned area when active -->
                         <div id="scraperContainer" class="relative z-20 hidden bg-black p-3 sm:p-4 w-full flex-1 min-h-[300px]"></div>
 
                         <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
@@ -413,7 +410,8 @@
         const externalPlayerBtn = $('externalPlayerBtn');
         const floatingExitBtn = $('floatingExitBtn');
         
-        let isAdShieldActive = true; 
+        // Changed this variable to default to false as requested
+        let isAdShieldActive = false; 
 
         let isAppInitialized = false;
 
@@ -530,9 +528,7 @@
                     }
                 }
                 
-                setTimeout(() => {
-                    showToast("🛡️ Security Shield Active: Blocking Malware & Popups", 4000);
-                }, 1500);
+                // Removed the hardcoded notification since Ad-Shield defaults to OFF now.
             } catch (err) {
                 console.error("Initialization Error:", err);
                 if (mediaGrid) {
@@ -1173,6 +1169,7 @@
             });
         }
 
+        // Updated toggle logic for Ad-Shield
         if (adBlockToggle) {
             adBlockToggle.addEventListener('click', () => {
                 isAdShieldActive = !isAdShieldActive;
