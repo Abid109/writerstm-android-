@@ -369,6 +369,55 @@
         const floatingExitBtn = $('floatingExitBtn');
         
         let isAdShieldActive = true; 
+        let playerHistoryPushed = false; // tracks back-button history entry for the player modal
+
+        // ===== Back-button navigation system (History API) =====
+        function getAppState() {
+            return { type: currentType, category: currentCategory, genre: currentGenre || '', query: currentQuery || '', page: currentPage || 1, watchlist: !!isWatchlistView };
+        }
+
+        function pushAppState(s) {
+            try { history.pushState({ writerstm: 'app', app: s }, ''); } catch (err) {}
+        }
+
+        async function applyAppState(s) {
+            currentType = s.type; currentCategory = s.category; currentGenre = s.genre || '';
+            currentQuery = s.query || ''; currentPage = s.page || 1; isWatchlistView = !!s.watchlist;
+
+            tabBtns.forEach(b => {
+                if (b.dataset.type === currentType) {
+                    b.classList.add('bg-red-600', 'text-white', 'shadow-sm'); b.classList.remove('text-zinc-400');
+                } else {
+                    b.classList.remove('bg-red-600', 'text-white', 'shadow-sm'); b.classList.add('text-zinc-400');
+                }
+            });
+
+            let ph = "Search movies...";
+            if(currentType === 'tv') ph = "Search TV series...";
+            if(currentType === 'anime') ph = "Search anime...";
+            if(currentType === 'archive') ph = "Search public domain films...";
+            if (searchInput) { searchInput.placeholder = ph; searchInput.value = currentQuery; }
+            if (mobileSearchInput) { mobileSearchInput.placeholder = ph; mobileSearchInput.value = currentQuery; }
+
+            if (categoryFilter) { categoryFilter.value = currentCategory; categoryFilter.disabled = isWatchlistView; categoryFilter.classList.toggle('opacity-50', isWatchlistView); }
+            if (genreFilter) { genreFilter.disabled = isWatchlistView; genreFilter.classList.toggle('opacity-50', isWatchlistView); }
+            if (clearWatchlistBtn) clearWatchlistBtn.classList.toggle('hidden', !isWatchlistView);
+            if (pagination) pagination.classList.toggle('hidden', isWatchlistView);
+            if (sectionTitle && isWatchlistView) sectionTitle.textContent = "My Watchlist";
+
+            await loadGenres();
+            if (genreFilter) genreFilter.value = currentGenre;
+
+            updateWatchlistUI();
+            if (isWatchlistView) renderGrid(watchlist);
+            else fetchMedia();
+        }
+
+        function navigateApp() {
+            const s = getAppState();
+            applyAppState(s);
+            pushAppState(s);
+        }
         
         const serverSelect = $('serverSelect');
         const audioSubBtn = $('audio-sub');
@@ -401,6 +450,7 @@
                     }
                 }
                 
+                try { history.replaceState({ writerstm: 'app', app: getAppState() }, ''); } catch(e) {}
                 setTimeout(() => {
                     showToast("🛡️ Security Shield Active: Blocking Malware & Popups", 4000);
                 }, 1500);
@@ -470,28 +520,11 @@
         if (viewWatchlistBtn) {
             viewWatchlistBtn.addEventListener('click', () => {
                 isWatchlistView = !isWatchlistView;
-                if(isWatchlistView) {
-                    tabBtns.forEach(b => {
-                        b.classList.remove('bg-red-600', 'text-white', 'shadow-sm');
-                        b.classList.add('text-zinc-400');
-                    });
-                    if (categoryFilter) { categoryFilter.disabled = true; categoryFilter.classList.add('opacity-50'); }
-                    if (genreFilter) { genreFilter.disabled = true; genreFilter.classList.add('opacity-50'); }
-                    if (sectionTitle) sectionTitle.textContent = "My Watchlist";
-                    if (clearWatchlistBtn) clearWatchlistBtn.classList.remove('hidden');
-                    if (pagination) pagination.classList.add('hidden');
-                    renderGrid(watchlist);
-                } else {
-                    if (categoryFilter) { categoryFilter.disabled = false; categoryFilter.classList.remove('opacity-50'); }
-                    if (genreFilter) { genreFilter.disabled = false; genreFilter.classList.remove('opacity-50'); }
-                    if (clearWatchlistBtn) clearWatchlistBtn.classList.add('hidden');
-                    const activeTab = document.querySelector(`[data-type="${currentType}"]`);
-                    if(activeTab) activeTab.click();
-                }
-                updateWatchlistUI();
+                currentPage = 1;
+                navigateApp();
             });
         }
-        
+
         if (clearWatchlistBtn) {
             clearWatchlistBtn.addEventListener('click', () => {
                 if(confirm("Are you sure you want to clear your watchlist?")) {
@@ -542,38 +575,28 @@
 
         tabBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                if(isWatchlistView && viewWatchlistBtn) viewWatchlistBtn.click();
-                tabBtns.forEach(b => { b.classList.remove('bg-red-600', 'text-white', 'shadow-sm'); b.classList.add('text-zinc-400'); });
-                e.target.classList.remove('text-zinc-400'); e.target.classList.add('bg-red-600', 'text-white', 'shadow-sm');
-                
                 currentType = e.target.dataset.type;
-                let ph = "Search movies...";
-                if(currentType === 'tv') ph = "Search TV series...";
-                if(currentType === 'anime') ph = "Search anime...";
-                if(currentType === 'archive') ph = "Search public domain films...";
-                if (searchInput) { searchInput.placeholder = ph; searchInput.value = ''; }
-                if (mobileSearchInput) { mobileSearchInput.placeholder = ph; mobileSearchInput.value = ''; }
-
-                currentQuery = ''; 
+                isWatchlistView = false;
+                currentQuery = '';
                 currentGenre = ''; currentPage = 1;
-                loadGenres(); fetchMedia();
+                navigateApp();
             });
         });
 
-        if (categoryFilter) categoryFilter.addEventListener('change', (e) => { currentCategory = e.target.value; currentPage = 1; fetchMedia(); });
-        if (genreFilter) genreFilter.addEventListener('change', (e) => { currentGenre = e.target.value; currentPage = 1; fetchMedia(); });
+        if (categoryFilter) categoryFilter.addEventListener('change', (e) => { currentCategory = e.target.value; currentPage = 1; navigateApp(); });
+        if (genreFilter) genreFilter.addEventListener('change', (e) => { currentGenre = e.target.value; currentPage = 1; navigateApp(); });
 
         const handleSearch = (e) => {
             if(e.key === 'Enter') {
-                currentQuery = e.target.value; currentPage = 1;
-                if(isWatchlistView && viewWatchlistBtn) viewWatchlistBtn.click(); else fetchMedia();
+                currentQuery = e.target.value; currentPage = 1; isWatchlistView = false;
+                navigateApp();
             }
         };
         if (searchInput) searchInput.addEventListener('keypress', handleSearch);
         if (mobileSearchInput) mobileSearchInput.addEventListener('keypress', handleSearch);
         
-        if (prevPageBtn) prevPageBtn.addEventListener('click', () => { if(currentPage > 1) { currentPage--; fetchMedia(); } });
-        if (nextPageBtn) nextPageBtn.addEventListener('click', () => { currentPage++; fetchMedia(); });
+        if (prevPageBtn) prevPageBtn.addEventListener('click', () => { if(currentPage > 1) { currentPage--; navigateApp(); } });
+        if (nextPageBtn) nextPageBtn.addEventListener('click', () => { currentPage++; navigateApp(); });
 
         function updateSectionTitle() {
             if(isWatchlistView || !sectionTitle) return;
@@ -769,6 +792,7 @@
             if (modalTitle) modalTitle.textContent = item.title;
             
             playerModal.classList.remove('hidden'); 
+            try { history.pushState({ writerstm: 'player' }, ''); playerHistoryPushed = true; } catch(e) {}
             if (videoFrame) videoFrame.classList.add('hidden');
             if (scraperContainer) scraperContainer.classList.add('hidden');
             
@@ -805,6 +829,7 @@
 
         if (closeModalBtn) {
             closeModalBtn.addEventListener('click', () => {
+                if (playerHistoryPushed) { playerHistoryPushed = false; history.back(); return; }
                 if (playerModal) playerModal.classList.add('hidden'); 
                 if (videoFrame) videoFrame.src = ''; 
                 currentMediaObj = null; currentDirectUrl = null;
@@ -925,6 +950,27 @@
         
         if (floatingExitBtn && fullscreenBtn) floatingExitBtn.addEventListener('click', () => { fullscreenBtn.click(); });
         
+        // Phone back button support: restore previous app screen, close the player modal,
+        // and only leave the site when there is nothing left to go back to.
+        window.addEventListener('popstate', (e) => {
+            playerHistoryPushed = false;
+            if (e.state && e.state.writerstm === 'app') {
+                const inc = e.state.app, cur = getAppState();
+                const same = inc.type === cur.type && inc.category === cur.category && inc.genre === cur.genre && inc.query === cur.query && inc.page === cur.page && inc.watchlist === cur.watchlist;
+                if (!same) applyAppState(inc);
+                return;
+            }
+            if (playerModal && !playerModal.classList.contains('hidden')) {
+                if (videoFrame) videoFrame.src = '';
+                currentMediaObj = null; currentDirectUrl = null;
+                playerModal.classList.add('hidden');
+                if (videoContainer) videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
+                if (fullscreenBtn) fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
+                const dMsg2 = document.getElementById('directPlayMsg');
+                if (dMsg2) dMsg2.remove();
+            }
+        });
+
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement && videoContainer && fullscreenBtn) {
                 videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
