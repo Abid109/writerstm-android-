@@ -263,21 +263,22 @@
             </div>
         </main>
 
-        <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-md flex flex-col md:p-6 lg:p-10 items-center justify-center">
-            <div class="w-full h-full flex flex-col bg-black md:rounded-2xl md:border md:border-zinc-800 overflow-hidden shadow-2xl max-w-[1400px] md:max-h-[85vh]">
+        <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+            <div class="w-full max-w-3xl max-h-[92vh] overflow-y-auto flex flex-col bg-black rounded-2xl border border-zinc-800 shadow-2xl">
                 <!-- Added safe-top-nav class here so the modal close buttons are also clickable on APK -->
                 <div class="flex justify-between items-center p-4 sm:p-5 border-b border-zinc-900 bg-black safe-top-nav">
                     <h2 id="modalTitle" class="text-lg sm:text-xl font-bold text-white truncate max-w-[60%] sm:max-w-[70%]">Movie Title</h2>
                     <div class="flex items-center gap-3">
-                        <i class="ph ph-bookmark text-lg sm:text-xl"></i>
-                    </button>
+                        <button id="modalBookmarkBtn" class="bookmark-btn p-2.5 sm:p-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full transition-colors border border-zinc-800 focus:outline-none">
+                            <i class="ph ph-bookmark text-lg sm:text-xl"></i>
+                        </button>
                     <button id="closeModal" class="p-2.5 sm:p-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-full transition-colors border border-red-500/20 focus:outline-none">
                         <i class="ph ph-x text-lg sm:text-xl"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="flex-1 flex flex-col md:flex-row overflow-hidden bg-black">
+            <div class="flex flex-col overflow-hidden bg-black">
                 <div class="flex-1 relative flex flex-col">
                     <div class="p-3 sm:p-4 bg-zinc-950 border-b border-zinc-900 flex flex-wrap gap-4 items-center justify-between z-20">
                         <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
@@ -337,7 +338,7 @@
                         </div>
                     </div>
 
-                    <div id="videoContainer" class="flex-1 w-full relative bg-black flex flex-col">
+                    <div id="videoContainer" class="w-full aspect-video relative bg-black flex flex-col">
                         <button id="floatingExitBtn" class="absolute top-6 right-6 z-[999999] bg-black/70 text-white w-12 h-12 rounded-full hover:bg-black/90 transition-colors backdrop-blur-md border border-zinc-700 items-center justify-center cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.8)]">
                             <i class="ph ph-corners-in text-2xl"></i>
                         </button>
@@ -359,7 +360,7 @@
                 </div>
 
                 <!-- TV Episode Sidebar -->
-                <div id="tvSidebar" class="w-full md:w-80 lg:w-96 bg-zinc-950 border-t md:border-t-0 md:border-l border-zinc-900 flex-col hidden h-64 md:h-auto overflow-hidden">
+                <div id="tvSidebar" class="w-full bg-zinc-950 border-t border-zinc-900 flex-col hidden max-h-60 overflow-hidden">
                     <div class="p-4 border-b border-zinc-900">
                         <h3 class="font-semibold text-white mb-2 flex items-center gap-2 text-lg"><i class="ph ph-list-numbers text-red-600"></i> Episodes</h3>
                         <select id="seasonSelect" class="w-full bg-zinc-900 border border-zinc-800 text-white text-base rounded-lg p-3 outline-none cursor-pointer focus:border-red-600">
