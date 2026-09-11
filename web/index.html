@@ -2,20 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Updated viewport meta to support safe areas in mobile APKs -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     
-    <!-- SECURITY & MALWARE PROTECTION LAYER -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; object-src 'none'; base-uri 'self';">
     
     <title>Writerstm.stream - External Player & 1DM Supported</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Cloudflare Turnstile Script -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     
     <script>
-        // MALWARE & REDIRECT SHIELD
         const originalWindowOpen = window.open;
         window.open = function(url, windowName, windowFeatures) {
             console.warn("Writerstm Security Shield blocked an unauthorized popup attempt to:", url);
@@ -34,13 +30,11 @@
             }
         });
 
-        // Global Error Handler to prevent silent blank screens
         window.onerror = function(message, source, lineno, colno, error) {
             console.error("Global script error:", message, "at line:", lineno);
             return false; 
         };
 
-        // Cloudflare Turnstile Callback
         window.onTurnstileSuccess = function(token) {
             console.log("Turnstile verification successful!");
             document.getElementById('cf-gateway').classList.add('hidden');
@@ -125,7 +119,6 @@
         #desktopSearchWrap input:focus, #mobileSearchBar input:focus { border-color: #dc2626; }
         #desktopSearchWrap input::placeholder, #mobileSearchBar input::placeholder { color: #71717a; }
         
-        /* APK / Mobile Webview Status Bar Fix */
         .safe-top-nav { padding-top: max(env(safe-area-inset-top), 32px) !important; }
         
         @media (min-width: 768px) {
@@ -138,10 +131,9 @@
             #mobileSearchBar { display: block !important; }
         }
 
-        /* Scraper mode: expand player area so Server 10/11 link list is fully visible */
-        #videoContainer.scraper-open { aspect-ratio: auto !important; height: auto !important; min-height: 70vh; }
+        /* Fixed scraper open state to allow full scrolling */
+        #videoContainer.scraper-open { aspect-ratio: auto !important; height: auto !important; min-height: 50vh; max-height: none !important; }
 
-        /* Fade in animation for app reveal */
         @keyframes fadeInApp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -153,7 +145,6 @@
 </head>
 <body class="bg-black text-white min-h-screen">
 
-    <!-- Cloudflare Turnstile Gateway -->
     <div id="cf-gateway" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-4">
         <div class="mb-8 text-center flex flex-col items-center">
             <div class="w-20 h-20 rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.15)] mb-6 transition-transform hover:scale-105">
@@ -164,7 +155,6 @@
             <p class="text-zinc-400 mt-3 text-sm sm:text-base max-w-sm">Please complete the security check to access the streaming library securely.</p>
         </div>
         
-        <!-- Turnstile Widget Area -->
         <div class="cf-turnstile min-h-[65px]" data-sitekey="0x4AAAAAAEv6sH7oXAh-8j0f" data-callback="onTurnstileSuccess" data-theme="dark"></div>
         
         <div class="mt-12 text-zinc-600 text-xs flex items-center gap-2">
@@ -172,13 +162,10 @@
         </div>
     </div>
 
-    <!-- Main App Content (Hidden initially until verification) -->
     <div id="app-content" class="hidden">
-        <!-- Added safe-top-nav class here to push content below the Android status bar -->
         <nav class="sticky top-0 z-40 bg-black/90 backdrop-blur-md border-b border-zinc-900 safe-top-nav">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
-                    <!-- Logo & Title -->
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-md bg-white flex items-center justify-center overflow-hidden shadow-[0_0_10px_rgba(255,255,255,0.1)]">
                             <img src="3768.png" alt="Logo" class="w-full h-full object-cover grayscale brightness-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -187,7 +174,6 @@
                         <h1 class="text-xl font-bold text-white tracking-tight drop-shadow-md">Writerstm.stream</h1>
                     </div>
                     
-                    <!-- Desktop Search -->
                     <div id="desktopSearchWrap" class="hidden md:block flex-1 max-w-md mx-8">
                         <div class="relative">
                             <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
@@ -195,7 +181,6 @@
                         </div>
                     </div>
                     
-                    <!-- Watchlist Toggle -->
                     <button id="viewWatchlistBtn" class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
                         <i class="ph ph-bookmarks text-xl"></i>
                         <span class="hidden sm:inline text-sm font-medium">Watchlist</span>
@@ -204,7 +189,6 @@
             </div>
         </nav>
 
-        <!-- Mobile Search -->
         <div id="mobileSearchBar" class="md:hidden p-4 bg-black border-b border-zinc-900">
             <div class="relative">
                 <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
@@ -213,7 +197,6 @@
         </div>
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Controls: Tabs & Filters -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div class="flex space-x-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800 overflow-x-auto hide-scrollbar max-w-full" id="typeTabs">
                     <button data-type="movie" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md bg-red-600 text-white shadow-sm transition-all focus:outline-none">Movies</button>
@@ -235,7 +218,6 @@
                 </div>
             </div>
             
-            <!-- Continue Watching Section -->
             <div id="continueWatchingSection" class="hidden mb-10 border-b border-zinc-900 pb-8">
                 <div class="flex justify-between items-end mb-4">
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
@@ -244,7 +226,6 @@
                     <button id="clearHistoryBtn" class="text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear History</button>
                 </div>
                 <div id="continueWatchingList" class="flex gap-4 overflow-x-auto hide-scrollbar snap-x pb-2">
-                    <!-- Cards injected here via JS -->
                 </div>
             </div>
 
@@ -267,8 +248,7 @@
         </main>
 
         <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-start sm:items-center justify-center p-3 sm:p-6">
-            <div class="w-full max-w-3xl max-h-[92vh] overflow-y-auto flex flex-col bg-black rounded-2xl border border-zinc-800 shadow-2xl">
-                <!-- Added safe-top-nav class here so the modal close buttons are also clickable on APK -->
+            <div class="w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col bg-black rounded-2xl border border-zinc-800 shadow-2xl">
                 <div class="flex justify-between items-center gap-2 p-3 border-b border-zinc-900 bg-black safe-top-nav">
                     <h2 id="modalTitle" class="text-base sm:text-lg font-bold text-white truncate">Movie Title</h2>
                     <div class="flex items-center gap-2 flex-none">
@@ -281,9 +261,10 @@
                 </div>
             </div>
 
-            <div class="flex flex-col overflow-hidden bg-black">
-                <div class="flex-1 relative flex flex-col">
-                    <div class="p-2 bg-zinc-950 border-b border-zinc-900 flex flex-wrap items-center gap-2 z-20">
+            <!-- Modified container to handle overflow better -->
+            <div class="flex flex-col overflow-y-auto bg-black flex-1">
+                <div class="relative flex flex-col min-h-min">
+                    <div class="p-2 bg-zinc-950 border-b border-zinc-900 flex flex-wrap items-center gap-2 z-20 sticky top-0">
                         <div class="flex items-center gap-1.5 flex-none">
                                 <i class="ph ph-hard-drives text-red-600 text-base flex-none"></i>
                                 <select id="serverSelect" class="w-32 sm:w-40 shrink-0 bg-zinc-900 text-white text-xs sm:text-sm rounded-lg pl-2 pr-6 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600" style="text-overflow:ellipsis;">
@@ -335,7 +316,8 @@
                         </div>
                     </div>
 
-                    <div id="videoContainer" class="w-full aspect-video relative bg-black flex flex-col">
+                    <!-- Modified video container to allow scraper content to expand -->
+                    <div id="videoContainer" class="w-full aspect-video relative bg-black flex flex-col shrink-0">
                         <button id="floatingExitBtn" class="absolute top-6 right-6 z-[999999] bg-black/70 text-white w-12 h-12 rounded-full hover:bg-black/90 transition-colors backdrop-blur-md border border-zinc-700 items-center justify-center cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.8)]">
                             <i class="ph ph-corners-in text-2xl"></i>
                         </button>
@@ -347,7 +329,8 @@
 
                         <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
                         
-                        <div id="scraperContainer" class="relative z-20 hidden bg-black p-3 sm:p-4 overflow-y-auto w-full flex-1 border-b border-zinc-800"></div>
+                        <!-- Moved scraperContainer out of the absolute positioned area when active -->
+                        <div id="scraperContainer" class="relative z-20 hidden bg-black p-3 sm:p-4 w-full flex-1 min-h-[300px]"></div>
 
                         <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
                             <i class="ph ph-circle-notch animate-spin text-5xl text-red-600 mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"></i>
@@ -356,14 +339,13 @@
                     </div>
                 </div>
 
-                <!-- TV Episode Sidebar -->
-                <div id="tvSidebar" class="w-full bg-zinc-950 border-t border-zinc-900 flex-col hidden max-h-60 overflow-hidden">
+                <div id="tvSidebar" class="w-full bg-zinc-950 border-t border-zinc-900 flex-col hidden shrink-0">
                     <div class="p-4 border-b border-zinc-900">
                         <h3 class="font-semibold text-white mb-2 flex items-center gap-2 text-lg"><i class="ph ph-list-numbers text-red-600"></i> Episodes</h3>
                         <select id="seasonSelect" class="w-full bg-zinc-900 border border-zinc-800 text-white text-base rounded-lg p-3 outline-none cursor-pointer focus:border-red-600">
                         </select>
                     </div>
-                    <div id="episodeList" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+                    <div id="episodeList" class="flex-1 overflow-y-auto max-h-60 p-3 space-y-2"></div>
                 </div>
             </div>
             </div>
@@ -384,7 +366,7 @@
         let currentPage = 1;
         let isWatchlistView = false;
         let watchlist = [];
-        let watchHistory = []; // History array
+        let watchHistory = []; 
         
         let currentMediaId = null;
         let currentMediaObj = null; 
@@ -393,7 +375,6 @@
         let currentAudioType = 'sub';
         let currentDirectUrl = null; 
 
-        // DOM Elements mapping safely
         const $ = (id) => document.getElementById(id);
         const mediaGrid = $('mediaGrid');
         const mainLoader = $('mainLoader');
@@ -434,7 +415,6 @@
         
         let isAdShieldActive = true; 
 
-        // ===== Robust History & Back-Button Shield System =====
         let isAppInitialized = false;
 
         function getAppState() {
@@ -538,7 +518,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 loadWatchlist();
-                loadWatchHistory(); // Initialize History
+                loadWatchHistory(); 
                 loadGenres();
                 fetchMedia();
                 initHistory();
@@ -571,7 +551,6 @@
             });
         }
         
-        // ===== Watchlist & History System =====
         function loadWatchlist() {
             if (safeStorageAccess()) {
                 try {
@@ -608,7 +587,6 @@
 
         function addToHistory(item, season = null, episode = null) {
             if(!item) return;
-            // Remove existing entry for same media to bring it to top
             watchHistory = watchHistory.filter(h => h.id !== item.id);
             
             const historyItem = {
@@ -619,7 +597,7 @@
             };
             
             watchHistory.unshift(historyItem);
-            if(watchHistory.length > 20) watchHistory.pop(); // keep limit
+            if(watchHistory.length > 20) watchHistory.pop(); 
             
             saveWatchHistory();
             renderWatchHistory();
@@ -646,13 +624,11 @@
         function renderWatchHistory() {
             if (!continueWatchingSection || !continueWatchingList) return;
             
-            // Only show when not searching and not in watchlist
             if (isWatchlistView || currentQuery !== '') {
                 continueWatchingSection.classList.add('hidden');
                 return;
             }
 
-            // Filter history items relevant to current tab
             const filteredHistory = watchHistory.filter(h => (h.originalType || h.type) === currentType);
             
             if (filteredHistory.length === 0) {
@@ -688,7 +664,7 @@
                     </div>
                 `;
                 
-                card.onclick = () => openPlayer(item, true); // true = fromHistory flag
+                card.onclick = () => openPlayer(item, true); 
                 card.addEventListener('keydown', (e) => { if(e.key === 'Enter') card.click(); });
                 
                 fragment.appendChild(card);
@@ -838,7 +814,7 @@
             if (mainLoader) mainLoader.classList.remove('hidden'); 
             if (pagination) pagination.classList.add('hidden');
             updateSectionTitle();
-            renderWatchHistory(); // Ensure history updates visibility
+            renderWatchHistory(); 
             
             let url = '';
             if (currentType === 'archive') {
@@ -1008,7 +984,6 @@
             if (!playerModal) return;
             currentMediaObj = item; updateModalBookmarkBtn(); currentDirectUrl = null;
             
-            // History Resume Check
             if (!fromHistory) {
                 const histItem = watchHistory.find(h => h.id === item.id);
                 if (histItem && (item.type === 'tv' || item.type === 'anime' || item.originalType === 'tv' || item.originalType === 'anime')) {
@@ -1018,15 +993,12 @@
                     currentSeason = 1;
                     currentEpisode = 1;
                 }
-            } else {
-                // fromHistory click naturally inherits the globally set currentSeason and currentEpisode from the card click
             }
 
             if (modalTitle) modalTitle.textContent = item.title;
             
             playerModal.classList.remove('hidden'); 
             
-            // Push player history state so hardware back button can close the modal instead of navigating away
             try {
                 history.pushState({ writerstm: 'player', modalOpen: true }, '');
             } catch(e) {}
@@ -1046,7 +1018,7 @@
             }
 
             if (item.type === 'archive') { 
-                addToHistory(item); // movies/archive log immediately
+                addToHistory(item); 
                 await playArchiveItem(item); 
                 return; 
             }
@@ -1067,7 +1039,7 @@
                 if (tvSidebar) { tvSidebar.classList.remove('hidden'); tvSidebar.classList.add('flex'); }
                 await loadTvDetails(currentMediaId);
             } else { 
-                addToHistory(item); // movies log immediately
+                addToHistory(item); 
                 updateStreamIframe(); 
             }
         }
@@ -1148,14 +1120,12 @@
                     btn.innerHTML = `<span class="font-mono text-zinc-500 mr-2 ${ep.episode_number == currentEpisode ? 'text-zinc-200' : ''}">${ep.episode_number}.</span> ${ep.name}`;
                     
                     btn.onclick = () => {
-                        // Remove active styling from all buttons
                         episodeList.querySelectorAll('button').forEach(b => {
                             b.classList.remove('bg-red-600', 'text-white', 'border-red-500'); 
                             b.classList.add('text-zinc-400', 'border-transparent', 'hover:bg-zinc-900', 'hover:text-white', 'hover:border-zinc-800');
                             const span = b.querySelector('span');
                             if(span) span.classList.remove('text-zinc-200');
                         });
-                        // Add active styling to clicked button
                         btn.classList.add('bg-red-600', 'text-white', 'border-red-500'); 
                         btn.classList.remove('text-zinc-400', 'border-transparent', 'hover:bg-zinc-900', 'hover:text-white', 'hover:border-zinc-800');
                         const span = btn.querySelector('span');
@@ -1169,7 +1139,6 @@
                     episodeList.appendChild(btn);
                 });
                 
-                // Track automatic initial load
                 addToHistory(currentMediaObj, currentSeason, currentEpisode);
                 updateStreamIframe();
             } catch (e) { console.error("Error loading episodes:", e); }
@@ -1245,7 +1214,6 @@
         
         if (floatingExitBtn && fullscreenBtn) floatingExitBtn.addEventListener('click', () => { fullscreenBtn.click(); });
         
-        // Robust Unified popstate event listener for managing back button behavior cleanly
         window.addEventListener('popstate', (e) => {
             const state = e.state;
             
