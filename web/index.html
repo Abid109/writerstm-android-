@@ -263,28 +263,28 @@
             </div>
         </main>
 
-        <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+        <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-start sm:items-center justify-center p-3 sm:p-6">
             <div class="w-full max-w-3xl max-h-[92vh] overflow-y-auto flex flex-col bg-black rounded-2xl border border-zinc-800 shadow-2xl">
                 <!-- Added safe-top-nav class here so the modal close buttons are also clickable on APK -->
-                <div class="flex justify-between items-center p-4 sm:p-5 border-b border-zinc-900 bg-black safe-top-nav">
-                    <h2 id="modalTitle" class="text-lg sm:text-xl font-bold text-white truncate max-w-[60%] sm:max-w-[70%]">Movie Title</h2>
-                    <div class="flex items-center gap-3">
-                        <button id="modalBookmarkBtn" class="bookmark-btn p-2.5 sm:p-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full transition-colors border border-zinc-800 focus:outline-none">
-                            <i class="ph ph-bookmark text-lg sm:text-xl"></i>
+                <div class="flex justify-between items-center gap-2 p-3 border-b border-zinc-900 bg-black safe-top-nav">
+                    <h2 id="modalTitle" class="text-base sm:text-lg font-bold text-white truncate">Movie Title</h2>
+                    <div class="flex items-center gap-2 flex-none">
+                        <button id="modalBookmarkBtn" class="bookmark-btn p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full transition-colors border border-zinc-800 focus:outline-none">
+                            <i class="ph ph-bookmark text-base"></i>
                         </button>
-                    <button id="closeModal" class="p-2.5 sm:p-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-full transition-colors border border-red-500/20 focus:outline-none">
-                        <i class="ph ph-x text-lg sm:text-xl"></i>
+                    <button id="closeModal" class="p-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-full transition-colors border border-red-500/20 focus:outline-none">
+                        <i class="ph ph-x text-base"></i>
                     </button>
                 </div>
             </div>
 
             <div class="flex flex-col overflow-hidden bg-black">
                 <div class="flex-1 relative flex flex-col">
-                    <div class="p-3 sm:p-4 bg-zinc-950 border-b border-zinc-900 flex flex-wrap gap-4 items-center justify-between z-20">
-                        <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
-                            <div class="flex items-center gap-2 flex-1 sm:flex-none">
-                                <i class="ph ph-hard-drives text-red-600 text-lg"></i>
-                                <select id="serverSelect" class="w-full sm:w-auto bg-zinc-900 text-white text-sm rounded-lg px-3 py-2 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600">
+                    <div class="p-2 bg-zinc-950 border-b border-zinc-900 flex items-center gap-2 overflow-x-auto hide-scrollbar z-20">
+                        <div class="flex items-center gap-2 flex-none">
+                            <div class="flex items-center gap-1.5 flex-none">
+                                <i class="ph ph-hard-drives text-red-600 text-base flex-none"></i>
+                                <select id="serverSelect" class="bg-zinc-900 text-white text-xs sm:text-sm rounded-lg pl-2 pr-6 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600">
                                     <option value="direct_ext" class="bg-blue-900 text-blue-400 font-bold">Server 11 (External PRO - All Streams)</option>
                                     <option value="torrentio" class="bg-zinc-800 text-green-400 font-bold">Server 10 (Torrentio / 1DM Manager)</option>
                                     <option value="vidsrc_to">Server 1 (VidSrc To)</option>
@@ -299,27 +299,23 @@
                                 </select>
                             </div>
 
-                            <div class="h-6 w-px bg-zinc-800 hidden sm:block"></div>
-
                             <div class="flex items-center gap-2">
-                                <button id="adBlockToggle" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors" title="Enable Malware, Redirect & Popup Protection">
+                                <button id="adBlockToggle" class="flex items-center gap-1 px-2 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors" title="Enable Malware, Redirect & Popup Protection">
                                     <i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline">Ad-Shield</span>
                                 </button>
                                 
-                                <button id="externalPlayerBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-900/40 text-blue-400 border border-blue-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-blue-900/60 transition-colors" title="Open stream in VLC / MX Player">
+                                <button id="externalPlayerBtn" class="flex items-center gap-1 px-2 py-1.5 bg-blue-900/40 text-blue-400 border border-blue-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-blue-900/60 transition-colors" title="Open stream in VLC / MX Player">
                                     <i class="ph ph-arrow-square-out text-base"></i> <span class="hidden sm:inline">External</span>
                                 </button>
 
-                                <button id="fullscreenBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-white border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors">
+                                <button id="fullscreenBtn" class="flex items-center gap-1 px-2 py-1.5 bg-zinc-800 text-white border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors">
                                     <i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>
                                 </button>
                             </div>
                             
-                            <div class="h-6 w-px bg-zinc-800 hidden sm:block"></div>
-
-                            <div class="flex items-center gap-1 bg-zinc-900 rounded-lg p-1 border border-zinc-800">
-                                <button id="audio-sub" class="audio-toggle-btn active px-3 py-1.5 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-md text-white bg-red-600 focus:outline-none">Sub</button>
-                                <button id="audio-dub" class="audio-toggle-btn px-3 py-1.5 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-md text-zinc-400 hover:text-white focus:outline-none">Dub</button>
+                            <div class="flex items-center gap-1 bg-zinc-900 rounded-lg p-0.5 border border-zinc-800">
+                                <button id="audio-sub" class="audio-toggle-btn active px-2 py-1 text-xs uppercase tracking-wider font-bold rounded-md text-white bg-red-600 focus:outline-none">Sub</button>
+                                <button id="audio-dub" class="audio-toggle-btn px-2 py-1 text-xs uppercase tracking-wider font-bold rounded-md text-zinc-400 hover:text-white focus:outline-none">Dub</button>
                                 <select id="dub-lang-select" class="hidden bg-zinc-900 text-zinc-300 text-xs sm:text-sm rounded-md ml-1 px-2 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:outline-none">
                                     <option value="en">English</option>
                                     <option value="es">Spanish</option>
@@ -333,7 +329,7 @@
                             </div>
                         </div>
 
-                        <div id="streamStatus" class="flex items-center gap-1.5 text-zinc-500 text-xs">
+                        <div id="streamStatus" class="flex items-center gap-1.5 text-zinc-500 text-[11px] whitespace-nowrap pl-1 flex-none">
                             <i class="ph ph-spinner animate-spin"></i> Connecting to stream...
                         </div>
                     </div>
