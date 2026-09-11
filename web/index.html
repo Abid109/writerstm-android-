@@ -280,11 +280,11 @@
 
             <div class="flex flex-col overflow-hidden bg-black">
                 <div class="flex-1 relative flex flex-col">
-                    <div class="p-2 bg-zinc-950 border-b border-zinc-900 flex items-center gap-2 overflow-x-auto hide-scrollbar z-20">
+                    <div class="p-2 bg-zinc-950 border-b border-zinc-900 flex flex-wrap items-center gap-2 z-20">
                         <div class="flex items-center gap-2 flex-none">
                             <div class="flex items-center gap-1.5 flex-none">
                                 <i class="ph ph-hard-drives text-red-600 text-base flex-none"></i>
-                                <select id="serverSelect" class="bg-zinc-900 text-white text-xs sm:text-sm rounded-lg pl-2 pr-6 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600">
+                                <select id="serverSelect" class="w-32 sm:w-40 shrink-0 bg-zinc-900 text-white text-xs sm:text-sm rounded-lg pl-2 pr-6 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600" style="text-overflow:ellipsis;">
                                     <option value="direct_ext" class="bg-blue-900 text-blue-400 font-bold">Server 11 (External PRO - All Streams)</option>
                                     <option value="torrentio" class="bg-zinc-800 text-green-400 font-bold">Server 10 (Torrentio / 1DM Manager)</option>
                                     <option value="vidsrc_to">Server 1 (VidSrc To)</option>
@@ -1716,7 +1716,7 @@
                 if (streamStatus) {
                     streamStatus.innerHTML = currentDirectUrl
                         ? `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Direct video loaded &mdash; External player fully supported`
-                        : `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Stream Connected & Secure <span class="text-zinc-500 text-[10px] ml-1 font-normal">(Use player gear icon for specific audio/subs)</span>`;
+                        : `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Connected & Secure <span class="hidden sm:inline text-zinc-500 text-[10px] ml-1 font-normal">(gear icon = audio/subs)</span>`;
                     streamStatus.className = "flex items-center gap-1.5 text-green-400 font-medium text-xs";
                 }
             }, 1800);
