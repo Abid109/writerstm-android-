@@ -138,6 +138,9 @@
             #mobileSearchBar { display: block !important; }
         }
 
+        /* Scraper mode: expand player area so Server 10/11 link list is fully visible */
+        #videoContainer.scraper-open { aspect-ratio: auto !important; height: auto !important; min-height: 70vh; }
+
         /* Fade in animation for app reveal */
         @keyframes fadeInApp {
             from { opacity: 0; transform: translateY(10px); }
@@ -344,7 +347,7 @@
 
                         <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
                         
-                        <div id="scraperContainer" class="absolute inset-x-0 top-0 z-20 hidden bg-black p-3 sm:p-4 overflow-y-auto min-h-full max-h-[100vh] border-b border-zinc-800"></div>
+                        <div id="scraperContainer" class="relative z-20 hidden bg-black p-3 sm:p-4 overflow-y-auto w-full flex-1 border-b border-zinc-800"></div>
 
                         <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
                             <i class="ph ph-circle-notch animate-spin text-5xl text-red-600 mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"></i>
@@ -1029,7 +1032,7 @@
             } catch(e) {}
 
             if (videoFrame) videoFrame.classList.add('hidden');
-            if (scraperContainer) scraperContainer.classList.add('hidden');
+            if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
             
             const dMsg = document.getElementById('directPlayMsg');
             if (dMsg) dMsg.remove();
@@ -1364,7 +1367,7 @@
 
         async function loadTorrentioStreams() {
             if (videoFrame) videoFrame.classList.add('hidden');
-            if (scraperContainer) scraperContainer.classList.remove('hidden');
+            if (scraperContainer) scraperContainer.classList.remove('hidden'); if (videoContainer) videoContainer.classList.add('scraper-open');
             if (playerLoader) playerLoader.classList.remove('hidden');
             if (loaderMessage) loaderMessage.textContent = "Scraping Torrents & 1DM Links...";
             if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Fetching Torrents...`;
@@ -1417,20 +1420,20 @@
                     html += `
                         <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-zinc-900 border border-zinc-800 rounded-lg transition-colors hover:border-red-500">
                             <div class="flex-1 min-w-0">
-                                <span class="block text-sm sm:text-base font-bold text-white break-words">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
-                                <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-words">${sizeOrDetails}</span>
+                                <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
+                                <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${sizeOrDetails}</span>
                             </div>
                             
-                            <div class="flex flex-col gap-2 sm:w-44 sm:flex-none mt-auto">
+                            <div class="grid grid-cols-2 gap-2 w-full mt-auto sm:flex sm:flex-col sm:w-44 sm:flex-none">
                                 ${isMagnet ? `
-                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-2 px-3 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-1.5 px-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
                                         <i class="ph-fill ph-magnet text-sm"></i> Launch App (1DM)
                                     </button>
-                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied! Paste it in your torrent app.', 4000);" class="w-full text-center py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied! Paste it in your torrent app.', 4000);" class="w-full text-center py-1.5 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
                                         <i class="ph ph-copy text-sm"></i> Copy Magnet Link
                                     </button>
                                 ` : `
-                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', false)" class="w-full text-center py-2 px-3 bg-green-600/20 hover:bg-green-600/40 text-green-400 border border-green-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', false)" class="w-full text-center py-1.5 px-2 bg-green-600/20 hover:bg-green-600/40 text-green-400 border border-green-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
                                         <i class="ph-fill ph-play-circle text-sm"></i> Direct Play Stream
                                     </button>
                                 `}
@@ -1450,7 +1453,7 @@
 
         async function loadDirectStreams() {
             if (videoFrame) videoFrame.classList.add('hidden');
-            if (scraperContainer) scraperContainer.classList.remove('hidden');
+            if (scraperContainer) scraperContainer.classList.remove('hidden'); if (videoContainer) videoContainer.classList.add('scraper-open');
             if (playerLoader) playerLoader.classList.remove('hidden');
             if (loaderMessage) loaderMessage.textContent = "Scraping All External Streams...";
             if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Fetching Links...`;
@@ -1534,8 +1537,8 @@
                         html += `
                             <button onclick="handleDirectClick('${stream.url.replace(/'/g, "\\'")}')" class="flex flex-col sm:flex-row sm:items-center gap-3 text-left p-4 bg-zinc-900 border border-zinc-800 hover:border-blue-500 hover:bg-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600">
                                 <div class="flex-1 min-w-0">
-                                    <span class="block text-sm sm:text-base font-bold text-white break-words">${stream.name || 'Server'} &mdash; ${quality}</span>
-                                    <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-words">${details}</span>
+                                    <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Server'} &mdash; ${quality}</span>
+                                    <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${details}</span>
                                 </div>
                                 <span class="text-xs font-semibold flex items-center gap-1.5 text-blue-400 sm:flex-none">
                                     <i class="ph-fill ph-play-circle text-base"></i> Select for VLC/MX
@@ -1561,15 +1564,15 @@
                         html += `
                             <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-zinc-900 border border-zinc-800 rounded-lg transition-colors hover:border-purple-500">
                                 <div class="flex-1 min-w-0">
-                                    <span class="block text-sm sm:text-base font-bold text-white break-words">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
-                                    <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-words">${details}</span>
+                                    <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
+                                    <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${details}</span>
                                 </div>
                                 
-                                <div class="flex flex-col gap-2 sm:w-44 sm:flex-none mt-auto">
-                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-2 px-3 bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 border border-purple-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                <div class="grid grid-cols-2 gap-2 w-full mt-auto sm:flex sm:flex-col sm:w-44 sm:flex-none">
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-1.5 px-2 bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 border border-purple-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
                                         <i class="ph-fill ph-magnet text-sm"></i> Launch App (1DM)
                                     </button>
-                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied! Paste it in your torrent app.', 4000);" class="w-full text-center py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied! Paste it in your torrent app.', 4000);" class="w-full text-center py-1.5 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
                                         <i class="ph ph-copy text-sm"></i> Copy Link
                                     </button>
                                 </div>
@@ -1603,14 +1606,14 @@
                 }, 1500);
             } else {
                 currentDirectUrl = link;
-                if (scraperContainer) scraperContainer.classList.add('hidden');
+                if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
                 updateStreamIframe(); 
             }
         }
 
         window.handleDirectClick = function(link) {
             currentDirectUrl = link;
-            if (scraperContainer) scraperContainer.classList.add('hidden');
+            if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
             if (videoFrame) videoFrame.classList.add('hidden');
             
             const existingMsg = document.getElementById('directPlayMsg');
@@ -1684,7 +1687,7 @@
                     return;
                 }
             } else {
-                if (scraperContainer) scraperContainer.classList.add('hidden');
+                if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
             }
             
             if (videoFrame) videoFrame.classList.add('hidden');
