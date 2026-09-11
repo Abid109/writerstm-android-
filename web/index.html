@@ -281,8 +281,7 @@
             <div class="flex flex-col overflow-hidden bg-black">
                 <div class="flex-1 relative flex flex-col">
                     <div class="p-2 bg-zinc-950 border-b border-zinc-900 flex flex-wrap items-center gap-2 z-20">
-                        <div class="flex items-center gap-2 flex-none">
-                            <div class="flex items-center gap-1.5 flex-none">
+                        <div class="flex items-center gap-1.5 flex-none">
                                 <i class="ph ph-hard-drives text-red-600 text-base flex-none"></i>
                                 <select id="serverSelect" class="w-32 sm:w-40 shrink-0 bg-zinc-900 text-white text-xs sm:text-sm rounded-lg pl-2 pr-6 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600" style="text-overflow:ellipsis;">
                                     <option value="direct_ext" class="bg-blue-900 text-blue-400 font-bold">Server 11 (External PRO - All Streams)</option>
@@ -327,9 +326,8 @@
                                     <option value="ja">Japanese</option>
                                 </select>
                             </div>
-                        </div>
 
-                        <div id="streamStatus" class="flex items-center gap-1.5 text-zinc-500 text-[11px] whitespace-nowrap pl-1 flex-none">
+                        <div id="streamStatus" class="flex items-center gap-1.5 text-zinc-500 text-[11px] pl-1 min-w-0">
                             <i class="ph ph-spinner animate-spin"></i> Connecting to stream...
                         </div>
                     </div>
@@ -346,7 +344,7 @@
 
                         <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
                         
-                        <div id="scraperContainer" class="absolute inset-0 z-10 hidden bg-black p-4 overflow-y-auto"></div>
+                        <div id="scraperContainer" class="absolute inset-x-0 top-0 z-20 hidden bg-black p-3 sm:p-4 overflow-y-auto min-h-full max-h-[85vh] border-b border-zinc-800"></div>
 
                         <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
                             <i class="ph ph-circle-notch animate-spin text-5xl text-red-600 mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"></i>
