@@ -192,9 +192,22 @@
             </div>
         </div>
         
+        <!-- Continue Watching Section -->
+        <div id="continueWatchingSection" class="hidden mb-10 border-b border-zinc-900 pb-8">
+            <div class="flex justify-between items-end mb-4">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="ph-fill ph-clock-counter-clockwise text-red-600"></i> Continue Watching
+                </h2>
+                <button id="clearHistoryBtn" class="text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear History</button>
+            </div>
+            <div id="continueWatchingList" class="flex gap-4 overflow-x-auto hide-scrollbar snap-x pb-2">
+                <!-- Cards injected here via JS -->
+            </div>
+        </div>
+
         <div class="mb-4 flex justify-between items-end">
             <h2 id="sectionTitle" class="text-2xl font-bold text-white">Trending Movies</h2>
-            <button id="clearWatchlistBtn" class="hidden text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded">Clear All</button>
+            <button id="clearWatchlistBtn" class="hidden text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear All</button>
         </div>
 
         <div id="mediaGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6"></div>
@@ -331,6 +344,7 @@
         let currentPage = 1;
         let isWatchlistView = false;
         let watchlist = [];
+        let watchHistory = []; // History array
         
         let currentMediaId = null;
         let currentMediaObj = null; 
@@ -352,6 +366,10 @@
         const viewWatchlistBtn = $('viewWatchlistBtn');
         const clearWatchlistBtn = $('clearWatchlistBtn');
         
+        const continueWatchingSection = $('continueWatchingSection');
+        const continueWatchingList = $('continueWatchingList');
+        const clearHistoryBtn = $('clearHistoryBtn');
+
         const pagination = $('pagination');
         const prevPageBtn = $('prevPageBtn');
         const nextPageBtn = $('nextPageBtn');
@@ -377,7 +395,6 @@
         let isAdShieldActive = true; 
 
         // ===== Robust History & Back-Button Shield System =====
-        // We initialize the history state stack with a sentinel entry so the very first back press stays on site.
         let isAppInitialized = false;
 
         function getAppState() {
@@ -394,7 +411,6 @@
         function initHistory() {
             if (isAppInitialized) return;
             isAppInitialized = true;
-            // Replace initial history with our baseline app state
             try {
                 history.replaceState({ writerstm: 'app', app: getAppState() }, '');
             } catch(e) {}
@@ -449,11 +465,14 @@
             if (genreFilter) genreFilter.value = currentGenre;
 
             updateWatchlistUI();
-            if (isWatchlistView) renderGrid(watchlist);
-            else fetchMedia();
+            if (isWatchlistView) {
+                renderGrid(watchlist);
+                renderWatchHistory(); 
+            } else {
+                fetchMedia();
+            }
         }
 
-        // When user interacts with filters/tabs/search
         function navigateApp() {
             applyAppState(getAppState());
             pushStateChange();
@@ -479,6 +498,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 loadWatchlist();
+                loadWatchHistory(); // Initialize History
                 loadGenres();
                 fetchMedia();
                 initHistory();
@@ -511,6 +531,8 @@
             });
         }
         
+        // ===== Watchlist & History System =====
+        
         function loadWatchlist() {
             if (safeStorageAccess()) {
                 try {
@@ -527,6 +549,115 @@
         function saveWatchlist() {
             if (safeStorageAccess()) localStorage.setItem('writerstm_watchlist', JSON.stringify(watchlist));
         }
+        
+        function loadWatchHistory() {
+            if (safeStorageAccess()) {
+                try {
+                    const stored = localStorage.getItem('writerstm_history');
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        if(Array.isArray(parsed)) watchHistory = parsed;
+                    }
+                } catch(e) { watchHistory = []; }
+            }
+            renderWatchHistory();
+        }
+
+        function saveWatchHistory() {
+            if (safeStorageAccess()) localStorage.setItem('writerstm_history', JSON.stringify(watchHistory));
+        }
+
+        function addToHistory(item, season = null, episode = null) {
+            if(!item) return;
+            // Remove existing entry for same media to bring it to top
+            watchHistory = watchHistory.filter(h => h.id !== item.id);
+            
+            const historyItem = {
+                ...item,
+                resumeSeason: season,
+                resumeEpisode: episode,
+                lastWatched: Date.now()
+            };
+            
+            watchHistory.unshift(historyItem);
+            if(watchHistory.length > 20) watchHistory.pop(); // keep limit
+            
+            saveWatchHistory();
+            renderWatchHistory();
+        }
+
+        let historyClearTimeout;
+        if (clearHistoryBtn) {
+            clearHistoryBtn.addEventListener('click', () => {
+                if (clearHistoryBtn.textContent === "Confirm Clear?") {
+                    watchHistory = [];
+                    saveWatchHistory();
+                    renderWatchHistory();
+                    clearHistoryBtn.textContent = "Clear History";
+                    clearTimeout(historyClearTimeout);
+                } else {
+                    clearHistoryBtn.textContent = "Confirm Clear?";
+                    historyClearTimeout = setTimeout(() => {
+                        clearHistoryBtn.textContent = "Clear History";
+                    }, 3000);
+                }
+            });
+        }
+
+        function renderWatchHistory() {
+            if (!continueWatchingSection || !continueWatchingList) return;
+            
+            // Only show when not searching and not in watchlist
+            if (isWatchlistView || currentQuery !== '') {
+                continueWatchingSection.classList.add('hidden');
+                return;
+            }
+
+            // Filter history items relevant to current tab
+            const filteredHistory = watchHistory.filter(h => (h.originalType || h.type) === currentType);
+            
+            if (filteredHistory.length === 0) {
+                continueWatchingSection.classList.add('hidden');
+                return;
+            }
+            
+            continueWatchingSection.classList.remove('hidden');
+            continueWatchingList.innerHTML = '';
+
+            const fragment = document.createDocumentFragment();
+            filteredHistory.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "group cursor-pointer flex-none w-36 sm:w-44 flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-red-600 snap-start transition-transform hover:-translate-y-1 duration-200";
+                card.tabIndex = 0;
+                
+                let progressText = 'Movie';
+                if (item.type === 'archive') progressText = 'Public Domain';
+                else if (item.type === 'tv' || item.type === 'anime') progressText = `S${item.resumeSeason || 1} E${item.resumeEpisode || 1}`;
+
+                card.innerHTML = `
+                    <div class="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 group-hover:border-red-600 transition-colors">
+                        <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
+                        <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="ph-fill ph-play text-4xl sm:text-5xl text-red-600 drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]"></i>
+                        </div>
+                        <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2 pt-6">
+                            <span class="text-[10px] sm:text-xs font-bold text-white bg-red-600 px-1.5 py-0.5 rounded shadow-sm inline-block">${progressText}</span>
+                        </div>
+                    </div>
+                    <div class="px-1">
+                        <h3 class="font-semibold text-xs sm:text-sm text-white line-clamp-1 group-hover:text-red-400">${item.title}</h3>
+                    </div>
+                `;
+                
+                card.onclick = () => openPlayer(item, true); // true = fromHistory flag
+                card.addEventListener('keydown', (e) => { if(e.key === 'Enter') card.click(); });
+                
+                fragment.appendChild(card);
+            });
+            continueWatchingList.appendChild(fragment);
+        }
+
+        // ===== End History System =====
 
         function toggleBookmark(mediaItem, event) {
             if(event) event.stopPropagation();
@@ -564,10 +695,21 @@
             });
         }
 
+        let watchlistClearTimeout;
         if (clearWatchlistBtn) {
             clearWatchlistBtn.addEventListener('click', () => {
-                if(confirm("Are you sure you want to clear your watchlist?")) {
-                    watchlist = []; saveWatchlist(); renderGrid(watchlist); updateWatchlistUI();
+                if (clearWatchlistBtn.textContent === "Confirm Clear?") {
+                    watchlist = []; 
+                    saveWatchlist(); 
+                    renderGrid(watchlist); 
+                    updateWatchlistUI();
+                    clearWatchlistBtn.textContent = "Clear All";
+                    clearTimeout(watchlistClearTimeout);
+                } else {
+                    clearWatchlistBtn.textContent = "Confirm Clear?";
+                    watchlistClearTimeout = setTimeout(() => {
+                        clearWatchlistBtn.textContent = "Clear All";
+                    }, 3000);
                 }
             });
         }
@@ -659,6 +801,7 @@
             if (mainLoader) mainLoader.classList.remove('hidden'); 
             if (pagination) pagination.classList.add('hidden');
             updateSectionTitle();
+            renderWatchHistory(); // Ensure history updates visibility
             
             let url = '';
             if (currentType === 'archive') {
@@ -824,9 +967,24 @@
             }
         }
 
-        async function openPlayer(item) {
+        async function openPlayer(item, fromHistory = false) {
             if (!playerModal) return;
             currentMediaObj = item; updateModalBookmarkBtn(); currentDirectUrl = null;
+            
+            // History Resume Check
+            if (!fromHistory) {
+                const histItem = watchHistory.find(h => h.id === item.id);
+                if (histItem && (item.type === 'tv' || item.type === 'anime' || item.originalType === 'tv' || item.originalType === 'anime')) {
+                    currentSeason = histItem.resumeSeason || 1;
+                    currentEpisode = histItem.resumeEpisode || 1;
+                } else {
+                    currentSeason = 1;
+                    currentEpisode = 1;
+                }
+            } else {
+                // fromHistory click naturally inherits the globally set currentSeason and currentEpisode from the card click
+            }
+
             if (modalTitle) modalTitle.textContent = item.title;
             
             playerModal.classList.remove('hidden'); 
@@ -850,7 +1008,11 @@
                 streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
             }
 
-            if (item.type === 'archive') { await playArchiveItem(item); return; }
+            if (item.type === 'archive') { 
+                addToHistory(item); // movies/archive log immediately
+                await playArchiveItem(item); 
+                return; 
+            }
 
             currentMediaId = item.id;
             let actualType = item.type;
@@ -867,7 +1029,10 @@
             if (actualType === 'tv') {
                 if (tvSidebar) { tvSidebar.classList.remove('hidden'); tvSidebar.classList.add('flex'); }
                 await loadTvDetails(currentMediaId);
-            } else { updateStreamIframe(); }
+            } else { 
+                addToHistory(item); // movies log immediately
+                updateStreamIframe(); 
+            }
         }
 
         function closePlayerModal(fromPopState = false) {
@@ -884,10 +1049,8 @@
             const dMsg = document.getElementById('directPlayMsg');
             if (dMsg) dMsg.remove();
 
-            // If closed via UI button and we pushed a modal state, pop it back to clean up history
             if (!fromPopState) {
                 try {
-                    // Check if current history state is player
                     if (history.state && history.state.writerstm === 'player') {
                         history.back();
                     }
@@ -907,11 +1070,21 @@
                 const data = await res.json();
                 if (!seasonSelect) return;
                 seasonSelect.innerHTML = '';
+                
                 const seasons = data.seasons.filter(s => s.season_number > 0);
                 seasons.forEach(s => {
-                    const opt = document.createElement('option'); opt.value = s.season_number; opt.textContent = `Season ${s.season_number}`; seasonSelect.appendChild(opt);
+                    const opt = document.createElement('option'); 
+                    opt.value = s.season_number; 
+                    opt.textContent = `Season ${s.season_number}`; 
+                    seasonSelect.appendChild(opt);
                 });
-                if(seasons.length > 0) { currentSeason = seasons[0].season_number; await loadEpisodes(id, currentSeason); }
+                
+                if(seasons.length > 0) { 
+                    let seasonExists = seasons.some(s => s.season_number == currentSeason);
+                    if(!seasonExists) currentSeason = seasons[0].season_number;
+                    seasonSelect.value = currentSeason;
+                    await loadEpisodes(id, currentSeason); 
+                }
             } catch (e) { console.error("Error loading TV details:", e); }
         }
 
@@ -921,25 +1094,47 @@
                 const data = await res.json();
                 if (!episodeList) return;
                 episodeList.innerHTML = '';
+                
+                let epExists = data.episodes.some(e => e.episode_number == currentEpisode);
+                if(!epExists) currentEpisode = data.episodes.length > 0 ? data.episodes[0].episode_number : 1;
+
                 data.episodes.forEach(ep => {
                     const btn = document.createElement('button');
-                    btn.className = "w-full text-left px-4 py-3 rounded-lg text-sm sm:text-base transition-colors text-zinc-400 hover:bg-zinc-900 hover:text-white border border-transparent hover:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600";
-                    btn.innerHTML = `<span class="font-mono text-zinc-500 mr-2">${ep.episode_number}.</span> ${ep.name}`;
-                    if(ep.episode_number === 1) {
-                        btn.classList.add('bg-red-600', 'text-white', 'border-red-500'); btn.classList.remove('text-zinc-400', 'border-transparent', 'hover:border-zinc-800', 'hover:bg-zinc-900');
+                    btn.className = "w-full text-left px-4 py-3 rounded-lg text-sm sm:text-base transition-colors border focus:outline-none focus:ring-2 focus:ring-red-600";
+                    
+                    if(ep.episode_number == currentEpisode) {
+                        btn.classList.add('bg-red-600', 'text-white', 'border-red-500'); 
+                    } else {
+                        btn.classList.add('text-zinc-400', 'border-transparent', 'hover:bg-zinc-900', 'hover:text-white', 'hover:border-zinc-800');
                     }
+                    
+                    btn.innerHTML = `<span class="font-mono text-zinc-500 mr-2 ${ep.episode_number == currentEpisode ? 'text-zinc-200' : ''}">${ep.episode_number}.</span> ${ep.name}`;
+                    
                     btn.onclick = () => {
+                        // Remove active styling from all buttons
                         episodeList.querySelectorAll('button').forEach(b => {
-                            b.classList.remove('bg-red-600', 'text-white', 'border-red-500'); b.classList.add('text-zinc-400', 'border-transparent', 'hover:border-zinc-800', 'hover:bg-zinc-900');
+                            b.classList.remove('bg-red-600', 'text-white', 'border-red-500'); 
+                            b.classList.add('text-zinc-400', 'border-transparent', 'hover:bg-zinc-900', 'hover:text-white', 'hover:border-zinc-800');
+                            const span = b.querySelector('span');
+                            if(span) span.classList.remove('text-zinc-200');
                         });
-                        btn.classList.add('bg-red-600', 'text-white', 'border-red-500'); btn.classList.remove('text-zinc-400', 'border-transparent', 'hover:border-zinc-800', 'hover:bg-zinc-900');
+                        // Add active styling to clicked button
+                        btn.classList.add('bg-red-600', 'text-white', 'border-red-500'); 
+                        btn.classList.remove('text-zinc-400', 'border-transparent', 'hover:bg-zinc-900', 'hover:text-white', 'hover:border-zinc-800');
+                        const span = btn.querySelector('span');
+                        if(span) span.classList.add('text-zinc-200');
+
                         currentEpisode = ep.episode_number;
+                        addToHistory(currentMediaObj, currentSeason, currentEpisode);
                         currentDirectUrl = null; 
                         updateStreamIframe();
                     };
                     episodeList.appendChild(btn);
                 });
-                currentEpisode = 1; updateStreamIframe();
+                
+                // Track automatic initial load
+                addToHistory(currentMediaObj, currentSeason, currentEpisode);
+                updateStreamIframe();
             } catch (e) { console.error("Error loading episodes:", e); }
         }
 
@@ -959,7 +1154,11 @@
             dubLangSelect.addEventListener('change', () => { if(currentAudioType === 'dub') updateStreamIframe(); });
         }
         
-        if (seasonSelect) seasonSelect.addEventListener('change', (e) => { currentSeason = e.target.value; currentDirectUrl = null; loadEpisodes(currentMediaId, currentSeason); });
+        if (seasonSelect) seasonSelect.addEventListener('change', (e) => { 
+            currentSeason = e.target.value; 
+            currentDirectUrl = null; 
+            loadEpisodes(currentMediaId, currentSeason); 
+        });
 
         if (clickShield && videoFrame) {
             clickShield.addEventListener('click', (e) => {
@@ -1013,10 +1212,8 @@
         window.addEventListener('popstate', (e) => {
             const state = e.state;
             
-            // If the modal was open, back button should close it first
             if (playerModal && !playerModal.classList.contains('hidden')) {
                 closePlayerModal(true);
-                // Push a state back so we don't accidentally leave the site on subsequent presses
                 try {
                     history.pushState({ writerstm: 'app', app: getAppState() }, '');
                 } catch(err) {}
@@ -1028,8 +1225,6 @@
                 return;
             }
 
-            // Fallback: If state is missing or empty (e.g. user pressed back past our initial history),
-            // intercept it, restore the base app state, and prevent exiting the website entirely.
             try {
                 history.pushState({ writerstm: 'app', app: getAppState() }, '');
             } catch(err) {}
@@ -1081,7 +1276,6 @@
         function hideExtMenu() { extMenu.style.display = 'none'; }
         document.addEventListener('click', (e) => { if (extMenu.style.display === 'block' && !extMenu.contains(e.target) && e.target !== externalPlayerBtn) hideExtMenu(); });
 
-        // Safely try to open Intent URLs
         function launchUrl(url) {
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
