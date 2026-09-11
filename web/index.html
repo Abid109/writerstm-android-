@@ -11,6 +11,8 @@
     <title>Writerstm.stream - External Player & 1DM Supported</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Cloudflare Turnstile Script -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     
     <script>
         // MALWARE & REDIRECT SHIELD
@@ -36,6 +38,14 @@
         window.onerror = function(message, source, lineno, colno, error) {
             console.error("Global script error:", message, "at line:", lineno);
             return false; 
+        };
+
+        // Cloudflare Turnstile Callback
+        window.onTurnstileSuccess = function(token) {
+            console.log("Turnstile verification successful!");
+            document.getElementById('cf-gateway').classList.add('hidden');
+            document.getElementById('app-content').classList.remove('hidden');
+            document.getElementById('app-content').classList.add('fade-in');
         };
     </script>
 
@@ -127,212 +137,243 @@
             #desktopSearchWrap { display: none !important; }
             #mobileSearchBar { display: block !important; }
         }
+
+        /* Fade in animation for app reveal */
+        @keyframes fadeInApp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeInApp 0.5s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen">
 
-    <!-- Added safe-top-nav class here to push content below the Android status bar -->
-    <nav class="sticky top-0 z-40 bg-black/90 backdrop-blur-md border-b border-zinc-900 safe-top-nav">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo & Title -->
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-md bg-white flex items-center justify-center overflow-hidden shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-                        <img src="3768.png" alt="Logo" class="w-full h-full object-cover grayscale brightness-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span style="display:none;" class="text-black font-black font-serif text-xl">W</span>
-                    </div>
-                    <h1 class="text-xl font-bold text-white tracking-tight drop-shadow-md">Writerstm.stream</h1>
-                </div>
-                
-                <!-- Desktop Search -->
-                <div id="desktopSearchWrap" class="hidden md:block flex-1 max-w-md mx-8">
-                    <div class="relative">
-                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
-                        <input type="text" id="searchInput" placeholder="Search movies..." class="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full focus:ring-2 focus:ring-red-600 focus:border-red-600 block pl-10 p-2 transition-all outline-none placeholder-zinc-500">
-                    </div>
-                </div>
-                
-                <!-- Watchlist Toggle -->
-                <button id="viewWatchlistBtn" class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
-                    <i class="ph ph-bookmarks text-xl"></i>
-                    <span class="hidden sm:inline text-sm font-medium">Watchlist</span>
-                </button>
+    <!-- Cloudflare Turnstile Gateway -->
+    <div id="cf-gateway" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-4">
+        <div class="mb-8 text-center flex flex-col items-center">
+            <div class="w-20 h-20 rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.15)] mb-6 transition-transform hover:scale-105">
+                <img src="3768.png" alt="Logo" class="w-full h-full object-cover grayscale brightness-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <span style="display:none;" class="text-black font-black font-serif text-4xl">W</span>
             </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-md">Writerstm.stream</h1>
+            <p class="text-zinc-400 mt-3 text-sm sm:text-base max-w-sm">Please complete the security check to access the streaming library securely.</p>
         </div>
-    </nav>
-
-    <!-- Mobile Search -->
-    <div id="mobileSearchBar" class="md:hidden p-4 bg-black border-b border-zinc-900">
-        <div class="relative">
-            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
-            <input type="text" id="mobileSearchInput" placeholder="Search movies..." class="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full focus:ring-2 focus:ring-red-600 focus:border-red-600 block pl-10 p-2 transition-all outline-none placeholder-zinc-500">
+        
+        <!-- Turnstile Widget Area -->
+        <div class="cf-turnstile min-h-[65px]" data-sitekey="0x4AAAAAAEv6sH7oXAh-8j0f" data-callback="onTurnstileSuccess" data-theme="dark"></div>
+        
+        <div class="mt-12 text-zinc-600 text-xs flex items-center gap-2">
+            <i class="ph-fill ph-shield-check text-lg"></i> Secured by Cloudflare
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Controls: Tabs & Filters -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div class="flex space-x-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800 overflow-x-auto hide-scrollbar max-w-full" id="typeTabs">
-                <button data-type="movie" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md bg-red-600 text-white shadow-sm transition-all focus:outline-none">Movies</button>
-                <button data-type="tv" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">TV Series</button>
-                <button data-type="anime" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">Anime</button>
-                <button data-type="archive" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">Public Domain</button>
-            </div>
-
-            <div class="flex flex-wrap gap-3 w-full sm:w-auto">
-                <select id="genreFilter" class="flex-1 sm:flex-none bg-zinc-900 border border-zinc-800 text-white text-sm sm:text-base rounded-lg focus:ring-red-600 focus:border-red-600 block p-2.5 sm:p-3 outline-none cursor-pointer">
-                    <option value="">All Genres</option>
-                </select>
-
-                <select id="categoryFilter" class="flex-1 sm:flex-none bg-zinc-900 border border-zinc-800 text-white text-sm sm:text-base rounded-lg focus:ring-red-600 focus:border-red-600 block p-2.5 sm:p-3 outline-none cursor-pointer">
-                    <option value="trending">Trending Now</option>
-                    <option value="popular">Most Popular</option>
-                    <option value="top_rated">Top Rated</option>
-                </select>
-            </div>
-        </div>
-        
-        <!-- Continue Watching Section -->
-        <div id="continueWatchingSection" class="hidden mb-10 border-b border-zinc-900 pb-8">
-            <div class="flex justify-between items-end mb-4">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="ph-fill ph-clock-counter-clockwise text-red-600"></i> Continue Watching
-                </h2>
-                <button id="clearHistoryBtn" class="text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear History</button>
-            </div>
-            <div id="continueWatchingList" class="flex gap-4 overflow-x-auto hide-scrollbar snap-x pb-2">
-                <!-- Cards injected here via JS -->
-            </div>
-        </div>
-
-        <div class="mb-4 flex justify-between items-end">
-            <h2 id="sectionTitle" class="text-2xl font-bold text-white">Trending Movies</h2>
-            <button id="clearWatchlistBtn" class="hidden text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear All</button>
-        </div>
-
-        <div id="mediaGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6"></div>
-        
-        <div id="mainLoader" class="flex justify-center items-center py-12 hidden">
-            <i class="ph ph-spinner animate-spin text-4xl text-red-600"></i>
-        </div>
-        
-        <div id="pagination" class="flex justify-center items-center gap-4 mt-8 hidden">
-            <button id="prevPageBtn" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg border border-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
-            <span id="pageIndicator" class="text-zinc-500 text-sm">Page 1</span>
-            <button id="nextPageBtn" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg border border-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
-        </div>
-    </main>
-
-    <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-md flex flex-col">
-        <!-- Added safe-top-nav class here so the modal close buttons are also clickable on APK -->
-        <div class="flex justify-between items-center p-4 sm:p-5 border-b border-zinc-900 bg-black safe-top-nav">
-            <h2 id="modalTitle" class="text-lg sm:text-xl font-bold text-white truncate max-w-[60%] sm:max-w-[70%]">Movie Title</h2>
-            <div class="flex items-center gap-3">
-                <button id="modalBookmarkBtn" class="bookmark-btn p-2.5 sm:p-3 bg-zinc-900 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 border border-zinc-800 focus:outline-none">
-                    <i class="ph ph-bookmark text-lg sm:text-xl"></i>
-                </button>
-                <button id="closeModal" class="p-2.5 sm:p-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-full transition-colors border border-red-500/20 focus:outline-none">
-                    <i class="ph ph-x text-lg sm:text-xl"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="flex-1 flex flex-col md:flex-row overflow-hidden bg-black">
-            <div class="flex-1 relative flex flex-col">
-                <div class="p-3 sm:p-4 bg-zinc-950 border-b border-zinc-900 flex flex-wrap gap-4 items-center justify-between z-20">
-                    <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
-                        <div class="flex items-center gap-2 flex-1 sm:flex-none">
-                            <i class="ph ph-hard-drives text-red-600 text-lg"></i>
-                            <select id="serverSelect" class="w-full sm:w-auto bg-zinc-900 text-white text-sm rounded-lg px-3 py-2 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600">
-                                <option value="direct_ext" class="bg-blue-900 text-blue-400 font-bold">Server 11 (External PRO - All Streams)</option>
-                                <option value="torrentio" class="bg-zinc-800 text-green-400 font-bold">Server 10 (Torrentio / 1DM Manager)</option>
-                                <option value="vidsrc_to">Server 1 (VidSrc To)</option>
-                                <option value="vidsrc_me">Server 2 (VidSrc Fast)</option>
-                                <option value="vidlink">Server 3 (VidLink Pro)</option>
-                                <option value="smashy">Server 4 (SmashyStream)</option>
-                                <option value="multiembed">Server 5 (MultiEmbed)</option>
-                                <option value="autoembed">Server 6 (AutoEmbed Ultra)</option>
-                                <option value="2embed">Server 7 (Backup 2Embed)</option>
-                                <option value="vidbinge">Server 8 (VidBinge - Good for Anime)</option>
-                                <option value="movieapi">Server 9 (MovieAPI)</option>
-                            </select>
+    <!-- Main App Content (Hidden initially until verification) -->
+    <div id="app-content" class="hidden">
+        <!-- Added safe-top-nav class here to push content below the Android status bar -->
+        <nav class="sticky top-0 z-40 bg-black/90 backdrop-blur-md border-b border-zinc-900 safe-top-nav">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Logo & Title -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-md bg-white flex items-center justify-center overflow-hidden shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                            <img src="3768.png" alt="Logo" class="w-full h-full object-cover grayscale brightness-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span style="display:none;" class="text-black font-black font-serif text-xl">W</span>
                         </div>
-
-                        <div class="h-6 w-px bg-zinc-800 hidden sm:block"></div>
-
-                        <div class="flex items-center gap-2">
-                            <button id="adBlockToggle" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors" title="Enable Malware, Redirect & Popup Protection">
-                                <i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline">Ad-Shield</span>
-                            </button>
-                            
-                            <button id="externalPlayerBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-900/40 text-blue-400 border border-blue-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-blue-900/60 transition-colors" title="Open stream in VLC / MX Player">
-                                <i class="ph ph-arrow-square-out text-base"></i> <span class="hidden sm:inline">External</span>
-                            </button>
-
-                            <button id="fullscreenBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-white border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors">
-                                <i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>
-                            </button>
-                        </div>
-                        
-                        <div class="h-6 w-px bg-zinc-800 hidden sm:block"></div>
-
-                        <div class="flex items-center gap-1 bg-zinc-900 rounded-lg p-1 border border-zinc-800">
-                            <button id="audio-sub" class="audio-toggle-btn active px-3 py-1.5 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-md text-white bg-red-600 focus:outline-none">Sub</button>
-                            <button id="audio-dub" class="audio-toggle-btn px-3 py-1.5 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-md text-zinc-400 hover:text-white focus:outline-none">Dub</button>
-                            <select id="dub-lang-select" class="hidden bg-zinc-900 text-zinc-300 text-xs sm:text-sm rounded-md ml-1 px-2 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:outline-none">
-                                <option value="en">English</option>
-                                <option value="es">Spanish</option>
-                                <option value="fr">French</option>
-                                <option value="de">German</option>
-                                <option value="it">Italian</option>
-                                <option value="hi">Hindi</option>
-                                <option value="bn">Bangla</option>
-                                <option value="ja">Japanese</option>
-                            </select>
-                        </div>
+                        <h1 class="text-xl font-bold text-white tracking-tight drop-shadow-md">Writerstm.stream</h1>
                     </div>
-
-                    <div id="streamStatus" class="flex items-center gap-1.5 text-zinc-500 text-xs">
-                        <i class="ph ph-spinner animate-spin"></i> Connecting to stream...
-                    </div>
-                </div>
-
-                <div id="videoContainer" class="flex-1 w-full relative bg-black flex flex-col">
-                    <button id="floatingExitBtn" class="absolute top-6 right-6 z-[999999] bg-black/70 text-white w-12 h-12 rounded-full hover:bg-black/90 transition-colors backdrop-blur-md border border-zinc-700 items-center justify-center cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.8)]">
-                        <i class="ph ph-corners-in text-2xl"></i>
-                    </button>
-
-                    <div id="clickShield" class="click-shield flex flex-col gap-2">
-                         <i class="ph-fill ph-play-circle text-6xl text-white/80 transition-transform duration-300"></i>
-                         <p class="text-white/80 text-sm font-medium bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">Click to bypass initial ads & play</p>
-                    </div>
-
-                    <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
                     
-                    <div id="scraperContainer" class="absolute inset-0 z-10 hidden bg-black p-4 overflow-y-auto"></div>
-
-                    <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
-                        <i class="ph ph-circle-notch animate-spin text-5xl text-red-600 mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"></i>
-                        <p id="loaderMessage" class="text-zinc-500 text-sm">Loading media engine...</p>
+                    <!-- Desktop Search -->
+                    <div id="desktopSearchWrap" class="hidden md:block flex-1 max-w-md mx-8">
+                        <div class="relative">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
+                            <input type="text" id="searchInput" placeholder="Search movies..." class="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full focus:ring-2 focus:ring-red-600 focus:border-red-600 block pl-10 p-2 transition-all outline-none placeholder-zinc-500">
+                        </div>
                     </div>
+                    
+                    <!-- Watchlist Toggle -->
+                    <button id="viewWatchlistBtn" class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
+                        <i class="ph ph-bookmarks text-xl"></i>
+                        <span class="hidden sm:inline text-sm font-medium">Watchlist</span>
+                    </button>
                 </div>
             </div>
+        </nav>
 
-            <!-- TV Episode Sidebar -->
-            <div id="tvSidebar" class="w-full md:w-80 lg:w-96 bg-zinc-950 border-t md:border-t-0 md:border-l border-zinc-900 flex-col hidden h-64 md:h-auto overflow-hidden">
-                <div class="p-4 border-b border-zinc-900">
-                    <h3 class="font-semibold text-white mb-2 flex items-center gap-2 text-lg"><i class="ph ph-list-numbers text-red-600"></i> Episodes</h3>
-                    <select id="seasonSelect" class="w-full bg-zinc-900 border border-zinc-800 text-white text-base rounded-lg p-3 outline-none cursor-pointer focus:border-red-600">
+        <!-- Mobile Search -->
+        <div id="mobileSearchBar" class="md:hidden p-4 bg-black border-b border-zinc-900">
+            <div class="relative">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
+                <input type="text" id="mobileSearchInput" placeholder="Search movies..." class="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full focus:ring-2 focus:ring-red-600 focus:border-red-600 block pl-10 p-2 transition-all outline-none placeholder-zinc-500">
+            </div>
+        </div>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Controls: Tabs & Filters -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                <div class="flex space-x-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800 overflow-x-auto hide-scrollbar max-w-full" id="typeTabs">
+                    <button data-type="movie" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md bg-red-600 text-white shadow-sm transition-all focus:outline-none">Movies</button>
+                    <button data-type="tv" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">TV Series</button>
+                    <button data-type="anime" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">Anime</button>
+                    <button data-type="archive" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">Public Domain</button>
+                </div>
+
+                <div class="flex flex-wrap gap-3 w-full sm:w-auto">
+                    <select id="genreFilter" class="flex-1 sm:flex-none bg-zinc-900 border border-zinc-800 text-white text-sm sm:text-base rounded-lg focus:ring-red-600 focus:border-red-600 block p-2.5 sm:p-3 outline-none cursor-pointer">
+                        <option value="">All Genres</option>
+                    </select>
+
+                    <select id="categoryFilter" class="flex-1 sm:flex-none bg-zinc-900 border border-zinc-800 text-white text-sm sm:text-base rounded-lg focus:ring-red-600 focus:border-red-600 block p-2.5 sm:p-3 outline-none cursor-pointer">
+                        <option value="trending">Trending Now</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="top_rated">Top Rated</option>
                     </select>
                 </div>
-                <div id="episodeList" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+            </div>
+            
+            <!-- Continue Watching Section -->
+            <div id="continueWatchingSection" class="hidden mb-10 border-b border-zinc-900 pb-8">
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="ph-fill ph-clock-counter-clockwise text-red-600"></i> Continue Watching
+                    </h2>
+                    <button id="clearHistoryBtn" class="text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear History</button>
+                </div>
+                <div id="continueWatchingList" class="flex gap-4 overflow-x-auto hide-scrollbar snap-x pb-2">
+                    <!-- Cards injected here via JS -->
+                </div>
+            </div>
+
+            <div class="mb-4 flex justify-between items-end">
+                <h2 id="sectionTitle" class="text-2xl font-bold text-white">Trending Movies</h2>
+                <button id="clearWatchlistBtn" class="hidden text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear All</button>
+            </div>
+
+            <div id="mediaGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6"></div>
+            
+            <div id="mainLoader" class="flex justify-center items-center py-12 hidden">
+                <i class="ph ph-spinner animate-spin text-4xl text-red-600"></i>
+            </div>
+            
+            <div id="pagination" class="flex justify-center items-center gap-4 mt-8 hidden">
+                <button id="prevPageBtn" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg border border-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <span id="pageIndicator" class="text-zinc-500 text-sm">Page 1</span>
+                <button id="nextPageBtn" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg border border-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+            </div>
+        </main>
+
+        <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-md flex flex-col">
+            <!-- Added safe-top-nav class here so the modal close buttons are also clickable on APK -->
+            <div class="flex justify-between items-center p-4 sm:p-5 border-b border-zinc-900 bg-black safe-top-nav">
+                <h2 id="modalTitle" class="text-lg sm:text-xl font-bold text-white truncate max-w-[60%] sm:max-w-[70%]">Movie Title</h2>
+                <div class="flex items-center gap-3">
+                    <button id="modalBookmarkBtn" class="bookmark-btn p-2.5 sm:p-3 bg-zinc-900 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 border border-zinc-800 focus:outline-none">
+                        <i class="ph ph-bookmark text-lg sm:text-xl"></i>
+                    </button>
+                    <button id="closeModal" class="p-2.5 sm:p-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-full transition-colors border border-red-500/20 focus:outline-none">
+                        <i class="ph ph-x text-lg sm:text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col md:flex-row overflow-hidden bg-black">
+                <div class="flex-1 relative flex flex-col">
+                    <div class="p-3 sm:p-4 bg-zinc-950 border-b border-zinc-900 flex flex-wrap gap-4 items-center justify-between z-20">
+                        <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+                            <div class="flex items-center gap-2 flex-1 sm:flex-none">
+                                <i class="ph ph-hard-drives text-red-600 text-lg"></i>
+                                <select id="serverSelect" class="w-full sm:w-auto bg-zinc-900 text-white text-sm rounded-lg px-3 py-2 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600">
+                                    <option value="direct_ext" class="bg-blue-900 text-blue-400 font-bold">Server 11 (External PRO - All Streams)</option>
+                                    <option value="torrentio" class="bg-zinc-800 text-green-400 font-bold">Server 10 (Torrentio / 1DM Manager)</option>
+                                    <option value="vidsrc_to">Server 1 (VidSrc To)</option>
+                                    <option value="vidsrc_me">Server 2 (VidSrc Fast)</option>
+                                    <option value="vidlink">Server 3 (VidLink Pro)</option>
+                                    <option value="smashy">Server 4 (SmashyStream)</option>
+                                    <option value="multiembed">Server 5 (MultiEmbed)</option>
+                                    <option value="autoembed">Server 6 (AutoEmbed Ultra)</option>
+                                    <option value="2embed">Server 7 (Backup 2Embed)</option>
+                                    <option value="vidbinge">Server 8 (VidBinge - Good for Anime)</option>
+                                    <option value="movieapi">Server 9 (MovieAPI)</option>
+                                </select>
+                            </div>
+
+                            <div class="h-6 w-px bg-zinc-800 hidden sm:block"></div>
+
+                            <div class="flex items-center gap-2">
+                                <button id="adBlockToggle" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors" title="Enable Malware, Redirect & Popup Protection">
+                                    <i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline">Ad-Shield</span>
+                                </button>
+                                
+                                <button id="externalPlayerBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-900/40 text-blue-400 border border-blue-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-blue-900/60 transition-colors" title="Open stream in VLC / MX Player">
+                                    <i class="ph ph-arrow-square-out text-base"></i> <span class="hidden sm:inline">External</span>
+                                </button>
+
+                                <button id="fullscreenBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-white border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors">
+                                    <i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>
+                                </button>
+                            </div>
+                            
+                            <div class="h-6 w-px bg-zinc-800 hidden sm:block"></div>
+
+                            <div class="flex items-center gap-1 bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+                                <button id="audio-sub" class="audio-toggle-btn active px-3 py-1.5 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-md text-white bg-red-600 focus:outline-none">Sub</button>
+                                <button id="audio-dub" class="audio-toggle-btn px-3 py-1.5 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-md text-zinc-400 hover:text-white focus:outline-none">Dub</button>
+                                <select id="dub-lang-select" class="hidden bg-zinc-900 text-zinc-300 text-xs sm:text-sm rounded-md ml-1 px-2 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:outline-none">
+                                    <option value="en">English</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                    <option value="it">Italian</option>
+                                    <option value="hi">Hindi</option>
+                                    <option value="bn">Bangla</option>
+                                    <option value="ja">Japanese</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="streamStatus" class="flex items-center gap-1.5 text-zinc-500 text-xs">
+                            <i class="ph ph-spinner animate-spin"></i> Connecting to stream...
+                        </div>
+                    </div>
+
+                    <div id="videoContainer" class="flex-1 w-full relative bg-black flex flex-col">
+                        <button id="floatingExitBtn" class="absolute top-6 right-6 z-[999999] bg-black/70 text-white w-12 h-12 rounded-full hover:bg-black/90 transition-colors backdrop-blur-md border border-zinc-700 items-center justify-center cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+                            <i class="ph ph-corners-in text-2xl"></i>
+                        </button>
+
+                        <div id="clickShield" class="click-shield flex flex-col gap-2">
+                             <i class="ph-fill ph-play-circle text-6xl text-white/80 transition-transform duration-300"></i>
+                             <p class="text-white/80 text-sm font-medium bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">Click to bypass initial ads & play</p>
+                        </div>
+
+                        <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
+                        
+                        <div id="scraperContainer" class="absolute inset-0 z-10 hidden bg-black p-4 overflow-y-auto"></div>
+
+                        <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
+                            <i class="ph ph-circle-notch animate-spin text-5xl text-red-600 mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"></i>
+                            <p id="loaderMessage" class="text-zinc-500 text-sm">Loading media engine...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TV Episode Sidebar -->
+                <div id="tvSidebar" class="w-full md:w-80 lg:w-96 bg-zinc-950 border-t md:border-t-0 md:border-l border-zinc-900 flex-col hidden h-64 md:h-auto overflow-hidden">
+                    <div class="p-4 border-b border-zinc-900">
+                        <h3 class="font-semibold text-white mb-2 flex items-center gap-2 text-lg"><i class="ph ph-list-numbers text-red-600"></i> Episodes</h3>
+                        <select id="seasonSelect" class="w-full bg-zinc-900 border border-zinc-800 text-white text-base rounded-lg p-3 outline-none cursor-pointer focus:border-red-600">
+                        </select>
+                    </div>
+                    <div id="episodeList" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <footer class="border-t border-zinc-900 mt-12 bg-black py-8 text-center text-zinc-600 text-sm">
-        <p>&copy; 2026 Writerstm.stream</p>
-    </footer>
+        <footer class="border-t border-zinc-900 mt-12 bg-black py-8 text-center text-zinc-600 text-sm">
+            <p>&copy; 2026 Writerstm.stream</p>
+        </footer>
+    </div>
 
     <script>
         const TMDB_API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c'; 
@@ -532,7 +573,6 @@
         }
         
         // ===== Watchlist & History System =====
-        
         function loadWatchlist() {
             if (safeStorageAccess()) {
                 try {
@@ -656,8 +696,6 @@
             });
             continueWatchingList.appendChild(fragment);
         }
-
-        // ===== End History System =====
 
         function toggleBookmark(mediaItem, event) {
             if(event) event.stopPropagation();
