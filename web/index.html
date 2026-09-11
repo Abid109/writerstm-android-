@@ -792,7 +792,9 @@
             if (modalTitle) modalTitle.textContent = item.title;
             
             playerModal.classList.remove('hidden'); 
-            try { history.pushState({ writerstm: 'player' }, ''); playerHistoryPushed = true; } catch(e) {}
+            if (!playerHistoryPushed) {
+                try { history.pushState({ writerstm: 'player' }, ''); playerHistoryPushed = true; } catch(e) {}
+            }
             if (videoFrame) videoFrame.classList.add('hidden');
             if (scraperContainer) scraperContainer.classList.add('hidden');
             
@@ -950,17 +952,12 @@
         
         if (floatingExitBtn && fullscreenBtn) floatingExitBtn.addEventListener('click', () => { fullscreenBtn.click(); });
         
-        // Phone back button support: restore previous app screen, close the player modal,
-        // and only leave the site when there is nothing left to go back to.
+        // Phone back button support (fixed):
+        // 1) If the player is open, back must CLOSE it - never leave the site from here.
+        // 2) Otherwise, walk backwards through real app history (tabs, filters, pages, watchlist).
         window.addEventListener('popstate', (e) => {
-            playerHistoryPushed = false;
-            if (e.state && e.state.writerstm === 'app') {
-                const inc = e.state.app, cur = getAppState();
-                const same = inc.type === cur.type && inc.category === cur.category && inc.genre === cur.genre && inc.query === cur.query && inc.page === cur.page && inc.watchlist === cur.watchlist;
-                if (!same) applyAppState(inc);
-                return;
-            }
             if (playerModal && !playerModal.classList.contains('hidden')) {
+                playerHistoryPushed = false;
                 if (videoFrame) videoFrame.src = '';
                 currentMediaObj = null; currentDirectUrl = null;
                 playerModal.classList.add('hidden');
@@ -968,6 +965,16 @@
                 if (fullscreenBtn) fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
                 const dMsg2 = document.getElementById('directPlayMsg');
                 if (dMsg2) dMsg2.remove();
+                // Re-sync the history entry with the app state we are actually still on,
+                // so the NEXT back press walks through real app history (and never skips it).
+                try { history.replaceState({ writerstm: 'app', app: getAppState() }, ''); } catch(err) {}
+                return;
+            }
+
+            if (e.state && e.state.app) {
+                const inc = e.state.app, cur = getAppState();
+                const same = inc.type === cur.type && inc.category === cur.category && inc.genre === cur.genre && inc.query === cur.query && inc.page === cur.page && inc.watchlist === cur.watchlist;
+                if (!same) applyAppState(inc);
             }
         });
 
