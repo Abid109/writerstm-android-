@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,7 +35,6 @@
         // Global Error Handler to prevent silent blank screens
         window.onerror = function(message, source, lineno, colno, error) {
             console.error("Global script error:", message, "at line:", lineno);
-            // We don't block the whole screen, but log it so other scripts might still run
             return false; 
         };
     </script>
@@ -107,7 +107,6 @@
             scrollbar-color: #dc2626 #000;
         }
 
-        /* ===== SEARCH BAR VISIBILITY FIX (Tailwind-CDN independent) ===== */
         #desktopSearchWrap { flex: 1 1 0%; max-width: 28rem; margin-left: 2rem; margin-right: 2rem; }
         #desktopSearchWrap input, #mobileSearchBar input {
             width: 100%; background: #18181b; border: 1px solid #27272a; color: #fff;
@@ -369,26 +368,53 @@
         const floatingExitBtn = $('floatingExitBtn');
         
         let isAdShieldActive = true; 
-        let playerHistoryPushed = false; // tracks back-button history entry for the player modal
 
-        // ===== Back-button navigation system (History API) =====
+        // ===== Robust History & Back-Button Shield System =====
+        // We initialize the history state stack with a sentinel entry so the very first back press stays on site.
+        let isAppInitialized = false;
+
         function getAppState() {
-            return { type: currentType, category: currentCategory, genre: currentGenre || '', query: currentQuery || '', page: currentPage || 1, watchlist: !!isWatchlistView };
+            return { 
+                type: currentType, 
+                category: currentCategory, 
+                genre: currentGenre || '', 
+                query: currentQuery || '', 
+                page: currentPage || 1, 
+                watchlist: !!isWatchlistView 
+            };
         }
 
-        function pushAppState(s) {
-            try { history.pushState({ writerstm: 'app', app: s }, ''); } catch (err) {}
+        function initHistory() {
+            if (isAppInitialized) return;
+            isAppInitialized = true;
+            // Replace initial history with our baseline app state
+            try {
+                history.replaceState({ writerstm: 'app', app: getAppState() }, '');
+            } catch(e) {}
+        }
+
+        function pushStateChange() {
+            if (!isAppInitialized) return;
+            try {
+                history.pushState({ writerstm: 'app', app: getAppState() }, '');
+            } catch (err) {}
         }
 
         async function applyAppState(s) {
-            currentType = s.type; currentCategory = s.category; currentGenre = s.genre || '';
-            currentQuery = s.query || ''; currentPage = s.page || 1; isWatchlistView = !!s.watchlist;
+            currentType = s.type; 
+            currentCategory = s.category; 
+            currentGenre = s.genre || '';
+            currentQuery = s.query || ''; 
+            currentPage = s.page || 1; 
+            isWatchlistView = !!s.watchlist;
 
             tabBtns.forEach(b => {
                 if (b.dataset.type === currentType) {
-                    b.classList.add('bg-red-600', 'text-white', 'shadow-sm'); b.classList.remove('text-zinc-400');
+                    b.classList.add('bg-red-600', 'text-white', 'shadow-sm'); 
+                    b.classList.remove('text-zinc-400');
                 } else {
-                    b.classList.remove('bg-red-600', 'text-white', 'shadow-sm'); b.classList.add('text-zinc-400');
+                    b.classList.remove('bg-red-600', 'text-white', 'shadow-sm'); 
+                    b.classList.add('text-zinc-400');
                 }
             });
 
@@ -399,8 +425,15 @@
             if (searchInput) { searchInput.placeholder = ph; searchInput.value = currentQuery; }
             if (mobileSearchInput) { mobileSearchInput.placeholder = ph; mobileSearchInput.value = currentQuery; }
 
-            if (categoryFilter) { categoryFilter.value = currentCategory; categoryFilter.disabled = isWatchlistView; categoryFilter.classList.toggle('opacity-50', isWatchlistView); }
-            if (genreFilter) { genreFilter.disabled = isWatchlistView; genreFilter.classList.toggle('opacity-50', isWatchlistView); }
+            if (categoryFilter) { 
+                categoryFilter.value = currentCategory; 
+                categoryFilter.disabled = isWatchlistView; 
+                categoryFilter.classList.toggle('opacity-50', isWatchlistView); 
+            }
+            if (genreFilter) { 
+                genreFilter.disabled = isWatchlistView; 
+                genreFilter.classList.toggle('opacity-50', isWatchlistView); 
+            }
             if (clearWatchlistBtn) clearWatchlistBtn.classList.toggle('hidden', !isWatchlistView);
             if (pagination) pagination.classList.toggle('hidden', isWatchlistView);
             if (sectionTitle && isWatchlistView) sectionTitle.textContent = "My Watchlist";
@@ -413,10 +446,10 @@
             else fetchMedia();
         }
 
+        // When user interacts with filters/tabs/search
         function navigateApp() {
-            const s = getAppState();
-            applyAppState(s);
-            pushAppState(s);
+            applyAppState(getAppState());
+            pushStateChange();
         }
         
         const serverSelect = $('serverSelect');
@@ -428,7 +461,6 @@
         const seasonSelect = $('seasonSelect');
         const episodeList = $('episodeList');
 
-        // Safe storage check to prevent fatal SecurityErrors in restricted webviews
         function safeStorageAccess() {
             try {
                 localStorage.setItem('__test__', '__test__');
@@ -442,6 +474,7 @@
                 loadWatchlist();
                 loadGenres();
                 fetchMedia();
+                initHistory();
                 
                 if(safeStorageAccess()) {
                     const pref = localStorage.getItem('writerstm_preferred_server');
@@ -450,7 +483,6 @@
                     }
                 }
                 
-                try { history.replaceState({ writerstm: 'app', app: getAppState() }, ''); } catch(e) {}
                 setTimeout(() => {
                     showToast("🛡️ Security Shield Active: Blocking Malware & Popups", 4000);
                 }, 1500);
@@ -706,7 +738,6 @@
             mediaGrid.innerHTML = '';
             if (!items || items.length === 0) { mediaGrid.innerHTML = `<p class="col-span-full text-center text-zinc-500 py-10">No results found.</p>`; return; }
             
-            // Fragment for better performance
             const fragment = document.createDocumentFragment();
 
             items.forEach(rawItem => {
@@ -792,9 +823,12 @@
             if (modalTitle) modalTitle.textContent = item.title;
             
             playerModal.classList.remove('hidden'); 
-            if (!playerHistoryPushed) {
-                try { history.pushState({ writerstm: 'player' }, ''); playerHistoryPushed = true; } catch(e) {}
-            }
+            
+            // Push player history state so hardware back button can close the modal instead of navigating away
+            try {
+                history.pushState({ writerstm: 'player', modalOpen: true }, '');
+            } catch(e) {}
+
             if (videoFrame) videoFrame.classList.add('hidden');
             if (scraperContainer) scraperContainer.classList.add('hidden');
             
@@ -829,18 +863,34 @@
             } else { updateStreamIframe(); }
         }
 
+        function closePlayerModal(fromPopState = false) {
+            if (!playerModal || playerModal.classList.contains('hidden')) return;
+            
+            playerModal.classList.add('hidden'); 
+            if (videoFrame) videoFrame.src = ''; 
+            currentMediaObj = null; 
+            currentDirectUrl = null;
+            
+            if (videoContainer) videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
+            if (fullscreenBtn) fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
+            
+            const dMsg = document.getElementById('directPlayMsg');
+            if (dMsg) dMsg.remove();
+
+            // If closed via UI button and we pushed a modal state, pop it back to clean up history
+            if (!fromPopState) {
+                try {
+                    // Check if current history state is player
+                    if (history.state && history.state.writerstm === 'player') {
+                        history.back();
+                    }
+                } catch(e) {}
+            }
+        }
+
         if (closeModalBtn) {
             closeModalBtn.addEventListener('click', () => {
-                if (playerHistoryPushed) { playerHistoryPushed = false; history.back(); return; }
-                if (playerModal) playerModal.classList.add('hidden'); 
-                if (videoFrame) videoFrame.src = ''; 
-                currentMediaObj = null; currentDirectUrl = null;
-                
-                if (videoContainer) videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
-                if (fullscreenBtn) fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
-                
-                const dMsg = document.getElementById('directPlayMsg');
-                if (dMsg) dMsg.remove();
+                closePlayerModal(false);
             });
         }
 
@@ -952,30 +1002,31 @@
         
         if (floatingExitBtn && fullscreenBtn) floatingExitBtn.addEventListener('click', () => { fullscreenBtn.click(); });
         
-        // Phone back button support (fixed):
-        // 1) If the player is open, back must CLOSE it - never leave the site from here.
-        // 2) Otherwise, walk backwards through real app history (tabs, filters, pages, watchlist).
+        // Robust Unified popstate event listener for managing back button behavior cleanly
         window.addEventListener('popstate', (e) => {
+            const state = e.state;
+            
+            // If the modal was open, back button should close it first
             if (playerModal && !playerModal.classList.contains('hidden')) {
-                playerHistoryPushed = false;
-                if (videoFrame) videoFrame.src = '';
-                currentMediaObj = null; currentDirectUrl = null;
-                playerModal.classList.add('hidden');
-                if (videoContainer) videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
-                if (fullscreenBtn) fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">Fullscreen</span>`;
-                const dMsg2 = document.getElementById('directPlayMsg');
-                if (dMsg2) dMsg2.remove();
-                // Re-sync the history entry with the app state we are actually still on,
-                // so the NEXT back press walks through real app history (and never skips it).
-                try { history.replaceState({ writerstm: 'app', app: getAppState() }, ''); } catch(err) {}
+                closePlayerModal(true);
+                // Push a state back so we don't accidentally leave the site on subsequent presses
+                try {
+                    history.pushState({ writerstm: 'app', app: getAppState() }, '');
+                } catch(err) {}
                 return;
             }
 
-            if (e.state && e.state.app) {
-                const inc = e.state.app, cur = getAppState();
-                const same = inc.type === cur.type && inc.category === cur.category && inc.genre === cur.genre && inc.query === cur.query && inc.page === cur.page && inc.watchlist === cur.watchlist;
-                if (!same) applyAppState(inc);
+            if (state && state.writerstm === 'app' && state.app) {
+                applyAppState(state.app);
+                return;
             }
+
+            // Fallback: If state is missing or empty (e.g. user pressed back past our initial history),
+            // intercept it, restore the base app state, and prevent exiting the website entirely.
+            try {
+                history.pushState({ writerstm: 'app', app: getAppState() }, '');
+            } catch(err) {}
+            showToast("You are on the main page of Writerstm.stream");
         });
 
         document.addEventListener('fullscreenchange', () => {
@@ -985,7 +1036,6 @@
             }
         });
 
-        // Toast Notification System
         const toastEl = document.createElement('div');
         toastEl.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#18181b;color:#fff;padding:10px 18px;border-radius:9999px;border:1px solid #3f3f46;font-size:13px;z-index:100000;display:none;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6);";
         document.body.appendChild(toastEl);
@@ -995,7 +1045,6 @@
             clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.style.display = 'none', ms);
         }
 
-        // External Player & Clipboard Logic
         function copyToClipboard(text) {
             if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).catch(() => {});
             const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
@@ -1025,8 +1074,15 @@
         function hideExtMenu() { extMenu.style.display = 'none'; }
         document.addEventListener('click', (e) => { if (extMenu.style.display === 'block' && !extMenu.contains(e.target) && e.target !== externalPlayerBtn) hideExtMenu(); });
 
+        // Safely try to open Intent URLs
         function launchUrl(url) {
-            const a = document.createElement('a'); a.href = url; a.rel = 'noopener'; document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 1500);
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url;
+            document.body.appendChild(iframe);
+            setTimeout(() => {
+                if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
+            }, 1500);
         }
 
         function openInVLC() {
@@ -1108,8 +1164,7 @@
                         <div>
                             <h4 class="font-bold text-white text-sm sm:text-base">Torrentio (1DM Compatible)</h4>
                             <p class="text-xs sm:text-sm text-zinc-400 mt-1">
-                                <strong>Magnet Links (Blue):</strong> Will open automatically in 1DM, Flud, or your default download manager.<br>
-                                <strong>Direct Links (Green):</strong> Can be played directly here or sent to VLC/MX Player.
+                                <strong>Magnet Links (Blue):</strong> Tap to open in 1DM/Flud. If the app shows an error page, use the <strong>Copy Magnet</strong> button instead.
                             </p>
                         </div>
                     </div>
@@ -1122,15 +1177,28 @@
                     const titleParts = (stream.title || '').split('\n');
                     const quality = titleParts[0] || 'Unknown';
                     const sizeOrDetails = titleParts.slice(1).join(' &bull; ');
+                    const safeLink = encodeURIComponent(link);
 
                     html += `
-                        <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', ${isMagnet})" class="flex flex-col text-left p-4 bg-zinc-900 border border-zinc-800 hover:border-red-500 hover:bg-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-600">
+                        <div class="flex flex-col p-4 bg-zinc-900 border border-zinc-800 rounded-lg transition-colors hover:border-red-500">
                             <span class="text-sm font-bold text-white break-words">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
-                            <span class="text-xs text-zinc-400 mt-2 line-clamp-2">${sizeOrDetails}</span>
-                            <span class="text-xs font-semibold mt-3 flex items-center gap-1.5 ${isMagnet ? 'text-blue-400' : 'text-green-400'}">
-                                ${isMagnet ? '<i class="ph-fill ph-magnet text-base"></i> Open Magnet in 1DM' : '<i class="ph-fill ph-link text-base"></i> Direct Play Stream'}
-                            </span>
-                        </button>
+                            <span class="text-xs text-zinc-400 mt-2 mb-3 line-clamp-2 flex-grow">${sizeOrDetails}</span>
+                            
+                            <div class="flex flex-col gap-2 mt-auto">
+                                ${isMagnet ? `
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-2 px-3 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph-fill ph-magnet text-sm"></i> Launch App (1DM)
+                                    </button>
+                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied! Paste it in your torrent app.', 4000);" class="w-full text-center py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph ph-copy text-sm"></i> Copy Magnet Link
+                                    </button>
+                                ` : `
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', false)" class="w-full text-center py-2 px-3 bg-green-600/20 hover:bg-green-600/40 text-green-400 border border-green-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph-fill ph-play-circle text-sm"></i> Direct Play Stream
+                                    </button>
+                                `}
+                            </div>
+                        </div>
                     `;
                 });
                 html += '</div>';
@@ -1211,7 +1279,7 @@
                             <h4 class="font-bold text-white text-sm sm:text-base">External Player PRO Hub</h4>
                             <p class="text-xs sm:text-sm text-zinc-400 mt-1">
                                 <strong>HTTP Links (Blue):</strong> Standard video files. Tap to send directly to VLC or MX Player.<br>
-                                <strong>Torrent Links (Purple):</strong> Magnet links. Tap to securely stream using <strong class="text-white">1DM</strong>, <strong class="text-white">Flud</strong>, or <strong class="text-white">TorrSE</strong>. Guaranteed to have almost every movie!
+                                <strong>Torrent Links (Purple):</strong> Magnet links. Tap to securely stream using <strong class="text-white">1DM</strong>, <strong class="text-white">Flud</strong>, or <strong class="text-white">TorrSE</strong>.
                             </p>
                         </div>
                     </div>
@@ -1249,14 +1317,22 @@
                         const titleParts = (stream.title || '').split('\n');
                         const quality = titleParts[0] || 'Unknown';
                         const details = titleParts.slice(1).join(' &bull; ');
+                        const safeLink = encodeURIComponent(link);
+                        
                         html += `
-                            <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="flex flex-col text-left p-4 bg-zinc-900 border border-zinc-800 hover:border-purple-500 hover:bg-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-600">
+                            <div class="flex flex-col p-4 bg-zinc-900 border border-zinc-800 rounded-lg transition-colors hover:border-purple-500">
                                 <span class="text-sm font-bold text-white break-words">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
-                                <span class="text-xs text-zinc-400 mt-2 line-clamp-2">${details}</span>
-                                <span class="text-xs font-semibold mt-3 flex items-center gap-1.5 text-purple-400">
-                                    <i class="ph-fill ph-magnet text-base"></i> Stream via 1DM
-                                </span>
-                            </button>
+                                <span class="text-xs text-zinc-400 mt-2 mb-3 line-clamp-2 flex-grow">${details}</span>
+                                
+                                <div class="flex flex-col gap-2 mt-auto">
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-2 px-3 bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 border border-purple-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph-fill ph-magnet text-sm"></i> Launch App (1DM)
+                                    </button>
+                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied! Paste it in your torrent app.', 4000);" class="w-full text-center py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph ph-copy text-sm"></i> Copy Link
+                                    </button>
+                                </div>
+                            </div>
                         `;
                     });
                     html += `</div>`;
@@ -1273,8 +1349,17 @@
 
         window.handleTorrentioClick = function(link, isMagnet) {
             if(isMagnet) {
-                showToast("Opening in your Torrent/Download manager (e.g. 1DM)...", 5000);
-                window.location.href = link; 
+                showToast("Attempting to launch Torrent/Download manager...", 4000);
+                const intentUrl = `intent://${link.replace(/^magnet:\/?\/?/, '')}#Intent;scheme=magnet;end`;
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                const isAndroid = /android/i.test(navigator.userAgent || '');
+                iframe.src = isAndroid ? intentUrl : link;
+                document.body.appendChild(iframe);
+                setTimeout(() => {
+                    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                    showToast("If the app didn't open, use the 'Copy Magnet Link' button.", 5000);
+                }, 1500);
             } else {
                 currentDirectUrl = link;
                 if (scraperContainer) scraperContainer.classList.add('hidden');
@@ -1402,3 +1487,4 @@
     </script>
 </body>
 </html>
+```
