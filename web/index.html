@@ -146,59 +146,6 @@
         .fade-in {
             animation: fadeInApp 0.5s ease-out forwards;
         }
-
-        /* ============ Theme System ============ */
-        .theme-opt.active { border-color:#dc2626 !important; box-shadow:0 0 0 2px rgba(220,38,38,0.35); }
-
-        /* Light theme */
-        body.theme-light { background-color:#f4f4f5 !important; color:#18181b !important; }
-        body.theme-light .bg-black { background-color:#ffffff !important; }
-        body.theme-light .bg-zinc-950 { background-color:#fafafa !important; }
-        body.theme-light .bg-zinc-900 { background-color:#f4f4f5 !important; }
-        body.theme-light .bg-zinc-800 { background-color:#e4e4e7 !important; }
-        body.theme-light .border-zinc-900,
-        body.theme-light .border-zinc-800,
-        body.theme-light .border-zinc-700,
-        body.theme-light .border-zinc-600 { border-color:#d4d4d8 !important; }
-        body.theme-light .text-white { color:#18181b !important; }
-        body.theme-light .text-zinc-400,
-        body.theme-light .text-zinc-500 { color:#52525b !important; }
-        body.theme-light .text-zinc-600 { color:#71717a !important; }
-        body.theme-light #desktopSearchWrap input,
-        body.theme-light #mobileSearchBar input { background:#ffffff !important; border-color:#d4d4d8 !important; color:#18181b !important; }
-        body.theme-light ::-webkit-scrollbar-track { background:#e4e4e7 !important; }
-        body.theme-light #appToast { background:#ffffff !important; color:#18181b !important; border-color:#d4d4d8 !important; }
-        body.theme-light #extPlayerMenu { background:#ffffff !important; border-color:#d4d4d8 !important; }
-        body.theme-light #extPlayerMenu button { color:#18181b !important; }
-        body.theme-light #extPlayerMenu button:hover { background:#e4e4e7 !important; }
-
-        /* Dark Blue theme */
-        body.theme-darkblue { background-color:#020617 !important; }
-        body.theme-darkblue .bg-black { background-color:#0b1226 !important; }
-        body.theme-darkblue .bg-zinc-950 { background-color:#0e1730 !important; }
-        body.theme-darkblue .bg-zinc-900 { background-color:#17223f !important; }
-        body.theme-darkblue .bg-zinc-800 { background-color:#223154 !important; }
-        body.theme-darkblue .border-zinc-900,
-        body.theme-darkblue .border-zinc-800,
-        body.theme-darkblue .border-zinc-700,
-        body.theme-darkblue .border-zinc-600 { border-color:#2a3a63 !important; }
-        body.theme-darkblue #desktopSearchWrap input,
-        body.theme-darkblue #mobileSearchBar input { background:#17223f !important; border-color:#2a3a63 !important; }
-        body.theme-darkblue ::-webkit-scrollbar-track { background:#0b1226 !important; }
-
-        /* Dark Purple theme */
-        body.theme-darkpurple { background-color:#0f0716 !important; }
-        body.theme-darkpurple .bg-black { background-color:#170b21 !important; }
-        body.theme-darkpurple .bg-zinc-950 { background-color:#1d1030 !important; }
-        body.theme-darkpurple .bg-zinc-900 { background-color:#2a1846 !important; }
-        body.theme-darkpurple .bg-zinc-800 { background-color:#3b2560 !important; }
-        body.theme-darkpurple .border-zinc-900,
-        body.theme-darkpurple .border-zinc-800,
-        body.theme-darkpurple .border-zinc-700,
-        body.theme-darkpurple .border-zinc-600 { border-color:#4c2d75 !important; }
-        body.theme-darkpurple #desktopSearchWrap input,
-        body.theme-darkpurple #mobileSearchBar input { background:#2a1846 !important; border-color:#4c2d75 !important; }
-        body.theme-darkpurple ::-webkit-scrollbar-track { background:#170b21 !important; }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen">
@@ -240,9 +187,18 @@
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <button id="settingsBtn" class="p-2 text-zinc-400 hover:text-white transition-colors" title="Settings">
-                            <i class="ph ph-gear text-xl"></i>
-                        </button>
+                        <!-- Language Switcher -->
+                        <div class="relative flex items-center">
+                            <i class="ph ph-globe text-zinc-400 text-lg absolute left-2.5 rtl:left-auto rtl:right-2.5 pointer-events-none"></i>
+                            <select id="langSelect" class="bg-zinc-900 border border-zinc-800 text-white text-xs sm:text-sm rounded-lg pl-8 pr-3 rtl:pl-3 rtl:pr-8 py-1.5 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600">
+                                <option value="en">English</option>
+                                <option value="bn">বাংলা (Bangla)</option>
+                                <option value="ar">العربية (Arabic)</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="hi">हिन्दी (Hindi)</option>
+                            </select>
+                        </div>
 
                         <button id="viewWatchlistBtn" class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
                             <i class="ph ph-bookmarks text-xl"></i>
@@ -310,44 +266,6 @@
                 <button id="nextPageBtn" data-i18n="next" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg border border-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
             </div>
         </main>
-
-        <div id="settingsPanel" class="hidden fixed inset-0 z-[60]">
-            <div id="settingsBackdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-            <div class="absolute top-20 right-4 sm:right-8 w-72 sm:w-80 bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl p-5 fade-in">
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="font-bold text-white flex items-center gap-2"><i class="ph-fill ph-gear text-red-500"></i> Settings</h3>
-                    <button id="closeSettingsBtn" class="p-1.5 text-zinc-400 hover:text-white transition-colors">
-                        <i class="ph ph-x text-lg"></i>
-                    </button>
-                </div>
-
-                <label class="block text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-2">Language</label>
-                <select id="settingsLangSelect" class="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg p-2.5 outline-none cursor-pointer hover:bg-zinc-700 transition-colors mb-5 focus:border-red-600">
-                    <option value="en">English</option>
-                    <option value="bn">বাংলা (Bangla)</option>
-                    <option value="ar">العربية (Arabic)</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
-                    <option value="hi">हिन्दी (Hindi)</option>
-                </select>
-
-                <label class="block text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-2">Theme</label>
-                <div class="grid grid-cols-2 gap-2" id="themeOptions">
-                    <button data-theme="dark" class="theme-opt flex items-center gap-2 p-2.5 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-red-500 transition-colors text-sm font-medium text-white">
-                        <span class="w-4 h-4 rounded-full border border-zinc-600 flex-none" style="background:#18181b"></span> Dark
-                    </button>
-                    <button data-theme="light" class="theme-opt flex items-center gap-2 p-2.5 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-red-500 transition-colors text-sm font-medium text-white">
-                        <span class="w-4 h-4 rounded-full border border-zinc-600 flex-none" style="background:#ffffff"></span> Light
-                    </button>
-                    <button data-theme="darkblue" class="theme-opt flex items-center gap-2 p-2.5 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-red-500 transition-colors text-sm font-medium text-white">
-                        <span class="w-4 h-4 rounded-full border border-zinc-600 flex-none" style="background:#17223f"></span> Dark Blue
-                    </button>
-                    <button data-theme="darkpurple" class="theme-opt flex items-center gap-2 p-2.5 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-red-500 transition-colors text-sm font-medium text-white">
-                        <span class="w-4 h-4 rounded-full border border-zinc-600 flex-none" style="background:#2a1846"></span> Dark Purple
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-start sm:items-center justify-center p-3 sm:p-6">
             <div class="w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col bg-black rounded-2xl border border-zinc-800 shadow-2xl">
@@ -831,9 +749,10 @@
             document.documentElement.lang = langCode;
             document.documentElement.dir = (langCode === 'ar') ? 'rtl' : 'ltr';
 
-            const settingsLangSelect = $('settingsLangSelect');
-            if (settingsLangSelect && settingsLangSelect.value !== langCode) {
-                settingsLangSelect.value = langCode;
+            // Update language selector dropdown if needed
+            const langSelect = $('langSelect');
+            if (langSelect && langSelect.value !== langCode) {
+                langSelect.value = langCode;
             }
 
             // Update static elements with data-i18n attribute
@@ -890,6 +809,7 @@
         const sectionTitle = $('sectionTitle');
         const viewWatchlistBtn = $('viewWatchlistBtn');
         const clearWatchlistBtn = $('clearWatchlistBtn');
+        const langSelect = $('langSelect');
         
         const continueWatchingSection = $('continueWatchingSection');
         const continueWatchingList = $('continueWatchingList');
@@ -1027,7 +947,6 @@
                     }
                 }
                 setLanguage(currentLang);
-                loadTheme();
 
                 loadWatchlist();
                 loadWatchHistory(); 
@@ -1048,6 +967,12 @@
                 }
             }
         });
+
+        if (langSelect) {
+            langSelect.addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
+        }
         
         if (serverSelect) {
             serverSelect.addEventListener('change', (e) => {
@@ -1762,7 +1687,6 @@
         });
 
         const toastEl = document.createElement('div');
-        toastEl.id = 'appToast';
         toastEl.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#18181b;color:#fff;padding:10px 18px;border-radius:9999px;border:1px solid #3f3f46;font-size:13px;z-index:100000;display:none;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6);";
         document.body.appendChild(toastEl);
         let toastTimer;
@@ -1843,66 +1767,376 @@
             if (act === 'vlc') openInVLC(); else if (act === 'mx') openInMX(); else if (act === 'copy') copyStreamLink();
         });
 
-        const THEMES = ['dark', 'light', 'darkblue', 'darkpurple'];
-        let currentTheme = 'dark';
-
-        function applyTheme(theme) {
-            if (!THEMES.includes(theme)) theme = 'dark';
-            currentTheme = theme;
-            document.body.classList.remove('theme-dark', 'theme-light', 'theme-darkblue', 'theme-darkpurple');
-            document.body.classList.add('theme-' + theme);
-            if (safeStorageAccess()) {
-                try { localStorage.setItem('writerstm_theme', theme); } catch(e) {}
-            }
-            document.querySelectorAll('#themeOptions .theme-opt').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.theme === theme);
-            });
-        }
-
-        function loadTheme() {
-            let saved = 'dark';
-            if (safeStorageAccess()) {
-                try {
-                    const s = localStorage.getItem('writerstm_theme');
-                    if (s && THEMES.includes(s)) saved = s;
-                } catch(e) {}
-            }
-            applyTheme(saved);
-            const sel = $('settingsLangSelect');
-            if (sel) sel.value = currentLang;
-        }
-
-        const settingsBtn = $('settingsBtn');
-        const settingsPanel = $('settingsPanel');
-        if (settingsBtn && settingsPanel) {
-            settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('hidden'));
-        }
-        const closeSettingsBtn = $('closeSettingsBtn');
-        if (closeSettingsBtn && settingsPanel) {
-            closeSettingsBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
-        }
-        const settingsBackdrop = $('settingsBackdrop');
-        if (settingsBackdrop && settingsPanel) {
-            settingsBackdrop.addEventListener('click', () => settingsPanel.classList.add('hidden'));
-        }
-        const settingsLangSelect = $('settingsLangSelect');
-        if (settingsLangSelect) {
-            settingsLangSelect.addEventListener('change', (e) => setLanguage(e.target.value));
-        }
-        document.querySelectorAll('#themeOptions .theme-opt').forEach(btn => {
-            btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
-        });
-
         async function getImdbId(mediaId, type) {
             try {
                 const ep = type === 'tv' ? `tv/${mediaId}` : `movie/${mediaId}`;
                 const res = await fetch(`https://api.themoviedb.org/3/${ep}/external_ids?api_key=${TMDB_API_KEY}`);
                 const data = await res.json();
                 return data.imdb_id;
-            } catch (error) {
-                console.error("Error fetching IMDB ID:", error);
-                return null;
+            } catch(e) { console.error("Error fetching IMDB ID:", e); return null; }
+        }
+
+        async function loadTorrentioStreams() {
+            if (videoFrame) videoFrame.classList.add('hidden');
+            if (scraperContainer) scraperContainer.classList.remove('hidden'); if (videoContainer) videoContainer.classList.add('scraper-open');
+            if (playerLoader) playerLoader.classList.remove('hidden');
+            if (loaderMessage) loaderMessage.textContent = t('loadingEngine');
+            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
+
+            try {
+                const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
+                const actualType = isTv ? 'tv' : 'movie';
+                const imdbId = await getImdbId(currentMediaId, actualType);
+
+                if(!imdbId) throw new Error("No IMDB ID found for this title. Torrentio requires IMDB.");
+
+                const url = isTv
+                    ? `https://torrentio.strem.fun/stream/series/${imdbId}:${currentSeason}:${currentEpisode}.json`
+                    : `https://torrentio.strem.fun/stream/movie/${imdbId}.json`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (playerLoader) playerLoader.classList.add('hidden');
+
+                if(!data.streams || data.streams.length === 0) {
+                    if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>${t('noResults')}</p></div>`;
+                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No torrents available</span>`;
+                    return;
+                }
+
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-400">${t('connectedSecure')}</span>`;
+                
+                let html = `
+                    <div class="mb-4 bg-zinc-900 border border-zinc-800 p-4 rounded-lg flex items-start gap-3">
+                        <i class="ph-fill ph-info text-2xl text-green-500 mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-white text-sm sm:text-base">${t('torrentioTitle')}</h4>
+                            <p class="text-xs sm:text-sm text-zinc-400 mt-1">
+                                ${t('torrentioDesc')}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3 pb-8">
+                `;
+                
+                data.streams.forEach(stream => {
+                    const isMagnet = !!stream.infoHash;
+                    const link = stream.url || `magnet:?xt=urn:btih:${stream.infoHash}`;
+                    const titleParts = (stream.title || '').split('\n');
+                    const quality = titleParts[0] || 'Unknown';
+                    const sizeOrDetails = titleParts.slice(1).join(' &bull; ');
+                    const safeLink = encodeURIComponent(link);
+
+                    html += `
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-zinc-900 border border-zinc-800 rounded-lg transition-colors hover:border-red-500">
+                            <div class="flex-1 min-w-0">
+                                <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
+                                <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${sizeOrDetails}</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 w-full mt-auto sm:flex sm:flex-col sm:w-44 sm:flex-none">
+                                ${isMagnet ? `
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-1.5 px-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph-fill ph-magnet text-sm"></i> ${t('launchApp')}
+                                    </button>
+                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied!', 4000);" class="w-full text-center py-1.5 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph ph-copy text-sm"></i> ${t('copyMagnet')}
+                                    </button>
+                                ` : `
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', false)" class="w-full text-center py-1.5 px-2 bg-green-600/20 hover:bg-green-600/40 text-green-400 border border-green-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph-fill ph-play-circle text-sm"></i> ${t('directPlay')}
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                if (scraperContainer) scraperContainer.innerHTML = html;
+
+            } catch(e) {
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error fetching Torrentio: ${e.message}</p></div>`;
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Torrentio failed</span>`;
             }
+        }
+
+        async function loadDirectStreams() {
+            if (videoFrame) videoFrame.classList.add('hidden');
+            if (scraperContainer) scraperContainer.classList.remove('hidden'); if (videoContainer) videoContainer.classList.add('scraper-open');
+            if (playerLoader) playerLoader.classList.remove('hidden');
+            if (loaderMessage) loaderMessage.textContent = t('loadingEngine');
+            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
+
+            try {
+                const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
+                const actualType = isTv ? 'tv' : 'movie';
+                const imdbId = await getImdbId(currentMediaId, actualType);
+
+                if(!imdbId) throw new Error("No IMDB ID found for this title.");
+
+                const endpoints = [
+                    `https://shluflix.elfhosted.com/stream/${actualType}/${imdbId}${isTv ? ':'+currentSeason+':'+currentEpisode : ''}.json`,
+                    `https://mediafusion.elfhosted.com/stream/${actualType}/${imdbId}${isTv ? ':'+currentSeason+':'+currentEpisode : ''}.json`,
+                    `https://stremio-gdrive.elfhosted.com/stream/${actualType}/${imdbId}${isTv ? ':'+currentSeason+':'+currentEpisode : ''}.json`
+                ];
+
+                let httpStreams = [];
+                let magnetStreams = [];
+
+                try {
+                    const requests = endpoints.map(url => fetch(url).then(r => r.json()).catch(() => null));
+                    const results = await Promise.all(requests);
+                    results.forEach(data => {
+                        if (data && data.streams) {
+                            data.streams.forEach(s => {
+                                if (s.url && !s.infoHash && !s.url.startsWith('magnet')) httpStreams.push(s);
+                            });
+                        }
+                    });
+                } catch(e) { console.log('HTTP Scrapers failed'); }
+
+                try {
+                    const torUrl = isTv ? `https://torrentio.strem.fun/stream/series/${imdbId}:${currentSeason}:${currentEpisode}.json` : `https://torrentio.strem.fun/stream/movie/${imdbId}.json`;
+                    const torRes = await fetch(torUrl);
+                    const torData = await torRes.json();
+                    if(torData && torData.streams) {
+                        torData.streams.forEach(s => {
+                            const isMagnet = !!s.infoHash || (s.url && s.url.startsWith('magnet'));
+                            if (isMagnet) {
+                                if (magnetStreams.length < 15) magnetStreams.push(s);
+                            } else if (s.url) {
+                                httpStreams.push(s); 
+                            }
+                        });
+                    }
+                } catch(e) { console.log('Torrentio fallback failed'); }
+
+                if (playerLoader) playerLoader.classList.add('hidden');
+
+                if(httpStreams.length === 0 && magnetStreams.length === 0) {
+                    if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>${t('noResults')}</p></div>`;
+                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No external streams available</span>`;
+                    return;
+                }
+
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-blue-500"></i> <span class="text-blue-400">${t('connectedSecure')}</span>`;
+                
+                let html = `
+                    <div class="mb-4 bg-zinc-900 border border-zinc-800 p-4 rounded-lg flex items-start gap-3 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                        <i class="ph-fill ph-arrow-square-out text-2xl text-blue-500 mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-white text-sm sm:text-base">${t('extHubTitle')}</h4>
+                            <p class="text-xs sm:text-sm text-zinc-400 mt-1">
+                                ${t('extHubDesc')}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                if (httpStreams.length > 0) {
+                    html += `
+                        <h5 class="text-white font-bold mb-3 flex items-center gap-2 mt-4"><span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> HTTP Direct Streams (VLC/MX)</h5>
+                        <div class="flex flex-col gap-3 mb-6">
+                    `;
+                    httpStreams.forEach((stream) => {
+                        const titleParts = (stream.title || stream.name || 'Direct Stream').split('\n');
+                        const quality = titleParts[0] || 'Unknown';
+                        const details = titleParts.slice(1).join(' &bull; ') || 'HTTP Stream';
+                        html += `
+                            <button onclick="handleDirectClick('${stream.url.replace(/'/g, "\\'")}')" class="flex flex-col sm:flex-row sm:items-center gap-3 text-left rtl:text-right p-4 bg-zinc-900 border border-zinc-800 hover:border-blue-500 hover:bg-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                <div class="flex-1 min-w-0">
+                                    <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Server'} &mdash; ${quality}</span>
+                                    <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${details}</span>
+                                </div>
+                                <span class="text-xs font-semibold flex items-center gap-1.5 text-blue-400 sm:flex-none">
+                                    <i class="ph-fill ph-play-circle text-base"></i> ${t('selectVlcMx')}
+                                </span>
+                            </button>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                if (magnetStreams.length > 0) {
+                    html += `
+                        <h5 class="text-white font-bold mb-3 flex items-center gap-2 mt-4 border-t border-zinc-800 pt-6"><span class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Torrent Streams (1DM/Flud)</h5>
+                        <div class="flex flex-col gap-3 pb-8">
+                    `;
+                    magnetStreams.forEach(stream => {
+                        const link = stream.url || `magnet:?xt=urn:btih:${stream.infoHash}`;
+                        const titleParts = (stream.title || '').split('\n');
+                        const quality = titleParts[0] || 'Unknown';
+                        const details = titleParts.slice(1).join(' &bull; ');
+                        const safeLink = encodeURIComponent(link);
+                        
+                        html += `
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-zinc-900 border border-zinc-800 rounded-lg transition-colors hover:border-purple-500">
+                                <div class="flex-1 min-w-0">
+                                    <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
+                                    <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${details}</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-2 w-full mt-auto sm:flex sm:flex-col sm:w-44 sm:flex-none">
+                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-1.5 px-2 bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 border border-purple-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph-fill ph-magnet text-sm"></i> ${t('launchApp')}
+                                    </button>
+                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied!', 4000);" class="w-full text-center py-1.5 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="ph ph-copy text-sm"></i> ${t('copyLink')}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                if (scraperContainer) scraperContainer.innerHTML = html;
+
+            } catch(e) {
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error scraping links: ${e.message}</p></div>`;
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Scraping failed</span>`;
+            }
+        }
+
+        window.handleTorrentioClick = function(link, isMagnet) {
+            if(isMagnet) {
+                showToast("Launching app...", 4000);
+                const intentUrl = `intent://${link.replace(/^magnet:\/?\/?/, '')}#Intent;scheme=magnet;end`;
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                const isAndroid = /android/i.test(navigator.userAgent || '');
+                iframe.src = isAndroid ? intentUrl : link;
+                document.body.appendChild(iframe);
+                setTimeout(() => {
+                    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                    showToast("If the app didn't open, copy the magnet link.", 5000);
+                }, 1500);
+            } else {
+                currentDirectUrl = link;
+                if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
+                updateStreamIframe(); 
+            }
+        }
+
+        window.handleDirectClick = function(link) {
+            currentDirectUrl = link;
+            if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
+            if (videoFrame) videoFrame.classList.add('hidden');
+            
+            const existingMsg = document.getElementById('directPlayMsg');
+            if(existingMsg) existingMsg.remove();
+
+            const msgDiv = document.createElement('div');
+            msgDiv.id = 'directPlayMsg';
+            msgDiv.className = 'absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 p-6 text-center';
+            msgDiv.innerHTML = `
+                <i class="ph-fill ph-check-circle text-6xl text-green-500 mb-4 drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]"></i>
+                <h3 class="text-xl sm:text-2xl font-bold text-white mb-2">${t('streamSelectedTitle')}</h3>
+                <p class="text-zinc-400 text-sm sm:text-base mb-8 max-w-md">${t('streamSelectedDesc')}</p>
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4">
+                    <button onclick="document.getElementById('externalPlayerBtn')?.click()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transition-colors">
+                        <i class="ph-fill ph-arrow-square-out text-xl"></i> ${t('openExtPlayer')}
+                    </button>
+                    <button onclick="currentDirectUrl = null; updateStreamIframe()" class="w-full sm:w-auto px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg border border-zinc-700 flex items-center justify-center gap-2 transition-colors">
+                        <i class="ph ph-arrow-left text-xl"></i> ${t('pickAnother')}
+                    </button>
+                </div>
+            `;
+            if (videoContainer) videoContainer.appendChild(msgDiv);
+            
+            if (streamStatus) {
+                streamStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Direct Stream Locked &mdash; Ready for External Player`;
+                streamStatus.className = "flex items-center gap-1.5 text-blue-400 font-medium text-xs";
+            }
+        }
+
+        function getStreamUrl() {
+            if (currentDirectUrl) return currentDirectUrl; 
+            const server = serverSelect ? serverSelect.value : 'vidsrc_to';
+            const lang = dubLangSelect ? dubLangSelect.value : 'en';
+            const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
+            
+            let url = "";
+            if (server === 'vidsrc_to') url = isTv ? `https://vidsrc.to/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}` : `https://vidsrc.to/embed/movie/${currentMediaId}`;
+            else if (server === 'vidsrc_me') url = isTv ? `https://vidsrc.me/embed/tv?tmdb=${currentMediaId}&season=${currentSeason}&episode=${currentEpisode}` : `https://vidsrc.me/embed/movie?tmdb=${currentMediaId}`;
+            else if (server === 'vidlink') url = isTv ? `https://vidlink.pro/tv/${currentMediaId}/${currentSeason}/${currentEpisode}` : `https://vidlink.pro/movie/${currentMediaId}`;
+            else if (server === 'smashy') url = isTv ? `https://player.smashy.stream/tv/${currentMediaId}?s=${currentSeason}&e=${currentEpisode}` : `https://player.smashy.stream/movie/${currentMediaId}`;
+            else if (server === 'multiembed') url = isTv ? `https://multiembed.mov/?video_id=${currentMediaId}&tmdb=1&s=${currentSeason}&e=${currentEpisode}` : `https://multiembed.mov/?video_id=${currentMediaId}&tmdb=1`;
+            else if (server === 'autoembed') url = isTv ? `https://autoembed.co/tv/tmdb/${currentMediaId}-${currentSeason}-${currentEpisode}` : `https://autoembed.co/movie/tmdb/${currentMediaId}`;
+            else if (server === '2embed') url = isTv ? `https://www.2embed.cc/embedtv/${currentMediaId}&s=${currentSeason}&e=${currentEpisode}` : `https://www.2embed.cc/embed/${currentMediaId}`;
+            else if (server === 'vidbinge') url = isTv ? `https://vidbinge.com/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}` : `https://vidbinge.com/embed/movie/${currentMediaId}`;
+            else if (server === 'movieapi') url = isTv ? `https://moviesapi.club/tv/${currentMediaId}-${currentSeason}-${currentEpisode}` : `https://moviesapi.club/movie/${currentMediaId}`;
+
+            if(currentAudioType === 'dub' && url) {
+                const prefix = url.includes('?') ? '&' : '?';
+                url += `${prefix}dub=1&audio=dub&lang=${lang}`;
+            }
+            return url;
+        }
+
+        function updateStreamIframe() {
+            if (!currentMediaId) return;
+            
+            const dMsg = document.getElementById('directPlayMsg');
+            if (dMsg) dMsg.remove();
+            
+            const server = serverSelect ? serverSelect.value : '';
+
+            if (server === 'torrentio' && !currentDirectUrl) {
+                loadTorrentioStreams();
+                return;
+            } else if (server === 'direct_ext') {
+                if (!currentDirectUrl) {
+                    loadDirectStreams();
+                    return;
+                } else {
+                    handleDirectClick(currentDirectUrl);
+                    return;
+                }
+            } else {
+                if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
+            }
+            
+            if (videoFrame) videoFrame.classList.add('hidden');
+            if (playerLoader) playerLoader.classList.remove('hidden');
+            if (loaderMessage) loaderMessage.textContent = t('loadingEngine');
+            
+            if (clickShield) {
+                clickShield.classList.remove('resolved');
+                if (currentDirectUrl) clickShield.classList.add('resolved'); 
+            }
+            
+            if (videoFrame) {
+                if(isAdShieldActive) {
+                    videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms allow-downloads');
+                } else { 
+                    videoFrame.removeAttribute('sandbox'); 
+                }
+                videoFrame.src = getStreamUrl();
+            }
+            
+            if (streamStatus) {
+                streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
+                streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
+            }
+            
+            setTimeout(() => {
+                if(serverSelect && serverSelect.value === 'torrentio' && !currentDirectUrl) return; 
+                if(serverSelect && serverSelect.value === 'direct_ext') return;
+
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (videoFrame) videoFrame.classList.remove('hidden');
+
+                if (streamStatus) {
+                    streamStatus.innerHTML = currentDirectUrl
+                        ? `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Direct video loaded`
+                        : `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> ${t('connectedSecure')}`;
+                    streamStatus.className = "flex items-center gap-1.5 text-green-400 font-medium text-xs";
+                }
+            }, 1800);
         }
     </script>
 </body>
