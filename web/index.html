@@ -1799,240 +1799,93 @@
                     videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
                     fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">${t('fullscreen')}</span>`;
                     try {
-                        if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+                        if (document.exitFullscreen) document.exitFullscreen().catch(err => console.warn(err));
                         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
                     } catch(e) {}
-                    if (screen.orientation && screen.orientation.unlock) try { screen.orientation.unlock(); } catch(e) {}
+                    if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
                 }
             });
         }
-        
-        if (floatingExitBtn && fullscreenBtn) floatingExitBtn.addEventListener('click', () => { fullscreenBtn.click(); });
-        
-        window.addEventListener('popstate', (e) => {
-            const state = e.state;
-            
-            if (playerModal && !playerModal.classList.contains('hidden')) {
-                closePlayerModal(true);
-                try {
-                    history.pushState({ writerstm: 'app', app: getAppState() }, '');
-                } catch(err) {}
-                return;
-            }
 
-            if (state && state.writerstm === 'app' && state.app) {
-                applyAppState(state.app);
-                return;
-            }
-
-            try {
-                history.pushState({ writerstm: 'app', app: getAppState() }, '');
-            } catch(err) {}
-            showToast(t('mainPageMsg'));
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement && videoContainer && fullscreenBtn) {
-                videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
-                fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">${t('fullscreen')}</span>`;
-            }
-        });
-
-        const toastEl = document.createElement('div');
-        toastEl.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--theme-panel, #18181b);color:var(--theme-text, #ffffff);padding:10px 18px;border-radius:9999px;border:1px solid var(--theme-border, #3f3f46);font-size:13px;z-index:100000;display:none;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6);";
-        document.body.appendChild(toastEl);
-        let toastTimer;
-        function showToast(msg, ms = 4000) {
-            toastEl.textContent = msg; toastEl.style.display = 'block';
-            clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.style.display = 'none', ms);
+        if (floatingExitBtn) {
+            floatingExitBtn.addEventListener('click', () => {
+                if (fullscreenBtn) fullscreenBtn.click();
+            });
         }
 
-        function copyToClipboard(text) {
-            if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).catch(() => {});
-            const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-            document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta);
-            return Promise.resolve();
-        }
-
-        const extMenu = document.createElement('div');
-        extMenu.id = 'extPlayerMenu';
-        extMenu.style.cssText = "position:fixed;z-index:100001;background:var(--theme-panel, #18181b);border:1px solid var(--theme-border, #3f3f46);border-radius:12px;padding:6px;display:none;min-width:200px;box-shadow:0 12px 32px rgba(0,0,0,.7);font-family:inherit;";
-        extMenu.innerHTML = `
-            <button data-act="vlc" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:var(--theme-text, #fff);font-size:14px;border-radius:8px;cursor:pointer;">
-                <span style="width:10px;height:10px;border-radius:50%;background:#f97316;display:inline-block;"></span> Open in VLC
-            </button>
-            <button data-act="mx" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:var(--theme-text, #fff);font-size:14px;border-radius:8px;cursor:pointer;">
-                <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block;"></span> Open in MX Player
-            </button>
-            <button data-act="copy" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:var(--theme-text, #fff);font-size:14px;border-radius:8px;cursor:pointer;">
-                <span style="width:10px;height:10px;border-radius:50%;background:#3b82f6;display:inline-block;"></span> Copy stream link
-            </button>
-        `;
-        document.body.appendChild(extMenu);
-        extMenu.querySelectorAll('button').forEach(b => {
-            b.addEventListener('mouseenter', () => b.style.background = 'var(--theme-hover, #27272a)'); b.addEventListener('mouseleave', () => b.style.background = 'transparent');
-        });
-
-        function hideExtMenu() { extMenu.style.display = 'none'; }
-        document.addEventListener('click', (e) => { if (extMenu.style.display === 'block' && !extMenu.contains(e.target) && e.target !== externalPlayerBtn) hideExtMenu(); });
-
-        function launchUrl(url) {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = url;
-            document.body.appendChild(iframe);
-            setTimeout(() => {
-                if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
-            }, 1500);
-        }
-
-        // Mock functions for getStreamUrl & updateStreamIframe to keep complete structural bounds.
-        function getStreamUrl() {
-            return currentDirectUrl || "https://example.com/stream.mp4";
-        }
-        
         function updateStreamIframe() {
-            if(!videoFrame) return;
-            if(playerLoader) playerLoader.classList.remove('hidden');
-            if(clickShield) clickShield.classList.remove('resolved');
+            if (!videoFrame) return;
+            const server = serverSelect ? serverSelect.value : 'vidsrc_to';
+            let url = '';
+            
+            if (currentDirectUrl) {
+                url = currentDirectUrl;
+            } else {
+                let actualType = currentType === 'anime' ? 'tv' : currentType;
+                
+                if (actualType === 'movie') {
+                    switch (server) {
+                        case 'vidsrc_to': url = `https://vidsrc.to/embed/movie/${currentMediaId}`; break;
+                        case 'vidsrc_me': url = `https://vidsrc.me/embed/movie?tmdb=${currentMediaId}`; break;
+                        case 'vidlink': url = `https://vidlink.pro/movie/${currentMediaId}`; break;
+                        case 'smashy': url = `https://player.smashy.stream/movie/${currentMediaId}`; break;
+                        case 'multiembed': url = `https://multiembed.mov/?video_id=${currentMediaId}&tmdb=1`; break;
+                        case 'autoembed': url = `https://autoembed.co/movie/tmdb/${currentMediaId}`; break;
+                        case '2embed': url = `https://www.2embed.cc/embed/${currentMediaId}`; break;
+                        case 'vidbinge': url = `https://vidbinge.com/embed/movie/${currentMediaId}`; break;
+                        case 'movieapi': url = `https://movieapi.stream/movie/${currentMediaId}`; break;
+                        default: url = `https://vidsrc.to/embed/movie/${currentMediaId}`;
+                    }
+                } else {
+                    switch (server) {
+                        case 'vidsrc_to': url = `https://vidsrc.to/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`; break;
+                        case 'vidsrc_me': url = `https://vidsrc.me/embed/tv?tmdb=${currentMediaId}&season=${currentSeason}&episode=${currentEpisode}`; break;
+                        case 'vidlink': url = `https://vidlink.pro/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`; break;
+                        case 'smashy': url = `https://player.smashy.stream/tv/${currentMediaId}?s=${currentSeason}&e=${currentEpisode}`; break;
+                        case 'multiembed': url = `https://multiembed.mov/?video_id=${currentMediaId}&tmdb=1&s=${currentSeason}&e=${currentEpisode}`; break;
+                        case 'autoembed': url = `https://autoembed.co/tv/tmdb/${currentMediaId}-${currentSeason}-${currentEpisode}`; break;
+                        case '2embed': url = `https://www.2embed.cc/embedtv/${currentMediaId}&s=${currentSeason}&e=${currentEpisode}`; break;
+                        case 'vidbinge': url = `https://vidbinge.com/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`; break;
+                        case 'movieapi': url = `https://movieapi.stream/tv/${currentMediaId}-${currentSeason}-${currentEpisode}`; break;
+                        default: url = `https://vidsrc.to/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`;
+                    }
+                }
+            }
+
+            if (isAdShieldActive) {
+                videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+            } else {
+                videoFrame.removeAttribute('sandbox');
+            }
+
+            videoFrame.src = url;
             videoFrame.classList.remove('hidden');
             
-            const server = serverSelect ? serverSelect.value : 'vidsrc_to';
-            if (server === 'torrentio') {
-                loadTorrentioStreams();
-                return;
+            if (playerLoader) playerLoader.classList.add('hidden');
+            if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-500">${t('connectedSecure')}</span>`;
+        }
+
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.writerstm === 'player') {
+                // Keep playing
+            } else if (e.state && e.state.writerstm === 'app') {
+                closePlayerModal(true);
+                applyAppState(e.state.app);
+            } else {
+                closePlayerModal(true);
             }
-            
-            setTimeout(() => {
-                videoFrame.src = getStreamUrl();
-                if(playerLoader) playerLoader.classList.add('hidden');
-                if(streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-400">${t('connectedSecure')}</span>`;
-            }, 1000);
-        }
-
-        function openInVLC() {
-            const streamUrl = getStreamUrl(); const ua = navigator.userAgent || '';
-            if (/android/i.test(ua)) { launchUrl(`intent://${streamUrl.replace(/^https?:\/\//, '')}#Intent;package=org.videolan.vlc;scheme=https;S.browser_fallback_url=${encodeURIComponent(streamUrl)};end`); showToast('Launching VLC... (link also copied)'); } 
-            else if (/iP(hone|ad|od)/i.test(ua)) { launchUrl('vlc-x-callback://x-callback-url/stream?url=' + encodeURIComponent(streamUrl)); showToast('Launching VLC... (link also copied)'); } 
-            else { launchUrl('vlc://' + streamUrl); showToast('If VLC does not open: VLC → Media → Open Network Stream → paste.'); }
-            copyToClipboard(streamUrl);
-        }
-
-        function openInMX() {
-            const streamUrl = getStreamUrl();
-            if (!/android/i.test(navigator.userAgent || '')) { showToast('MX Player is Android-only. Try VLC or Copy link instead.'); return; }
-            launchUrl(`intent://${streamUrl.replace(/^https?:\/\//, '')}#Intent;package=com.mxtech.videoplayer.ad;scheme=https;S.browser_fallback_url=${encodeURIComponent(streamUrl)};end`);
-            copyToClipboard(streamUrl); showToast('Launching MX Player... (link also copied)');
-        }
-
-        function copyStreamLink() { copyToClipboard(getStreamUrl()); showToast('Stream link copied to clipboard.'); }
-
-        if (externalPlayerBtn) {
-            externalPlayerBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (!currentMediaId && !currentDirectUrl) { showToast('Load a stream first.'); return; }
-                if (extMenu.style.display === 'block') { hideExtMenu(); return; }
-                const r = externalPlayerBtn.getBoundingClientRect(); extMenu.style.display = 'block';
-                extMenu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 216)) + 'px'; extMenu.style.top = (r.bottom + 8) + 'px';
-            });
-        }
-
-        extMenu.addEventListener('click', (e) => {
-            const btn = e.target.closest('button[data-act]'); if (!btn) return; hideExtMenu();
-            const act = btn.dataset.act;
-            if (act === 'vlc') openInVLC(); else if (act === 'mx') openInMX(); else if (act === 'copy') copyStreamLink();
         });
 
-        async function getImdbId(mediaId, type) {
-            try {
-                const ep = type === 'tv' ? `tv/${mediaId}` : `movie/${mediaId}`;
-                const res = await fetch(`https://api.themoviedb.org/3/${ep}/external_ids?api_key=${TMDB_API_KEY}`);
-                const data = await res.json();
-                return data.imdb_id;
-            } catch(e) { console.error("Error fetching IMDB ID:", e); return null; }
+        function showToast(message, duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-theme-panel text-theme-text px-4 py-2 rounded-full shadow-lg border border-theme-border z-[999999] transition-opacity duration-300';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
         }
-
-        async function loadTorrentioStreams() {
-            if (videoFrame) videoFrame.classList.add('hidden');
-            if (scraperContainer) scraperContainer.classList.remove('hidden'); if (videoContainer) videoContainer.classList.add('scraper-open');
-            if (playerLoader) playerLoader.classList.remove('hidden');
-            if (loaderMessage) loaderMessage.textContent = t('loadingEngine');
-            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
-
-            try {
-                const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
-                const actualType = isTv ? 'tv' : 'movie';
-                const imdbId = await getImdbId(currentMediaId, actualType);
-
-                if(!imdbId) throw new Error("No IMDB ID found for this title. Torrentio requires IMDB.");
-
-                const url = isTv
-                    ? `https://torrentio.strem.fun/stream/series/${imdbId}:${currentSeason}:${currentEpisode}.json`
-                    : `https://torrentio.strem.fun/stream/movie/${imdbId}.json`;
-
-                const res = await fetch(url);
-                const data = await res.json();
-
-                if (playerLoader) playerLoader.classList.add('hidden');
-
-                if(!data.streams || data.streams.length === 0) {
-                    if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-theme-muted"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-theme-accent"></i><p>${t('noResults')}</p></div>`;
-                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">No torrents available</span>`;
-                    return;
-                }
-
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-400">${t('connectedSecure')}</span>`;
-                
-                let html = `
-                    <div class="mb-4 bg-theme-panel border border-theme-border p-4 rounded-lg flex items-start gap-3">
-                        <i class="ph-fill ph-info text-2xl text-green-500 mt-1"></i>
-                        <div>
-                            <h4 class="font-bold text-theme-text text-sm sm:text-base">${t('torrentioTitle')}</h4>
-                            <p class="text-xs sm:text-sm text-theme-muted mt-1">
-                                ${t('torrentioDesc')}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-3 pb-8">
-                `;
-                
-                data.streams.forEach(stream => {
-                    const link = stream.url || `magnet:?xt=urn:btih:${stream.infoHash}`;
-                    const titleParts = (stream.title || '').split('\n');
-                    const quality = titleParts[0] || 'Unknown';
-                    const sizeOrDetails = titleParts.slice(1).join(' &bull; ');
-
-                    html += `
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 bg-theme-panel border border-theme-border p-3 rounded-xl hover:border-theme-accent transition-colors">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">1DM / TORRENT</span>
-                                    <span class="text-theme-text font-semibold text-sm truncate">${quality}</span>
-                                </div>
-                                <div class="text-theme-muted text-xs truncate">${sizeOrDetails}</div>
-                            </div>
-                            <div class="flex flex-wrap sm:flex-nowrap gap-2 shrink-0">
-                                <a href="${link}" class="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors">
-                                    ${t('launchApp')}
-                                </a>
-                                <button onclick="copyToClipboard('${link}'); showToast('${t('copyMagnet')} Copied!');" class="flex-1 sm:flex-none bg-theme-hover hover:brightness-110 text-theme-text text-xs font-bold py-2 px-4 rounded-lg transition-colors border border-theme-border">
-                                    Copy
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-                
-                if (scraperContainer) scraperContainer.innerHTML = html;
-
-            } catch (error) {
-                if (playerLoader) playerLoader.classList.add('hidden');
-                if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-theme-muted"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-theme-accent"></i><p>Failed to load Torrentio data.</p></div>`;
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">Connection Error</span>`;
-            }
-        }
-
     </script>
 </body>
 </html>
