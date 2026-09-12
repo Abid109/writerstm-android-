@@ -146,6 +146,59 @@
         .fade-in {
             animation: fadeInApp 0.5s ease-out forwards;
         }
+
+        /* ============ Theme System ============ */
+        .theme-opt.active { border-color:#dc2626 !important; box-shadow:0 0 0 2px rgba(220,38,38,0.35); }
+
+        /* Light theme */
+        body.theme-light { background-color:#f4f4f5 !important; color:#18181b !important; }
+        body.theme-light .bg-black { background-color:#ffffff !important; }
+        body.theme-light .bg-zinc-950 { background-color:#fafafa !important; }
+        body.theme-light .bg-zinc-900 { background-color:#f4f4f5 !important; }
+        body.theme-light .bg-zinc-800 { background-color:#e4e4e7 !important; }
+        body.theme-light .border-zinc-900,
+        body.theme-light .border-zinc-800,
+        body.theme-light .border-zinc-700,
+        body.theme-light .border-zinc-600 { border-color:#d4d4d8 !important; }
+        body.theme-light .text-white { color:#18181b !important; }
+        body.theme-light .text-zinc-400,
+        body.theme-light .text-zinc-500 { color:#52525b !important; }
+        body.theme-light .text-zinc-600 { color:#71717a !important; }
+        body.theme-light #desktopSearchWrap input,
+        body.theme-light #mobileSearchBar input { background:#ffffff !important; border-color:#d4d4d8 !important; color:#18181b !important; }
+        body.theme-light ::-webkit-scrollbar-track { background:#e4e4e7 !important; }
+        body.theme-light #appToast { background:#ffffff !important; color:#18181b !important; border-color:#d4d4d8 !important; }
+        body.theme-light #extPlayerMenu { background:#ffffff !important; border-color:#d4d4d8 !important; }
+        body.theme-light #extPlayerMenu button { color:#18181b !important; }
+        body.theme-light #extPlayerMenu button:hover { background:#e4e4e7 !important; }
+
+        /* Dark Blue theme */
+        body.theme-darkblue { background-color:#020617 !important; }
+        body.theme-darkblue .bg-black { background-color:#0b1226 !important; }
+        body.theme-darkblue .bg-zinc-950 { background-color:#0e1730 !important; }
+        body.theme-darkblue .bg-zinc-900 { background-color:#17223f !important; }
+        body.theme-darkblue .bg-zinc-800 { background-color:#223154 !important; }
+        body.theme-darkblue .border-zinc-900,
+        body.theme-darkblue .border-zinc-800,
+        body.theme-darkblue .border-zinc-700,
+        body.theme-darkblue .border-zinc-600 { border-color:#2a3a63 !important; }
+        body.theme-darkblue #desktopSearchWrap input,
+        body.theme-darkblue #mobileSearchBar input { background:#17223f !important; border-color:#2a3a63 !important; }
+        body.theme-darkblue ::-webkit-scrollbar-track { background:#0b1226 !important; }
+
+        /* Dark Purple theme */
+        body.theme-darkpurple { background-color:#0f0716 !important; }
+        body.theme-darkpurple .bg-black { background-color:#170b21 !important; }
+        body.theme-darkpurple .bg-zinc-950 { background-color:#1d1030 !important; }
+        body.theme-darkpurple .bg-zinc-900 { background-color:#2a1846 !important; }
+        body.theme-darkpurple .bg-zinc-800 { background-color:#3b2560 !important; }
+        body.theme-darkpurple .border-zinc-900,
+        body.theme-darkpurple .border-zinc-800,
+        body.theme-darkpurple .border-zinc-700,
+        body.theme-darkpurple .border-zinc-600 { border-color:#4c2d75 !important; }
+        body.theme-darkpurple #desktopSearchWrap input,
+        body.theme-darkpurple #mobileSearchBar input { background:#2a1846 !important; border-color:#4c2d75 !important; }
+        body.theme-darkpurple ::-webkit-scrollbar-track { background:#170b21 !important; }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen">
@@ -199,6 +252,10 @@
                                 <option value="hi">हिन्दी (Hindi)</option>
                             </select>
                         </div>
+
+                                                <button id="settingsBtn" class="p-2 text-zinc-400 hover:text-white transition-colors" title="Settings">
+                            <i class="ph ph-gear text-xl"></i>
+                        </button>
 
                         <button id="viewWatchlistBtn" class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
                             <i class="ph ph-bookmarks text-xl"></i>
@@ -266,6 +323,44 @@
                 <button id="nextPageBtn" data-i18n="next" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg border border-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
             </div>
         </main>
+
+        <div id="settingsPanel" class="hidden fixed inset-0 z-[60]">
+            <div id="settingsBackdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+            <div class="absolute top-20 right-4 sm:right-8 w-72 sm:w-80 bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl p-5 fade-in">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-bold text-white flex items-center gap-2"><i class="ph-fill ph-gear text-red-500"></i> Settings</h3>
+                    <button id="closeSettingsBtn" class="p-1.5 text-zinc-400 hover:text-white transition-colors">
+                        <i class="ph ph-x text-lg"></i>
+                    </button>
+                </div>
+
+                <label class="block text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-2">Language</label>
+                <select id="settingsLangSelect" class="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg p-2.5 outline-none cursor-pointer hover:bg-zinc-700 transition-colors mb-5 focus:border-red-600">
+                    <option value="en">English</option>
+                    <option value="bn">বাংলা (Bangla)</option>
+                    <option value="ar">العربية (Arabic)</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                </select>
+
+                <label class="block text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-2">Theme</label>
+                <div class="grid grid-cols-2 gap-2" id="themeOptions">
+                    <button data-theme="dark" class="theme-opt flex items-center gap-2 p-2.5 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-red-500 transition-colors text-sm font-medium text-white">
+                        <span class="w-4 h-4 rounded-full border border-zinc-600 flex-none" style="background:#18181b"></span> Dark
+                    </button>
+                    <button data-theme="light" class="theme-opt flex items-center gap-2 p-2.5 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-red-500 transition-colors text-sm font-medium text-white">
+                        <span class="w-4 h-4 rounded-full border border-zinc-600 flex-none" style="background:#ffffff"></span> Light
+                    </button>
+                    <button data-theme="darkblue" class="theme-opt flex items-center gap-2 p-2.5 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-red-500 transition-colors text-sm font-medium text-white">
+                        <span class="w-4 h-4 rounded-full border border-zinc-600 flex-none" style="background:#17223f"></span> Dark Blue
+                    </button>
+                    <button data-theme="darkpurple" class="theme-opt flex items-center gap-2 p-2.5 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-red-500 transition-colors text-sm font-medium text-white">
+                        <span class="w-4 h-4 rounded-full border border-zinc-600 flex-none" style="background:#2a1846"></span> Dark Purple
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-start sm:items-center justify-center p-3 sm:p-6">
             <div class="w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col bg-black rounded-2xl border border-zinc-800 shadow-2xl">
@@ -754,6 +849,10 @@
             if (langSelect && langSelect.value !== langCode) {
                 langSelect.value = langCode;
             }
+            const settingsLangSelect = $('settingsLangSelect');
+            if (settingsLangSelect && settingsLangSelect.value !== langCode) {
+                settingsLangSelect.value = langCode;
+            }
 
             // Update static elements with data-i18n attribute
             document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -947,6 +1046,7 @@
                     }
                 }
                 setLanguage(currentLang);
+                loadTheme();
 
                 loadWatchlist();
                 loadWatchHistory(); 
@@ -1687,6 +1787,7 @@
         });
 
         const toastEl = document.createElement('div');
+        toastEl.id = 'appToast';
         toastEl.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#18181b;color:#fff;padding:10px 18px;border-radius:9999px;border:1px solid #3f3f46;font-size:13px;z-index:100000;display:none;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6);";
         document.body.appendChild(toastEl);
         let toastTimer;
@@ -1765,6 +1866,56 @@
             const btn = e.target.closest('button[data-act]'); if (!btn) return; hideExtMenu();
             const act = btn.dataset.act;
             if (act === 'vlc') openInVLC(); else if (act === 'mx') openInMX(); else if (act === 'copy') copyStreamLink();
+        });
+
+        const THEMES = ['dark', 'light', 'darkblue', 'darkpurple'];
+        let currentTheme = 'dark';
+
+        function applyTheme(theme) {
+            if (!THEMES.includes(theme)) theme = 'dark';
+            currentTheme = theme;
+            document.body.classList.remove('theme-dark', 'theme-light', 'theme-darkblue', 'theme-darkpurple');
+            document.body.classList.add('theme-' + theme);
+            if (safeStorageAccess()) {
+                try { localStorage.setItem('writerstm_theme', theme); } catch(e) {}
+            }
+            document.querySelectorAll('#themeOptions .theme-opt').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === theme);
+            });
+        }
+
+        function loadTheme() {
+            let saved = 'dark';
+            if (safeStorageAccess()) {
+                try {
+                    const s = localStorage.getItem('writerstm_theme');
+                    if (s && THEMES.includes(s)) saved = s;
+                } catch(e) {}
+            }
+            applyTheme(saved);
+            const sel = $('settingsLangSelect');
+            if (sel) sel.value = currentLang;
+        }
+
+        const settingsBtn = $('settingsBtn');
+        const settingsPanel = $('settingsPanel');
+        if (settingsBtn && settingsPanel) {
+            settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('hidden'));
+        }
+        const closeSettingsBtn = $('closeSettingsBtn');
+        if (closeSettingsBtn && settingsPanel) {
+            closeSettingsBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+        }
+        const settingsBackdrop = $('settingsBackdrop');
+        if (settingsBackdrop && settingsPanel) {
+            settingsBackdrop.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+        }
+        const settingsLangSelect = $('settingsLangSelect');
+        if (settingsLangSelect) {
+            settingsLangSelect.addEventListener('change', (e) => setLanguage(e.target.value));
+        }
+        document.querySelectorAll('#themeOptions .theme-opt').forEach(btn => {
+            btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
         });
 
         async function getImdbId(mediaId, type) {
