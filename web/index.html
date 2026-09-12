@@ -1818,6 +1818,22 @@
             const server = serverSelect ? serverSelect.value : 'vidsrc_to';
             let url = '';
             
+            if (!currentDirectUrl && (server === 'torrentio' || server === 'direct_ext')) {
+                videoFrame.src = '';
+                videoFrame.classList.add('hidden');
+                if (clickShield) clickShield.classList.add('hidden');
+                if (scraperContainer) scraperContainer.classList.remove('hidden');
+                if (videoContainer) videoContainer.classList.add('scraper-open');
+                loadScraperData(server);
+                return;
+            } else {
+                if (scraperContainer) scraperContainer.classList.add('hidden');
+                if (videoContainer) videoContainer.classList.remove('scraper-open');
+                if (clickShield && !clickShield.classList.contains('resolved')) {
+                    clickShield.classList.remove('hidden');
+                }
+            }
+            
             if (currentDirectUrl) {
                 url = currentDirectUrl;
             } else {
@@ -1864,6 +1880,112 @@
             if (playerLoader) playerLoader.classList.add('hidden');
             if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-500">${t('connectedSecure')}</span>`;
         }
+
+        async function loadScraperData(server) {
+            scraperContainer.innerHTML = '';
+            if (playerLoader) {
+                playerLoader.classList.remove('hidden');
+                if (loaderMessage) loaderMessage.textContent = "Searching streams...";
+            }
+            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> <span class="text-theme-muted">Fetching sources...</span>`;
+            
+            try {
+                let imdbId = null;
+                let actualType = currentType === 'anime' ? 'tv' : currentType;
+                
+                // Fetch IMDB ID from TMDB
+                const extRes = await fetch(`https://api.themoviedb.org/3/${actualType}/${currentMediaId}/external_ids?api_key=${TMDB_API_KEY}`);
+                const extData = await extRes.json();
+                imdbId = extData.imdb_id;
+                
+                if (!imdbId) throw new Error("IMDB ID not found");
+
+                let urlType = actualType === 'movie' ? 'movie' : 'series';
+                let torrentioUrl = `https://torrentio.strem.fun/stream/${urlType}/${imdbId}`;
+                if (urlType === 'series') {
+                    torrentioUrl += `:${currentSeason}:${currentEpisode}`;
+                }
+                torrentioUrl += '.json';
+                
+                const torRes = await fetch(torrentioUrl);
+                const torData = await torRes.json();
+                
+                if (!torData.streams || torData.streams.length === 0) {
+                    throw new Error("No streams found");
+                }
+                
+                renderScraperStreams(torData.streams, server);
+                
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-500">Links found</span>`;
+                
+            } catch (e) {
+                console.error("Scraper Error:", e);
+                if (playerLoader) playerLoader.classList.add('hidden');
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">No links found</span>`;
+                scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-theme-muted p-6 text-center">
+                    <i class="ph-fill ph-empty text-4xl mb-2"></i>
+                    <p>No external streams found for this media.</p>
+                    <button onclick="serverSelect.value='vidsrc_to'; updateStreamIframe();" class="mt-4 px-4 py-2 bg-theme-accent text-theme-accent-text rounded-md font-medium transition-colors hover:brightness-110">Use Web Player</button>
+                </div>`;
+            }
+        }
+
+        function renderScraperStreams(streams, server) {
+            let html = `<div class="mb-4 bg-theme-panel p-4 rounded-xl border border-theme-border">
+                <h3 class="text-lg font-bold text-theme-text mb-1">${server === 'torrentio' ? t('torrentioTitle') : t('extHubTitle')}</h3>
+                <p class="text-xs text-theme-muted">${server === 'torrentio' ? t('torrentioDesc') : t('extHubDesc')}</p>
+            </div>
+            <div class="space-y-2 overflow-y-auto pr-1 pb-4" style="max-height: calc(100% - 100px);">`;
+            
+            streams.forEach((stream) => {
+                let quality = "SD";
+                let size = "N/A";
+                let parsedTitle = stream.title || "";
+                
+                const resMatch = parsedTitle.match(/4k|2160p|1080p|720p|480p/i);
+                if (resMatch) quality = resMatch[0].toUpperCase();
+                
+                const sizeMatch = parsedTitle.match(/(\d+(?:\.\d+)?\s*(GB|MB))/i);
+                if (sizeMatch) size = sizeMatch[1];
+                
+                let link = stream.url || (stream.infoHash ? `magnet:?xt=urn:btih:${stream.infoHash}` : '#');
+                
+                let btnClass = server === 'torrentio' ? 'bg-blue-900/40 text-blue-400 border-blue-900 hover:bg-blue-900/60' : 'bg-purple-900/40 text-purple-400 border-purple-900 hover:bg-purple-900/60';
+                
+                html += `
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between p-3 rounded-lg bg-theme-panel border border-theme-border hover:border-theme-muted transition-colors group">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-theme-hover text-theme-text uppercase">${quality}</span>
+                            <span class="text-[10px] font-medium text-theme-muted bg-theme-bg px-1.5 py-0.5 rounded border border-theme-border">${size}</span>
+                            <span class="text-[10px] text-theme-accent border border-theme-accent/30 px-1.5 py-0.5 rounded bg-theme-accent/10">${stream.name || 'Torrent'}</span>
+                        </div>
+                        <p class="text-xs text-theme-muted break-words line-clamp-2 group-hover:text-theme-text transition-colors" title="${parsedTitle.replace(/"/g, '&quot;')}">${parsedTitle.replace(/\n/g, ' | ')}</p>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+                        <a href="${link}" class="flex-1 sm:flex-none text-center px-3 py-1.5 rounded-md border text-xs font-semibold uppercase tracking-wider transition-colors ${btnClass}">
+                            <i class="ph-fill ph-link text-sm mr-1"></i> ${server === 'torrentio' ? t('launchApp') : t('selectVlcMx')}
+                        </a>
+                        ${stream.infoHash ? `<button onclick="copyToClipboard('${link}')" class="px-3 py-1.5 rounded-md border border-theme-border bg-theme-hover text-theme-muted hover:text-theme-text transition-colors" title="${t('copyMagnet')}">
+                            <i class="ph ph-copy text-sm"></i>
+                        </button>` : ''}
+                    </div>
+                </div>`;
+            });
+            
+            html += `</div>`;
+            scraperContainer.innerHTML = html;
+        }
+        
+        window.copyToClipboard = function(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied!", 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showToast("Failed to copy", 2000);
+            });
+        };
 
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.writerstm === 'player') {
