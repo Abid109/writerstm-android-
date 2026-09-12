@@ -527,8 +527,6 @@
                         serverSelect.value = pref;
                     }
                 }
-                
-                // Removed the hardcoded notification since Ad-Shield defaults to OFF now.
             } catch (err) {
                 console.error("Initialization Error:", err);
                 if (mediaGrid) {
@@ -1666,7 +1664,7 @@
             
             if (videoFrame) {
                 if(isAdShieldActive) {
-                    videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
+                    videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms allow-downloads');
                 } else { 
                     videoFrame.removeAttribute('sandbox'); 
                 }
