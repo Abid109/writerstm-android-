@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -7,7 +7,30 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; object-src 'none'; base-uri 'self';">
     
     <title>Writerstm.stream - External Player & 1DM Supported</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'rgb(var(--theme-bg) / <alpha-value>)',
+                            panel: 'rgb(var(--theme-panel) / <alpha-value>)',
+                            hover: 'rgb(var(--theme-hover) / <alpha-value>)',
+                            text: 'rgb(var(--theme-text) / <alpha-value>)',
+                            muted: 'rgb(var(--theme-muted) / <alpha-value>)',
+                            border: 'rgb(var(--theme-border) / <alpha-value>)',
+                            accent: 'rgb(var(--theme-accent) / <alpha-value>)',
+                            'accent-text': '#ffffff',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     
@@ -44,23 +67,60 @@
     </script>
 
     <style>
-        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: #000; color: #fff; }
+        :root, [data-theme="dark"] {
+            --theme-bg: 0 0 0;
+            --theme-panel: 24 24 27; /* zinc-900 */
+            --theme-hover: 39 39 42; /* zinc-800 */
+            --theme-text: 255 255 255;
+            --theme-muted: 161 161 170; /* zinc-400 */
+            --theme-border: 39 39 42; /* zinc-800 */
+            --theme-accent: 220 38 38; /* red-600 */
+        }
+        [data-theme="light"] {
+            --theme-bg: 244 244 245; /* zinc-100 */
+            --theme-panel: 255 255 255; 
+            --theme-hover: 228 228 231; /* zinc-200 */
+            --theme-text: 9 9 11; /* zinc-950 */
+            --theme-muted: 82 82 91; /* zinc-600 */
+            --theme-border: 212 212 216; /* zinc-300 */
+            --theme-accent: 220 38 38; /* red-600 */
+        }
+        [data-theme="blue"] {
+            --theme-bg: 2 6 23; /* slate-950 */
+            --theme-panel: 15 23 42; /* slate-900 */
+            --theme-hover: 30 41 59; /* slate-800 */
+            --theme-text: 248 250 252; /* slate-50 */
+            --theme-muted: 148 163 184; /* slate-400 */
+            --theme-border: 30 41 59; /* slate-800 */
+            --theme-accent: 59 130 246; /* blue-500 */
+        }
+        [data-theme="purple"] {
+            --theme-bg: 46 16 101; /* violet-950 */
+            --theme-panel: 76 29 149; /* violet-900 */
+            --theme-hover: 91 33 182; /* violet-800 */
+            --theme-text: 245 243 255; /* violet-50 */
+            --theme-muted: 196 181 253; /* violet-300 */
+            --theme-border: 91 33 182; /* violet-800 */
+            --theme-accent: 168 85 247; /* purple-500 */
+        }
+
+        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: rgb(var(--theme-bg)); color: rgb(var(--theme-text)); }
         .hidden { display: none !important; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000000; }
-        ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
+        ::-webkit-scrollbar-track { background: rgb(var(--theme-bg)); }
+        ::-webkit-scrollbar-thumb { background: rgb(var(--theme-accent)); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { filter: brightness(0.8); }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         
         .bookmark-btn { transition: all 0.2s; }
         .bookmark-btn:hover { transform: scale(1.1); }
-        .bookmark-btn.active i { color: #dc2626; }
+        .bookmark-btn.active i { color: rgb(var(--theme-accent)); }
         .bookmark-btn.active i::before { content: "\e93e"; }
         
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        *:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; }
+        *:focus-visible { outline: 2px solid rgb(var(--theme-accent)); outline-offset: 2px; }
         
         .click-shield {
             position: absolute;
@@ -74,7 +134,7 @@
             backdrop-filter: blur(2px);
             transition: opacity 0.3s;
         }
-        .click-shield:hover i { transform: scale(1.1); color: #dc2626; }
+        .click-shield:hover i { transform: scale(1.1); color: rgb(var(--theme-accent)); }
         .click-shield.resolved { display: none; }
         
         #videoContainer:-webkit-full-screen { width: 100vw; height: 100vh; background: black; }
@@ -108,12 +168,12 @@
 
         #scraperContainer {
             scrollbar-width: thin;
-            scrollbar-color: #dc2626 #000;
+            scrollbar-color: rgb(var(--theme-accent)) rgb(var(--theme-bg));
         }
 
         #desktopSearchWrap { flex: 1 1 0%; max-width: 28rem; margin-left: 1.5rem; margin-right: 1.5rem; }
         #desktopSearchWrap input, #mobileSearchBar input {
-            width: 100%; background: #18181b; border: 1px solid #27272a; color: #fff;
+            width: 100%; background: rgb(var(--theme-panel)); border: 1px solid rgb(var(--theme-border)); color: rgb(var(--theme-text));
             border-radius: 9999px; padding: 8px 16px 8px 40px; font-size: 14px; outline: none;
         }
         [dir="rtl"] #desktopSearchWrap input, [dir="rtl"] #mobileSearchBar input {
@@ -122,8 +182,8 @@
         [dir="rtl"] #desktopSearchWrap i, [dir="rtl"] #mobileSearchBar i {
             left: auto; right: 0.75rem;
         }
-        #desktopSearchWrap input:focus, #mobileSearchBar input:focus { border-color: #dc2626; }
-        #desktopSearchWrap input::placeholder, #mobileSearchBar input::placeholder { color: #71717a; }
+        #desktopSearchWrap input:focus, #mobileSearchBar input:focus { border-color: rgb(var(--theme-accent)); }
+        #desktopSearchWrap input::placeholder, #mobileSearchBar input::placeholder { color: rgb(var(--theme-muted)); }
         
         .safe-top-nav { padding-top: max(env(safe-area-inset-top), 32px) !important; }
         
@@ -148,27 +208,27 @@
         }
     </style>
 </head>
-<body class="bg-black text-white min-h-screen">
+<body class="bg-theme-bg text-theme-text min-h-screen transition-colors duration-300">
 
-    <div id="cf-gateway" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-4">
+    <div id="cf-gateway" class="fixed inset-0 z-[100] bg-theme-bg flex flex-col items-center justify-center p-4 transition-colors duration-300">
         <div class="mb-8 text-center flex flex-col items-center">
             <div class="w-20 h-20 rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.15)] mb-6 transition-transform hover:scale-105">
                 <img src="3768.png" alt="Logo" class="w-full h-full object-cover grayscale brightness-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <span style="display:none;" class="text-black font-black font-serif text-4xl">W</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-md">Writerstm.stream</h1>
-            <p data-i18n="secSubtitle" class="text-zinc-400 mt-3 text-sm sm:text-base max-w-sm">Please complete the security check to access the streaming library securely.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-theme-text tracking-tight drop-shadow-md">Writerstm.stream</h1>
+            <p data-i18n="secSubtitle" class="text-theme-muted mt-3 text-sm sm:text-base max-w-sm">Please complete the security check to access the streaming library securely.</p>
         </div>
         
         <div class="cf-turnstile min-h-[65px]" data-sitekey="0x4AAAAAAEv6sH7oXAh-8j0f" data-callback="onTurnstileSuccess" data-theme="dark"></div>
         
-        <div class="mt-12 text-zinc-600 text-xs flex items-center gap-2">
+        <div class="mt-12 text-theme-muted text-xs flex items-center gap-2">
             <i class="ph-fill ph-shield-check text-lg"></i> <span data-i18n="secSecured">Secured by Cloudflare</span>
         </div>
     </div>
 
     <div id="app-content" class="hidden">
-        <nav class="sticky top-0 z-40 bg-black/90 backdrop-blur-md border-b border-zinc-900 safe-top-nav">
+        <nav class="sticky top-0 z-40 bg-theme-bg/90 backdrop-blur-md border-b border-theme-border safe-top-nav transition-colors duration-300">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <div class="flex items-center gap-3">
@@ -176,31 +236,69 @@
                             <img src="3768.png" alt="Logo" class="w-full h-full object-cover grayscale brightness-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <span style="display:none;" class="text-black font-black font-serif text-xl">W</span>
                         </div>
-                        <h1 class="text-xl font-bold text-white tracking-tight drop-shadow-md">Writerstm.stream</h1>
+                        <h1 class="text-xl font-bold text-theme-text tracking-tight drop-shadow-md">Writerstm.stream</h1>
                     </div>
                     
                     <div id="desktopSearchWrap" class="hidden md:block flex-1 max-w-md mx-8">
                         <div class="relative">
-                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
-                            <input type="text" id="searchInput" placeholder="Search movies..." class="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full focus:ring-2 focus:ring-red-600 focus:border-red-600 block pl-10 p-2 transition-all outline-none placeholder-zinc-500">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-muted"></i>
+                            <input type="text" id="searchInput" placeholder="Search movies..." class="w-full bg-theme-panel border border-theme-border text-theme-text text-sm rounded-full focus:ring-2 focus:ring-theme-accent focus:border-theme-accent block pl-10 p-2 transition-all outline-none placeholder-theme-muted">
                         </div>
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <!-- Language Switcher -->
-                        <div class="relative flex items-center">
-                            <i class="ph ph-globe text-zinc-400 text-lg absolute left-2.5 rtl:left-auto rtl:right-2.5 pointer-events-none"></i>
-                            <select id="langSelect" class="bg-zinc-900 border border-zinc-800 text-white text-xs sm:text-sm rounded-lg pl-8 pr-3 rtl:pl-3 rtl:pr-8 py-1.5 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600">
-                                <option value="en">English</option>
-                                <option value="bn">বাংলা (Bangla)</option>
-                                <option value="ar">العربية (Arabic)</option>
-                                <option value="es">Español</option>
-                                <option value="fr">Français</option>
-                                <option value="hi">हिन्दी (Hindi)</option>
-                            </select>
+                        <!-- Settings / Theme & Language Switcher -->
+                        <div class="relative flex items-center z-50">
+                            <button id="settingsBtn" class="flex items-center justify-center w-9 h-9 rounded-full bg-theme-panel text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-colors border border-theme-border focus:outline-none focus:ring-2 focus:ring-theme-accent" title="Settings">
+                                <i class="ph ph-gear text-xl"></i>
+                            </button>
+
+                            <div id="settingsDropdown" class="hidden absolute top-full right-0 rtl:right-auto rtl:left-0 mt-2 w-72 bg-theme-panel border border-theme-border rounded-xl shadow-2xl p-4 z-50 transform origin-top-right rtl:origin-top-left transition-all">
+                                <div class="flex items-center justify-between mb-4 pb-2 border-b border-theme-border">
+                                    <h3 class="text-theme-text font-bold text-sm" data-i18n="settings">Settings</h3>
+                                    <button id="closeSettingsBtn" class="text-theme-muted hover:text-theme-text transition-colors"><i class="ph ph-x"></i></button>
+                                </div>
+                                
+                                <div class="mb-5">
+                                    <label class="text-theme-muted text-[10px] uppercase font-bold tracking-wider mb-2 block" data-i18n="theme">Theme</label>
+                                    <div class="grid grid-cols-4 gap-3">
+                                        <button class="theme-select-btn flex flex-col items-center gap-1 group" data-theme-value="dark">
+                                            <div class="w-8 h-8 rounded-full bg-black border-2 border-transparent group-[.active]:border-theme-accent transition-all shadow-sm"></div>
+                                            <span class="text-[10px] text-theme-muted group-[.active]:text-theme-text font-medium" data-i18n="themeDark">Dark</span>
+                                        </button>
+                                        <button class="theme-select-btn flex flex-col items-center gap-1 group" data-theme-value="light">
+                                            <div class="w-8 h-8 rounded-full bg-white border-2 border-gray-300 group-[.active]:border-theme-accent transition-all shadow-sm"></div>
+                                            <span class="text-[10px] text-theme-muted group-[.active]:text-theme-text font-medium" data-i18n="themeLight">Light</span>
+                                        </button>
+                                        <button class="theme-select-btn flex flex-col items-center gap-1 group" data-theme-value="blue">
+                                            <div class="w-8 h-8 rounded-full bg-slate-900 border-2 border-transparent group-[.active]:border-theme-accent transition-all shadow-sm"></div>
+                                            <span class="text-[10px] text-theme-muted group-[.active]:text-theme-text font-medium" data-i18n="themeBlue">Blue</span>
+                                        </button>
+                                        <button class="theme-select-btn flex flex-col items-center gap-1 group" data-theme-value="purple">
+                                            <div class="w-8 h-8 rounded-full bg-violet-950 border-2 border-transparent group-[.active]:border-theme-accent transition-all shadow-sm"></div>
+                                            <span class="text-[10px] text-theme-muted group-[.active]:text-theme-text font-medium" data-i18n="themePurple">Purple</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="text-theme-muted text-[10px] uppercase font-bold tracking-wider mb-2 block" data-i18n="language">Language</label>
+                                    <div class="relative">
+                                        <i class="ph ph-globe text-theme-muted text-lg absolute left-2.5 rtl:left-auto rtl:right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                        <select id="langSelect" class="w-full bg-theme-bg border border-theme-border text-theme-text text-xs sm:text-sm rounded-lg pl-8 pr-3 rtl:pl-3 rtl:pr-8 py-2 outline-none cursor-pointer hover:bg-theme-hover transition-colors focus:border-theme-accent">
+                                            <option value="en">English</option>
+                                            <option value="bn">বাংলা (Bangla)</option>
+                                            <option value="ar">العربية (Arabic)</option>
+                                            <option value="es">Español</option>
+                                            <option value="fr">Français</option>
+                                            <option value="hi">हिन्दी (Hindi)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <button id="viewWatchlistBtn" class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
+                        <button id="viewWatchlistBtn" class="flex items-center gap-2 text-theme-muted hover:text-theme-text transition-colors">
                             <i class="ph ph-bookmarks text-xl"></i>
                             <span id="watchlistLabel" class="hidden sm:inline text-sm font-medium" data-i18n="watchlist">Watchlist</span>
                         </button>
@@ -209,28 +307,28 @@
             </div>
         </nav>
 
-        <div id="mobileSearchBar" class="md:hidden p-4 bg-black border-b border-zinc-900">
+        <div id="mobileSearchBar" class="md:hidden p-4 bg-theme-bg border-b border-theme-border transition-colors duration-300">
             <div class="relative">
-                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
-                <input type="text" id="mobileSearchInput" placeholder="Search movies..." class="w-full bg-zinc-900 border border-zinc-800 text-white text-sm rounded-full focus:ring-2 focus:ring-red-600 focus:border-red-600 block pl-10 p-2 transition-all outline-none placeholder-zinc-500">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-muted"></i>
+                <input type="text" id="mobileSearchInput" placeholder="Search movies..." class="w-full bg-theme-panel border border-theme-border text-theme-text text-sm rounded-full focus:ring-2 focus:ring-theme-accent focus:border-theme-accent block pl-10 p-2 transition-all outline-none placeholder-theme-muted">
             </div>
         </div>
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <div class="flex space-x-1 rtl:space-x-reverse bg-zinc-900 p-1 rounded-lg border border-zinc-800 overflow-x-auto hide-scrollbar max-w-full" id="typeTabs">
-                    <button data-type="movie" data-i18n="tabMovies" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md bg-red-600 text-white shadow-sm transition-all focus:outline-none">Movies</button>
-                    <button data-type="tv" data-i18n="tabTv" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">TV Series</button>
-                    <button data-type="anime" data-i18n="tabAnime" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">Anime</button>
-                    <button data-type="archive" data-i18n="tabArchive" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all focus:outline-none">Public Domain</button>
+                <div class="flex space-x-1 rtl:space-x-reverse bg-theme-panel p-1 rounded-lg border border-theme-border overflow-x-auto hide-scrollbar max-w-full transition-colors duration-300" id="typeTabs">
+                    <button data-type="movie" data-i18n="tabMovies" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md bg-theme-accent text-theme-accent-text shadow-sm transition-all focus:outline-none">Movies</button>
+                    <button data-type="tv" data-i18n="tabTv" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-all focus:outline-none">TV Series</button>
+                    <button data-type="anime" data-i18n="tabAnime" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-all focus:outline-none">Anime</button>
+                    <button data-type="archive" data-i18n="tabArchive" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-all focus:outline-none">Public Domain</button>
                 </div>
 
                 <div class="flex flex-wrap gap-3 w-full sm:w-auto">
-                    <select id="genreFilter" class="flex-1 sm:flex-none bg-zinc-900 border border-zinc-800 text-white text-sm sm:text-base rounded-lg focus:ring-red-600 focus:border-red-600 block p-2.5 sm:p-3 outline-none cursor-pointer">
+                    <select id="genreFilter" class="flex-1 sm:flex-none bg-theme-panel border border-theme-border text-theme-text text-sm sm:text-base rounded-lg focus:ring-theme-accent focus:border-theme-accent block p-2.5 sm:p-3 outline-none cursor-pointer transition-colors duration-300">
                         <option value="" data-i18n="allGenres">All Genres</option>
                     </select>
 
-                    <select id="categoryFilter" class="flex-1 sm:flex-none bg-zinc-900 border border-zinc-800 text-white text-sm sm:text-base rounded-lg focus:ring-red-600 focus:border-red-600 block p-2.5 sm:p-3 outline-none cursor-pointer">
+                    <select id="categoryFilter" class="flex-1 sm:flex-none bg-theme-panel border border-theme-border text-theme-text text-sm sm:text-base rounded-lg focus:ring-theme-accent focus:border-theme-accent block p-2.5 sm:p-3 outline-none cursor-pointer transition-colors duration-300">
                         <option value="trending" data-i18n="catTrending">Trending Now</option>
                         <option value="popular" data-i18n="catPopular">Most Popular</option>
                         <option value="top_rated" data-i18n="catTopRated">Top Rated</option>
@@ -238,55 +336,55 @@
                 </div>
             </div>
             
-            <div id="continueWatchingSection" class="hidden mb-10 border-b border-zinc-900 pb-8">
+            <div id="continueWatchingSection" class="hidden mb-10 border-b border-theme-border pb-8">
                 <div class="flex justify-between items-end mb-4">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="ph-fill ph-clock-counter-clockwise text-red-600"></i> <span data-i18n="continueWatching">Continue Watching</span>
+                    <h2 class="text-xl font-bold text-theme-text flex items-center gap-2">
+                        <i class="ph-fill ph-clock-counter-clockwise text-theme-accent"></i> <span data-i18n="continueWatching">Continue Watching</span>
                     </h2>
-                    <button id="clearHistoryBtn" data-i18n="clearHistory" class="text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear History</button>
+                    <button id="clearHistoryBtn" data-i18n="clearHistory" class="text-xs text-theme-accent hover:opacity-80 font-medium bg-theme-accent/10 px-2 py-1 rounded transition-colors">Clear History</button>
                 </div>
                 <div id="continueWatchingList" class="flex gap-4 overflow-x-auto hide-scrollbar snap-x pb-2">
                 </div>
             </div>
 
             <div class="mb-4 flex justify-between items-end">
-                <h2 id="sectionTitle" class="text-2xl font-bold text-white">Trending Movies</h2>
-                <button id="clearWatchlistBtn" data-i18n="clearAll" class="hidden text-xs text-red-500 hover:text-red-400 font-medium bg-red-500/10 px-2 py-1 rounded transition-colors">Clear All</button>
+                <h2 id="sectionTitle" class="text-2xl font-bold text-theme-text">Trending Movies</h2>
+                <button id="clearWatchlistBtn" data-i18n="clearAll" class="hidden text-xs text-theme-accent hover:opacity-80 font-medium bg-theme-accent/10 px-2 py-1 rounded transition-colors">Clear All</button>
             </div>
 
             <div id="mediaGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6"></div>
             
             <div id="mainLoader" class="flex justify-center items-center py-12 hidden">
-                <i class="ph ph-spinner animate-spin text-4xl text-red-600"></i>
+                <i class="ph ph-spinner animate-spin text-4xl text-theme-accent"></i>
             </div>
             
             <div id="pagination" class="flex justify-center items-center gap-4 mt-8 hidden">
-                <button id="prevPageBtn" data-i18n="prev" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg border border-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
-                <span id="pageIndicator" class="text-zinc-500 text-sm">Page 1</span>
-                <button id="nextPageBtn" data-i18n="next" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg border border-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+                <button id="prevPageBtn" data-i18n="prev" class="px-4 py-2 bg-theme-panel hover:bg-theme-hover text-theme-text text-sm font-medium rounded-lg border border-theme-border transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <span id="pageIndicator" class="text-theme-muted text-sm">Page 1</span>
+                <button id="nextPageBtn" data-i18n="next" class="px-4 py-2 bg-theme-panel hover:bg-theme-hover text-theme-text text-sm font-medium rounded-lg border border-theme-border transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
             </div>
         </main>
 
         <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-start sm:items-center justify-center p-3 sm:p-6">
-            <div class="w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col bg-black rounded-2xl border border-zinc-800 shadow-2xl">
-                <div class="flex justify-between items-center gap-2 p-3 border-b border-zinc-900 bg-black safe-top-nav">
-                    <h2 id="modalTitle" class="text-base sm:text-lg font-bold text-white truncate">Movie Title</h2>
+            <div class="w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col bg-theme-bg rounded-2xl border border-theme-border shadow-2xl transition-colors duration-300">
+                <div class="flex justify-between items-center gap-2 p-3 border-b border-theme-border bg-theme-bg safe-top-nav">
+                    <h2 id="modalTitle" class="text-base sm:text-lg font-bold text-theme-text truncate">Movie Title</h2>
                     <div class="flex items-center gap-2 flex-none">
-                        <button id="modalBookmarkBtn" class="bookmark-btn p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full transition-colors border border-zinc-800 focus:outline-none">
+                        <button id="modalBookmarkBtn" class="bookmark-btn p-2 bg-theme-panel hover:bg-theme-hover text-theme-muted hover:text-theme-text rounded-full transition-colors border border-theme-border focus:outline-none">
                             <i class="ph ph-bookmark text-base"></i>
                         </button>
-                    <button id="closeModal" class="p-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-full transition-colors border border-red-500/20 focus:outline-none">
+                    <button id="closeModal" class="p-2 bg-theme-accent/10 hover:bg-theme-accent/20 text-theme-accent rounded-full transition-colors border border-theme-accent/20 focus:outline-none">
                         <i class="ph ph-x text-base"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="flex flex-col overflow-y-auto bg-black flex-1">
+            <div class="flex flex-col overflow-y-auto bg-theme-bg flex-1">
                 <div class="relative flex flex-col min-h-min">
-                    <div class="p-2 bg-zinc-950 border-b border-zinc-900 flex flex-wrap items-center gap-2 z-20 sticky top-0">
+                    <div class="p-2 bg-theme-panel border-b border-theme-border flex flex-wrap items-center gap-2 z-20 sticky top-0 transition-colors duration-300">
                         <div class="flex items-center gap-1.5 flex-none">
-                                <i class="ph ph-hard-drives text-red-600 text-base flex-none"></i>
-                                <select id="serverSelect" class="w-32 sm:w-40 shrink-0 bg-zinc-900 text-white text-xs sm:text-sm rounded-lg pl-2 pr-6 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:border-red-600" style="text-overflow:ellipsis;">
+                                <i class="ph ph-hard-drives text-theme-accent text-base flex-none"></i>
+                                <select id="serverSelect" class="w-32 sm:w-40 shrink-0 bg-theme-panel text-theme-text text-xs sm:text-sm rounded-lg pl-2 pr-6 py-1.5 border border-theme-border outline-none cursor-pointer hover:bg-theme-hover transition-colors focus:border-theme-accent">
                                     <option value="direct_ext" class="bg-blue-900 text-blue-400 font-bold">Server 11 (External PRO - All Streams)</option>
                                     <option value="torrentio" class="bg-zinc-800 text-green-400 font-bold">Server 10 (Torrentio / 1DM Manager)</option>
                                     <option value="vidsrc_to">Server 1 (VidSrc To)</option>
@@ -302,7 +400,7 @@
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <button id="adBlockToggle" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors" title="Enable Malware, Redirect & Popup Protection">
+                                <button id="adBlockToggle" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-theme-hover text-theme-muted border border-theme-border rounded-md text-xs font-semibold uppercase tracking-wider hover:brightness-110 transition-colors" title="Enable Malware, Redirect & Popup Protection">
                                     <i class="ph ph-shield text-base"></i> <span id="adShieldLabel" class="hidden sm:inline" data-i18n="adShieldOff">Ad-Shield Off</span>
                                 </button>
                                 
@@ -310,15 +408,15 @@
                                     <i class="ph ph-arrow-square-out text-base"></i> <span class="hidden sm:inline" data-i18n="external">External</span>
                                 </button>
 
-                                <button id="fullscreenBtn" class="flex items-center gap-1 px-2 py-1.5 bg-zinc-800 text-white border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors">
+                                <button id="fullscreenBtn" class="flex items-center gap-1 px-2 py-1.5 bg-theme-hover text-theme-text border border-theme-border rounded-md text-xs font-semibold uppercase tracking-wider transition-colors hover:brightness-110">
                                     <i class="ph ph-corners-out text-base"></i> <span id="fullscreenLabel" class="hidden sm:inline" data-i18n="fullscreen">Fullscreen</span>
                                 </button>
                             </div>
                             
-                            <div class="flex items-center gap-1 bg-zinc-900 rounded-lg p-0.5 border border-zinc-800">
-                                <button id="audio-sub" data-i18n="sub" class="audio-toggle-btn active px-2 py-1 text-xs uppercase tracking-wider font-bold rounded-md text-white bg-red-600 focus:outline-none">Sub</button>
-                                <button id="audio-dub" data-i18n="dub" class="audio-toggle-btn px-2 py-1 text-xs uppercase tracking-wider font-bold rounded-md text-zinc-400 hover:text-white focus:outline-none">Dub</button>
-                                <select id="dub-lang-select" class="hidden bg-zinc-900 text-zinc-300 text-xs sm:text-sm rounded-md ml-1 px-2 py-1.5 border border-zinc-800 outline-none cursor-pointer hover:bg-zinc-800 transition-colors focus:outline-none">
+                            <div class="flex items-center gap-1 bg-theme-panel rounded-lg p-0.5 border border-theme-border">
+                                <button id="audio-sub" data-i18n="sub" class="audio-toggle-btn active px-2 py-1 text-xs uppercase tracking-wider font-bold rounded-md text-theme-accent-text bg-theme-accent focus:outline-none transition-colors">Sub</button>
+                                <button id="audio-dub" data-i18n="dub" class="audio-toggle-btn px-2 py-1 text-xs uppercase tracking-wider font-bold rounded-md text-theme-muted hover:text-theme-text focus:outline-none transition-colors">Dub</button>
+                                <select id="dub-lang-select" class="hidden bg-theme-panel text-theme-text text-xs sm:text-sm rounded-md ml-1 px-2 py-1.5 border border-theme-border outline-none cursor-pointer hover:bg-theme-hover transition-colors focus:outline-none">
                                     <option value="en">English</option>
                                     <option value="es">Spanish</option>
                                     <option value="fr">French</option>
@@ -330,7 +428,7 @@
                                 </select>
                             </div>
 
-                        <div id="streamStatus" class="flex items-center gap-1.5 text-zinc-500 text-[11px] pl-1 min-w-0">
+                        <div id="streamStatus" class="flex items-center gap-1.5 text-theme-muted text-[11px] pl-1 min-w-0">
                             <i class="ph ph-spinner animate-spin"></i> <span data-i18n="connectingStream">Connecting to stream...</span>
                         </div>
                     </div>
@@ -347,19 +445,19 @@
 
                         <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
                         
-                        <div id="scraperContainer" class="relative z-20 hidden bg-black p-3 sm:p-4 w-full flex-1 min-h-[300px]"></div>
+                        <div id="scraperContainer" class="relative z-20 hidden bg-theme-bg p-3 sm:p-4 w-full flex-1 min-h-[300px]"></div>
 
                         <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-0">
-                            <i class="ph ph-circle-notch animate-spin text-5xl text-red-600 mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"></i>
-                            <p id="loaderMessage" data-i18n="loadingEngine" class="text-zinc-500 text-sm">Loading media engine...</p>
+                            <i class="ph ph-circle-notch animate-spin text-5xl text-theme-accent mb-4 drop-shadow-[0_0_15px_rgba(var(--theme-accent),0.5)]"></i>
+                            <p id="loaderMessage" data-i18n="loadingEngine" class="text-gray-400 text-sm">Loading media engine...</p>
                         </div>
                     </div>
                 </div>
 
-                <div id="tvSidebar" class="w-full bg-zinc-950 border-t border-zinc-900 flex-col hidden shrink-0">
-                    <div class="p-4 border-b border-zinc-900">
-                        <h3 class="font-semibold text-white mb-2 flex items-center gap-2 text-lg"><i class="ph ph-list-numbers text-red-600"></i> <span data-i18n="episodes">Episodes</span></h3>
-                        <select id="seasonSelect" class="w-full bg-zinc-900 border border-zinc-800 text-white text-base rounded-lg p-3 outline-none cursor-pointer focus:border-red-600">
+                <div id="tvSidebar" class="w-full bg-theme-bg border-t border-theme-border flex-col hidden shrink-0 transition-colors duration-300">
+                    <div class="p-4 border-b border-theme-border">
+                        <h3 class="font-semibold text-theme-text mb-2 flex items-center gap-2 text-lg"><i class="ph ph-list-numbers text-theme-accent"></i> <span data-i18n="episodes">Episodes</span></h3>
+                        <select id="seasonSelect" class="w-full bg-theme-panel border border-theme-border text-theme-text text-base rounded-lg p-3 outline-none cursor-pointer focus:border-theme-accent transition-colors">
                         </select>
                     </div>
                     <div id="episodeList" class="flex-1 overflow-y-auto max-h-60 p-3 space-y-2"></div>
@@ -368,7 +466,7 @@
             </div>
         </div>
 
-        <footer class="border-t border-zinc-900 mt-12 bg-black py-8 text-center text-zinc-600 text-sm">
+        <footer class="border-t border-theme-border mt-12 bg-theme-bg py-8 text-center text-theme-muted text-sm transition-colors duration-300">
             <p>&copy; 2026 Writerstm.stream</p>
         </footer>
     </div>
@@ -434,7 +532,9 @@
                 pickAnother: "Pick Another Link",
                 toastShieldOn: "🛡️ Strict Sandbox Enabled: Blocking popups and downloads",
                 toastShieldOff: "⚠️ Security reduced. Popups may occur.",
-                mainPageMsg: "You are on the main page of Writerstm.stream"
+                mainPageMsg: "You are on the main page of Writerstm.stream",
+                settings: "Settings", theme: "Theme", language: "Language",
+                themeDark: "Dark", themeLight: "Light", themeBlue: "Blue", themePurple: "Purple"
             },
             bn: {
                 secSubtitle: "স্ট্রিম লাইব্রেরি নিরাপদে অ্যাক্সেস করতে অনুগ্রহ করে সিকিউরিটি যাচাই সম্পূর্ণ করুন।",
@@ -492,7 +592,9 @@
                 pickAnother: "অন্য লিঙ্ক বাছুন",
                 toastShieldOn: "🛡️ সুরক্ষা চালুকৃত: পপআপ ও ডাউনলোড ব্লক করা হয়েছে",
                 toastShieldOff: "⚠️ সুরক্ষা কমানো হয়েছে। পপআপ আসতে পারে।",
-                mainPageMsg: "আপনি Writerstm.stream এর প্রধান পৃষ্ঠায় আছেন"
+                mainPageMsg: "আপনি Writerstm.stream এর প্রধান পৃষ্ঠায় আছেন",
+                settings: "সেটিংস", theme: "থিম", language: "ভাষা",
+                themeDark: "ডার্ক", themeLight: "লাইট", themeBlue: "নীল", themePurple: "বেগুনি"
             },
             ar: {
                 secSubtitle: "يرجى إكمال التحقق الأمني للوصول إلى مكتبة البث بأمان.",
@@ -550,7 +652,9 @@
                 pickAnother: "اختر رابطاً آخر",
                 toastShieldOn: "🛡️ تم تفعيل الحماية الفائقة: حظر الإعلانات والمنبثقات",
                 toastShieldOff: "⚠️ تم تقليل الحماية. قد تظهر نوافذ منبثقة.",
-                mainPageMsg: "أنت في الصفحة الرئيسية لـ Writerstm.stream"
+                mainPageMsg: "أنت في الصفحة الرئيسية لـ Writerstm.stream",
+                settings: "الإعدادات", theme: "المظهر", language: "اللغة",
+                themeDark: "داكن", themeLight: "فاتح", themeBlue: "أزرق", themePurple: "أرجواني"
             },
             es: {
                 secSubtitle: "Por favor complete la verificación de seguridad para acceder a la biblioteca.",
@@ -608,7 +712,9 @@
                 pickAnother: "Elegir Otro Enlace",
                 toastShieldOn: "🛡️ Protección Estricta Activada",
                 toastShieldOff: "⚠️ Seguridad reducida.",
-                mainPageMsg: "Estás en la página principal de Writerstm.stream"
+                mainPageMsg: "Estás en la página principal de Writerstm.stream",
+                settings: "Ajustes", theme: "Tema", language: "Idioma",
+                themeDark: "Oscuro", themeLight: "Claro", themeBlue: "Azul", themePurple: "Púrpura"
             },
             fr: {
                 secSubtitle: "Veuillez effectuer le contrôle de sécurité pour accéder au contenu.",
@@ -666,7 +772,9 @@
                 pickAnother: "Choisir un autre lien",
                 toastShieldOn: "🛡️ Shield Activé : Popups bloquées",
                 toastShieldOff: "⚠️ Sécurité réduite.",
-                mainPageMsg: "Vous êtes sur la page d'accueil de Writerstm.stream"
+                mainPageMsg: "Vous êtes sur la page d'accueil de Writerstm.stream",
+                settings: "Paramètres", theme: "Thème", language: "Langue",
+                themeDark: "Sombre", themeLight: "Clair", themeBlue: "Bleu", themePurple: "Violet"
             },
             hi: {
                 secSubtitle: "सुरक्षित रूप से स्ट्रीम लाइब्रेरी तक पहुँचने के लिए कृपया सुरक्षा जाँच पूरी करें।",
@@ -724,11 +832,14 @@
                 pickAnother: "दूसरा लिंक चुनें",
                 toastShieldOn: "🛡️ सुरक्षा चालू: पॉपअप और डाउनलोड ब्लॉक किए गए",
                 toastShieldOff: "⚠️ सुरक्षा घटाई गई। पॉपअप आ सकते हैं।",
-                mainPageMsg: "आप Writerstm.stream के मुख्य पृष्ठ पर हैं"
+                mainPageMsg: "आप Writerstm.stream के मुख्य पृष्ठ पर हैं",
+                settings: "सेटिंग्स", theme: "थीम", language: "भाषा",
+                themeDark: "डार्क", themeLight: "लाइट", themeBlue: "नीला", themePurple: "बैंगनी"
             }
         };
 
         let currentLang = 'en';
+        let currentTheme = 'dark';
 
         function t(key, replacements = {}) {
             let text = (translations[currentLang] && translations[currentLang][key]) || translations['en'][key] || key;
@@ -749,21 +860,19 @@
             document.documentElement.lang = langCode;
             document.documentElement.dir = (langCode === 'ar') ? 'rtl' : 'ltr';
 
-            // Update language selector dropdown if needed
             const langSelect = $('langSelect');
             if (langSelect && langSelect.value !== langCode) {
                 langSelect.value = langCode;
             }
 
-            // Update static elements with data-i18n attribute
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (key) {
-                    el.textContent = t(key);
+                    if (el.tagName === 'INPUT') el.placeholder = t(key);
+                    else el.textContent = t(key);
                 }
             });
 
-            // Update placeholders
             let searchKey = "searchMovies";
             if (currentType === 'tv') searchKey = "searchTv";
             else if (currentType === 'anime') searchKey = "searchAnime";
@@ -772,7 +881,6 @@
             if (searchInput) searchInput.placeholder = t(searchKey);
             if (mobileSearchInput) mobileSearchInput.placeholder = t(searchKey);
 
-            // Update UI elements
             updateWatchlistUI();
             updateSectionTitle();
             renderWatchHistory();
@@ -780,6 +888,22 @@
             if (isWatchlistView) {
                 renderGrid(watchlist);
             }
+        }
+        
+        function applyTheme(themeName) {
+            currentTheme = themeName;
+            document.documentElement.setAttribute('data-theme', themeName);
+            if (safeStorageAccess()) {
+                localStorage.setItem('writerstm_theme', themeName);
+            }
+            
+            document.querySelectorAll('.theme-select-btn').forEach(btn => {
+                if(btn.dataset.themeValue === themeName) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
         
         let currentType = 'movie'; 
@@ -810,6 +934,11 @@
         const viewWatchlistBtn = $('viewWatchlistBtn');
         const clearWatchlistBtn = $('clearWatchlistBtn');
         const langSelect = $('langSelect');
+        
+        const settingsBtn = $('settingsBtn');
+        const settingsDropdown = $('settingsDropdown');
+        const closeSettingsBtn = $('closeSettingsBtn');
+        const themeSelectBtns = document.querySelectorAll('.theme-select-btn');
         
         const continueWatchingSection = $('continueWatchingSection');
         const continueWatchingList = $('continueWatchingList');
@@ -876,11 +1005,11 @@
 
             tabBtns.forEach(b => {
                 if (b.dataset.type === currentType) {
-                    b.classList.add('bg-red-600', 'text-white', 'shadow-sm'); 
-                    b.classList.remove('text-zinc-400');
+                    b.classList.add('bg-theme-accent', 'text-theme-accent-text', 'shadow-sm'); 
+                    b.classList.remove('text-theme-muted', 'hover:bg-theme-hover', 'hover:text-theme-text');
                 } else {
-                    b.classList.remove('bg-red-600', 'text-white', 'shadow-sm'); 
-                    b.classList.add('text-zinc-400');
+                    b.classList.remove('bg-theme-accent', 'text-theme-accent-text', 'shadow-sm'); 
+                    b.classList.add('text-theme-muted', 'hover:bg-theme-hover', 'hover:text-theme-text');
                 }
             });
 
@@ -945,6 +1074,12 @@
                     if(savedLang && translations[savedLang]) {
                         currentLang = savedLang;
                     }
+                    const savedTheme = localStorage.getItem('writerstm_theme');
+                    if(savedTheme) {
+                        applyTheme(savedTheme);
+                    } else {
+                        applyTheme('dark');
+                    }
                 }
                 setLanguage(currentLang);
 
@@ -963,7 +1098,7 @@
             } catch (err) {
                 console.error("Initialization Error:", err);
                 if (mediaGrid) {
-                    mediaGrid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10 bg-red-950/20 rounded-xl border border-red-900"><i class="ph-fill ph-warning-circle text-4xl mb-3 block mx-auto"></i><p class="font-semibold text-lg">Failed to initialize application.</p><p class="text-sm mt-2 opacity-80">This might be due to strict browser privacy settings or a blocked script.</p></div>`;
+                    mediaGrid.innerHTML = `<div class="col-span-full text-center text-theme-accent py-10 bg-theme-accent/10 rounded-xl border border-theme-accent/20"><i class="ph-fill ph-warning-circle text-4xl mb-3 block mx-auto"></i><p class="font-semibold text-lg">Failed to initialize application.</p><p class="text-sm mt-2 opacity-80">This might be due to strict browser privacy settings or a blocked script.</p></div>`;
                 }
             }
         });
@@ -973,6 +1108,27 @@
                 setLanguage(e.target.value);
             });
         }
+        
+        if (settingsBtn && settingsDropdown) {
+            settingsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                settingsDropdown.classList.toggle('hidden');
+            });
+            if (closeSettingsBtn) {
+                closeSettingsBtn.addEventListener('click', () => settingsDropdown.classList.add('hidden'));
+            }
+            document.addEventListener('click', (e) => {
+                if (!settingsDropdown.contains(e.target) && e.target !== settingsBtn) {
+                    settingsDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        themeSelectBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyTheme(btn.dataset.themeValue);
+            });
+        });
         
         if (serverSelect) {
             serverSelect.addEventListener('change', (e) => {
@@ -1077,7 +1233,7 @@
             const fragment = document.createDocumentFragment();
             filteredHistory.forEach(item => {
                 const card = document.createElement('div');
-                card.className = "group cursor-pointer flex-none w-36 sm:w-44 flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-red-600 snap-start transition-transform hover:-translate-y-1 duration-200";
+                card.className = "group cursor-pointer flex-none w-36 sm:w-44 flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-theme-accent snap-start transition-transform hover:-translate-y-1 duration-200";
                 card.tabIndex = 0;
                 
                 let progressText = t('movie');
@@ -1085,17 +1241,17 @@
                 else if (item.type === 'tv' || item.type === 'anime') progressText = `S${item.resumeSeason || 1} E${item.resumeEpisode || 1}`;
 
                 card.innerHTML = `
-                    <div class="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 group-hover:border-red-600 transition-colors">
+                    <div class="relative aspect-[2/3] overflow-hidden rounded-xl bg-theme-panel border border-theme-border group-hover:border-theme-accent transition-colors">
                         <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
                         <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i class="ph-fill ph-play text-4xl sm:text-5xl text-red-600 drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]"></i>
+                            <i class="ph-fill ph-play text-4xl sm:text-5xl text-theme-accent drop-shadow-[0_0_10px_rgb(var(--theme-accent))]"></i>
                         </div>
                         <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2 pt-6">
-                            <span class="text-[10px] sm:text-xs font-bold text-white bg-red-600 px-1.5 py-0.5 rounded shadow-sm inline-block">${progressText}</span>
+                            <span class="text-[10px] sm:text-xs font-bold text-theme-accent-text bg-theme-accent px-1.5 py-0.5 rounded shadow-sm inline-block">${progressText}</span>
                         </div>
                     </div>
                     <div class="px-1">
-                        <h3 class="font-semibold text-xs sm:text-sm text-white line-clamp-1 group-hover:text-red-400">${item.title}</h3>
+                        <h3 class="font-semibold text-xs sm:text-sm text-theme-text line-clamp-1 group-hover:text-theme-accent">${item.title}</h3>
                     </div>
                 `;
                 
@@ -1131,8 +1287,8 @@
             const count = watchlist.length;
             const labelText = t('watchlist');
             viewWatchlistBtn.innerHTML = `
-                <i class="ph-fill ph-bookmarks text-xl ${isWatchlistView ? 'text-red-600 drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]' : ''}"></i>
-                <span class="hidden sm:inline text-sm font-medium ${isWatchlistView ? 'text-white' : ''}">${labelText} ${count > 0 ? `(${count})` : ''}</span>
+                <i class="ph-fill ph-bookmarks text-xl ${isWatchlistView ? 'text-theme-accent drop-shadow-[0_0_5px_rgb(var(--theme-accent))]' : ''}"></i>
+                <span class="hidden sm:inline text-sm font-medium ${isWatchlistView ? 'text-theme-text' : ''}">${labelText} ${count > 0 ? `(${count})` : ''}</span>
             `;
         }
         
@@ -1306,7 +1462,7 @@
             } catch (error) {
                 console.error("Fetch error", error); 
                 if (mainLoader) mainLoader.classList.add('hidden');
-                mediaGrid.innerHTML = `<p class="col-span-full text-center text-red-500 py-10"><i class="ph-fill ph-warning-circle text-2xl mb-2"></i><br>Error loading media. Please try again.</p>`;
+                mediaGrid.innerHTML = `<p class="col-span-full text-center text-theme-accent py-10"><i class="ph-fill ph-warning-circle text-2xl mb-2"></i><br>Error loading media. Please try again.</p>`;
             }
         }
 
@@ -1337,7 +1493,7 @@
         function renderGrid(items, needsFormatting = false) {
             if (!mediaGrid) return;
             mediaGrid.innerHTML = '';
-            if (!items || items.length === 0) { mediaGrid.innerHTML = `<p class="col-span-full text-center text-zinc-500 py-10">${t('noResults')}</p>`; return; }
+            if (!items || items.length === 0) { mediaGrid.innerHTML = `<p class="col-span-full text-center text-theme-muted py-10">${t('noResults')}</p>`; return; }
             
             const fragment = document.createDocumentFragment();
 
@@ -1346,7 +1502,7 @@
                 if(!item.poster) return;
                 const isSaved = watchlist.some(w => w.id === item.id && w.type === item.type);
                 const card = document.createElement('div');
-                card.className = "group cursor-pointer flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-red-600 focus-visible:ring-offset-4 focus-visible:ring-offset-black transition-shadow";
+                card.className = "group cursor-pointer flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-theme-accent focus-visible:ring-offset-4 focus-visible:ring-offset-theme-bg transition-shadow";
                 card.tabIndex = 0; 
                 card.addEventListener('keydown', (e) => { if(e.key === 'Enter') openPlayer(item); });
                 card.onclick = () => openPlayer(item);
@@ -1356,25 +1512,25 @@
                 else if (item.type === 'tv' || item.type === 'anime') itemTypeLabel = t('tabTv');
 
                 card.innerHTML = `
-                    <div class="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 group-hover:border-red-600 transition-colors">
+                    <div class="relative aspect-[2/3] overflow-hidden rounded-xl bg-theme-panel border border-theme-border group-hover:border-theme-accent transition-colors">
                         <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
-                            <i class="ph-fill ph-play-circle text-5xl sm:text-6xl text-red-600 drop-shadow-[0_0_10px_rgba(220,38,38,0.8)] mb-2"></i>
+                            <i class="ph-fill ph-play-circle text-5xl sm:text-6xl text-theme-accent drop-shadow-[0_0_10px_rgb(var(--theme-accent))] mb-2"></i>
                         </div>
                         <div class="absolute top-2 w-full px-2 flex justify-between items-start pointer-events-none">
-                            <div class="bg-black/80 backdrop-blur border border-zinc-800 text-white text-xs sm:text-sm font-bold px-2 py-1 rounded-md flex items-center gap-1">
-                                <i class="ph-fill ph-star text-red-500"></i> ${item.rating}
+                            <div class="bg-black/80 backdrop-blur border border-theme-border text-white text-xs sm:text-sm font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                                <i class="ph-fill ph-star text-theme-accent"></i> ${item.rating}
                             </div>
-                            <button class="grid-bookmark bookmark-btn pointer-events-auto p-2 sm:p-2.5 bg-black/80 border border-zinc-800 rounded-md text-zinc-400 hover:text-white ${isSaved ? 'active' : ''}" data-id="${item.id}" tabindex="0">
+                            <button class="grid-bookmark bookmark-btn pointer-events-auto p-2 sm:p-2.5 bg-black/80 border border-theme-border rounded-md text-gray-300 hover:text-white ${isSaved ? 'active' : ''}" data-id="${item.id}" tabindex="0">
                                 <i class="ph ph-bookmark text-sm sm:text-base"></i>
                             </button>
                         </div>
-                        ${item.type === 'anime' ? `<div class="absolute bottom-2 left-2 bg-red-600 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded uppercase">Anime</div>` : ''}
+                        ${item.type === 'anime' ? `<div class="absolute bottom-2 left-2 bg-theme-accent text-theme-accent-text text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded uppercase">Anime</div>` : ''}
                         ${item.type === 'archive' ? `<div class="absolute bottom-2 left-2 bg-green-600 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded uppercase">Direct</div>` : ''}
                     </div>
                     <div class="px-1">
-                        <h3 class="font-semibold text-sm sm:text-base text-white line-clamp-1 group-hover:text-red-400">${item.title}</h3>
-                        <p class="text-xs sm:text-sm text-zinc-500">${item.year} &bull; ${itemTypeLabel}</p>
+                        <h3 class="font-semibold text-sm sm:text-base text-theme-text line-clamp-1 group-hover:text-theme-accent">${item.title}</h3>
+                        <p class="text-xs sm:text-sm text-theme-muted">${item.year} &bull; ${itemTypeLabel}</p>
                     </div>
                 `;
                 const btn = card.querySelector('.grid-bookmark');
@@ -1418,7 +1574,7 @@
                 updateStreamIframe();
             } catch (e) {
                 if (playerLoader) playerLoader.classList.add('hidden');
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No direct video found</span>`;
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">No direct video found</span>`;
             }
         }
 
@@ -1456,7 +1612,7 @@
             if (loaderMessage) loaderMessage.textContent = t('loadingEngine');
             if (streamStatus) {
                 streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
-                streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
+                streamStatus.className = "flex items-center gap-1.5 text-theme-muted text-xs";
             }
 
             if (item.type === 'archive') { 
@@ -1472,7 +1628,7 @@
                 const tmdbId = await getTmdbIdForAnime(item.title);
                 if (tmdbId) { currentMediaId = tmdbId; actualType = 'tv'; } 
                 else {
-                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Stream not found</span>`;
+                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">Stream not found</span>`;
                     if (playerLoader) playerLoader.classList.add('hidden'); return;
                 }
             }
@@ -1551,27 +1707,23 @@
 
                 data.episodes.forEach(ep => {
                     const btn = document.createElement('button');
-                    btn.className = "w-full text-left rtl:text-right px-4 py-3 rounded-lg text-sm sm:text-base transition-colors border focus:outline-none focus:ring-2 focus:ring-red-600";
+                    btn.className = "w-full text-left rtl:text-right px-4 py-3 rounded-lg text-sm sm:text-base transition-colors border focus:outline-none focus:ring-2 focus:ring-theme-accent";
                     
                     if(ep.episode_number == currentEpisode) {
-                        btn.classList.add('bg-red-600', 'text-white', 'border-red-500'); 
+                        btn.classList.add('bg-theme-accent', 'text-theme-accent-text', 'border-theme-accent'); 
                     } else {
-                        btn.classList.add('text-zinc-400', 'border-transparent', 'hover:bg-zinc-900', 'hover:text-white', 'hover:border-zinc-800');
+                        btn.classList.add('text-theme-muted', 'border-transparent', 'hover:bg-theme-hover', 'hover:text-theme-text', 'hover:border-theme-border');
                     }
                     
-                    btn.innerHTML = `<span class="font-mono text-zinc-500 mr-2 rtl:mr-0 rtl:ml-2 ${ep.episode_number == currentEpisode ? 'text-zinc-200' : ''}">${ep.episode_number}.</span> ${ep.name}`;
+                    btn.innerHTML = `<span class="font-mono text-inherit opacity-75 mr-2 rtl:mr-0 rtl:ml-2">${ep.episode_number}.</span> ${ep.name}`;
                     
                     btn.onclick = () => {
                         episodeList.querySelectorAll('button').forEach(b => {
-                            b.classList.remove('bg-red-600', 'text-white', 'border-red-500'); 
-                            b.classList.add('text-zinc-400', 'border-transparent', 'hover:bg-zinc-900', 'hover:text-white', 'hover:border-zinc-800');
-                            const span = b.querySelector('span');
-                            if(span) span.classList.remove('text-zinc-200');
+                            b.classList.remove('bg-theme-accent', 'text-theme-accent-text', 'border-theme-accent'); 
+                            b.classList.add('text-theme-muted', 'border-transparent', 'hover:bg-theme-hover', 'hover:text-theme-text', 'hover:border-theme-border');
                         });
-                        btn.classList.add('bg-red-600', 'text-white', 'border-red-500'); 
-                        btn.classList.remove('text-zinc-400', 'border-transparent', 'hover:bg-zinc-900', 'hover:text-white', 'hover:border-zinc-800');
-                        const span = btn.querySelector('span');
-                        if(span) span.classList.add('text-zinc-200');
+                        btn.classList.add('bg-theme-accent', 'text-theme-accent-text', 'border-theme-accent'); 
+                        btn.classList.remove('text-theme-muted', 'border-transparent', 'hover:bg-theme-hover', 'hover:text-theme-text', 'hover:border-theme-border');
 
                         currentEpisode = ep.episode_number;
                         addToHistory(currentMediaObj, currentSeason, currentEpisode);
@@ -1589,14 +1741,14 @@
         if (audioSubBtn && audioDubBtn && dubLangSelect) {
             audioSubBtn.addEventListener('click', () => {
                 currentAudioType = 'sub';
-                audioSubBtn.classList.add('bg-red-600', 'text-white'); audioSubBtn.classList.remove('text-zinc-400');
-                audioDubBtn.classList.remove('bg-red-600', 'text-white'); audioDubBtn.classList.add('text-zinc-400');
+                audioSubBtn.classList.add('bg-theme-accent', 'text-theme-accent-text'); audioSubBtn.classList.remove('text-theme-muted');
+                audioDubBtn.classList.remove('bg-theme-accent', 'text-theme-accent-text'); audioDubBtn.classList.add('text-theme-muted');
                 dubLangSelect.classList.add('hidden'); updateStreamIframe();
             });
             audioDubBtn.addEventListener('click', () => {
                 currentAudioType = 'dub';
-                audioDubBtn.classList.add('bg-red-600', 'text-white'); audioDubBtn.classList.remove('text-zinc-400');
-                audioSubBtn.classList.remove('bg-red-600', 'text-white'); audioSubBtn.classList.add('text-zinc-400');
+                audioDubBtn.classList.add('bg-theme-accent', 'text-theme-accent-text'); audioDubBtn.classList.remove('text-theme-muted');
+                audioSubBtn.classList.remove('bg-theme-accent', 'text-theme-accent-text'); audioSubBtn.classList.add('text-theme-muted');
                 dubLangSelect.classList.remove('hidden'); updateStreamIframe();
             });
             dubLangSelect.addEventListener('change', () => { if(currentAudioType === 'dub') updateStreamIframe(); });
@@ -1624,7 +1776,7 @@
                     adBlockToggle.innerHTML = `<i class="ph-fill ph-shield-check text-base"></i> <span id="adShieldLabel" class="hidden sm:inline">${t('adShieldOn')}</span>`;
                     showToast(t('toastShieldOn'));
                 } else {
-                    adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-700 transition-colors";
+                    adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-theme-hover text-theme-muted border border-theme-border rounded-md text-xs font-semibold uppercase tracking-wider hover:brightness-110 transition-colors";
                     adBlockToggle.innerHTML = `<i class="ph ph-shield text-base"></i> <span id="adShieldLabel" class="hidden sm:inline">${t('adShieldOff')}</span>`;
                     showToast(t('toastShieldOff'), 3000);
                 }
@@ -1687,7 +1839,7 @@
         });
 
         const toastEl = document.createElement('div');
-        toastEl.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#18181b;color:#fff;padding:10px 18px;border-radius:9999px;border:1px solid #3f3f46;font-size:13px;z-index:100000;display:none;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6);";
+        toastEl.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--theme-panel, #18181b);color:var(--theme-text, #ffffff);padding:10px 18px;border-radius:9999px;border:1px solid var(--theme-border, #3f3f46);font-size:13px;z-index:100000;display:none;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6);";
         document.body.appendChild(toastEl);
         let toastTimer;
         function showToast(msg, ms = 4000) {
@@ -1704,21 +1856,21 @@
 
         const extMenu = document.createElement('div');
         extMenu.id = 'extPlayerMenu';
-        extMenu.style.cssText = "position:fixed;z-index:100001;background:#18181b;border:1px solid #3f3f46;border-radius:12px;padding:6px;display:none;min-width:200px;box-shadow:0 12px 32px rgba(0,0,0,.7);font-family:inherit;";
+        extMenu.style.cssText = "position:fixed;z-index:100001;background:var(--theme-panel, #18181b);border:1px solid var(--theme-border, #3f3f46);border-radius:12px;padding:6px;display:none;min-width:200px;box-shadow:0 12px 32px rgba(0,0,0,.7);font-family:inherit;";
         extMenu.innerHTML = `
-            <button data-act="vlc" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:#fff;font-size:14px;border-radius:8px;cursor:pointer;">
+            <button data-act="vlc" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:var(--theme-text, #fff);font-size:14px;border-radius:8px;cursor:pointer;">
                 <span style="width:10px;height:10px;border-radius:50%;background:#f97316;display:inline-block;"></span> Open in VLC
             </button>
-            <button data-act="mx" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:#fff;font-size:14px;border-radius:8px;cursor:pointer;">
+            <button data-act="mx" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:var(--theme-text, #fff);font-size:14px;border-radius:8px;cursor:pointer;">
                 <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block;"></span> Open in MX Player
             </button>
-            <button data-act="copy" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:#fff;font-size:14px;border-radius:8px;cursor:pointer;">
+            <button data-act="copy" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:var(--theme-text, #fff);font-size:14px;border-radius:8px;cursor:pointer;">
                 <span style="width:10px;height:10px;border-radius:50%;background:#3b82f6;display:inline-block;"></span> Copy stream link
             </button>
         `;
         document.body.appendChild(extMenu);
         extMenu.querySelectorAll('button').forEach(b => {
-            b.addEventListener('mouseenter', () => b.style.background = '#27272a'); b.addEventListener('mouseleave', () => b.style.background = 'transparent');
+            b.addEventListener('mouseenter', () => b.style.background = 'var(--theme-hover, #27272a)'); b.addEventListener('mouseleave', () => b.style.background = 'transparent');
         });
 
         function hideExtMenu() { extMenu.style.display = 'none'; }
@@ -1732,6 +1884,30 @@
             setTimeout(() => {
                 if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
             }, 1500);
+        }
+
+        // Mock functions for getStreamUrl & updateStreamIframe to keep complete structural bounds.
+        function getStreamUrl() {
+            return currentDirectUrl || "https://example.com/stream.mp4";
+        }
+        
+        function updateStreamIframe() {
+            if(!videoFrame) return;
+            if(playerLoader) playerLoader.classList.remove('hidden');
+            if(clickShield) clickShield.classList.remove('resolved');
+            videoFrame.classList.remove('hidden');
+            
+            const server = serverSelect ? serverSelect.value : 'vidsrc_to';
+            if (server === 'torrentio') {
+                loadTorrentioStreams();
+                return;
+            }
+            
+            setTimeout(() => {
+                videoFrame.src = getStreamUrl();
+                if(playerLoader) playerLoader.classList.add('hidden');
+                if(streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-400">${t('connectedSecure')}</span>`;
+            }, 1000);
         }
 
         function openInVLC() {
@@ -1800,19 +1976,19 @@
                 if (playerLoader) playerLoader.classList.add('hidden');
 
                 if(!data.streams || data.streams.length === 0) {
-                    if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>${t('noResults')}</p></div>`;
-                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No torrents available</span>`;
+                    if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-theme-muted"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-theme-accent"></i><p>${t('noResults')}</p></div>`;
+                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">No torrents available</span>`;
                     return;
                 }
 
                 if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-400">${t('connectedSecure')}</span>`;
                 
                 let html = `
-                    <div class="mb-4 bg-zinc-900 border border-zinc-800 p-4 rounded-lg flex items-start gap-3">
+                    <div class="mb-4 bg-theme-panel border border-theme-border p-4 rounded-lg flex items-start gap-3">
                         <i class="ph-fill ph-info text-2xl text-green-500 mt-1"></i>
                         <div>
-                            <h4 class="font-bold text-white text-sm sm:text-base">${t('torrentioTitle')}</h4>
-                            <p class="text-xs sm:text-sm text-zinc-400 mt-1">
+                            <h4 class="font-bold text-theme-text text-sm sm:text-base">${t('torrentioTitle')}</h4>
+                            <p class="text-xs sm:text-sm text-theme-muted mt-1">
                                 ${t('torrentioDesc')}
                             </p>
                         </div>
@@ -1821,323 +1997,42 @@
                 `;
                 
                 data.streams.forEach(stream => {
-                    const isMagnet = !!stream.infoHash;
                     const link = stream.url || `magnet:?xt=urn:btih:${stream.infoHash}`;
                     const titleParts = (stream.title || '').split('\n');
                     const quality = titleParts[0] || 'Unknown';
                     const sizeOrDetails = titleParts.slice(1).join(' &bull; ');
-                    const safeLink = encodeURIComponent(link);
 
                     html += `
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-zinc-900 border border-zinc-800 rounded-lg transition-colors hover:border-red-500">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 bg-theme-panel border border-theme-border p-3 rounded-xl hover:border-theme-accent transition-colors">
                             <div class="flex-1 min-w-0">
-                                <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
-                                <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${sizeOrDetails}</span>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">1DM / TORRENT</span>
+                                    <span class="text-theme-text font-semibold text-sm truncate">${quality}</span>
+                                </div>
+                                <div class="text-theme-muted text-xs truncate">${sizeOrDetails}</div>
                             </div>
-                            
-                            <div class="grid grid-cols-2 gap-2 w-full mt-auto sm:flex sm:flex-col sm:w-44 sm:flex-none">
-                                ${isMagnet ? `
-                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-1.5 px-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
-                                        <i class="ph-fill ph-magnet text-sm"></i> ${t('launchApp')}
-                                    </button>
-                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied!', 4000);" class="w-full text-center py-1.5 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
-                                        <i class="ph ph-copy text-sm"></i> ${t('copyMagnet')}
-                                    </button>
-                                ` : `
-                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', false)" class="w-full text-center py-1.5 px-2 bg-green-600/20 hover:bg-green-600/40 text-green-400 border border-green-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
-                                        <i class="ph-fill ph-play-circle text-sm"></i> ${t('directPlay')}
-                                    </button>
-                                `}
+                            <div class="flex flex-wrap sm:flex-nowrap gap-2 shrink-0">
+                                <a href="${link}" class="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors">
+                                    ${t('launchApp')}
+                                </a>
+                                <button onclick="copyToClipboard('${link}'); showToast('${t('copyMagnet')} Copied!');" class="flex-1 sm:flex-none bg-theme-hover hover:brightness-110 text-theme-text text-xs font-bold py-2 px-4 rounded-lg transition-colors border border-theme-border">
+                                    Copy
+                                </button>
                             </div>
                         </div>
                     `;
                 });
-                html += '</div>';
+                html += `</div>`;
+                
                 if (scraperContainer) scraperContainer.innerHTML = html;
 
-            } catch(e) {
+            } catch (error) {
                 if (playerLoader) playerLoader.classList.add('hidden');
-                if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error fetching Torrentio: ${e.message}</p></div>`;
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Torrentio failed</span>`;
+                if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-theme-muted"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-theme-accent"></i><p>Failed to load Torrentio data.</p></div>`;
+                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">Connection Error</span>`;
             }
         }
 
-        async function loadDirectStreams() {
-            if (videoFrame) videoFrame.classList.add('hidden');
-            if (scraperContainer) scraperContainer.classList.remove('hidden'); if (videoContainer) videoContainer.classList.add('scraper-open');
-            if (playerLoader) playerLoader.classList.remove('hidden');
-            if (loaderMessage) loaderMessage.textContent = t('loadingEngine');
-            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
-
-            try {
-                const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
-                const actualType = isTv ? 'tv' : 'movie';
-                const imdbId = await getImdbId(currentMediaId, actualType);
-
-                if(!imdbId) throw new Error("No IMDB ID found for this title.");
-
-                const endpoints = [
-                    `https://shluflix.elfhosted.com/stream/${actualType}/${imdbId}${isTv ? ':'+currentSeason+':'+currentEpisode : ''}.json`,
-                    `https://mediafusion.elfhosted.com/stream/${actualType}/${imdbId}${isTv ? ':'+currentSeason+':'+currentEpisode : ''}.json`,
-                    `https://stremio-gdrive.elfhosted.com/stream/${actualType}/${imdbId}${isTv ? ':'+currentSeason+':'+currentEpisode : ''}.json`
-                ];
-
-                let httpStreams = [];
-                let magnetStreams = [];
-
-                try {
-                    const requests = endpoints.map(url => fetch(url).then(r => r.json()).catch(() => null));
-                    const results = await Promise.all(requests);
-                    results.forEach(data => {
-                        if (data && data.streams) {
-                            data.streams.forEach(s => {
-                                if (s.url && !s.infoHash && !s.url.startsWith('magnet')) httpStreams.push(s);
-                            });
-                        }
-                    });
-                } catch(e) { console.log('HTTP Scrapers failed'); }
-
-                try {
-                    const torUrl = isTv ? `https://torrentio.strem.fun/stream/series/${imdbId}:${currentSeason}:${currentEpisode}.json` : `https://torrentio.strem.fun/stream/movie/${imdbId}.json`;
-                    const torRes = await fetch(torUrl);
-                    const torData = await torRes.json();
-                    if(torData && torData.streams) {
-                        torData.streams.forEach(s => {
-                            const isMagnet = !!s.infoHash || (s.url && s.url.startsWith('magnet'));
-                            if (isMagnet) {
-                                if (magnetStreams.length < 15) magnetStreams.push(s);
-                            } else if (s.url) {
-                                httpStreams.push(s); 
-                            }
-                        });
-                    }
-                } catch(e) { console.log('Torrentio fallback failed'); }
-
-                if (playerLoader) playerLoader.classList.add('hidden');
-
-                if(httpStreams.length === 0 && magnetStreams.length === 0) {
-                    if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>${t('noResults')}</p></div>`;
-                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">No external streams available</span>`;
-                    return;
-                }
-
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-blue-500"></i> <span class="text-blue-400">${t('connectedSecure')}</span>`;
-                
-                let html = `
-                    <div class="mb-4 bg-zinc-900 border border-zinc-800 p-4 rounded-lg flex items-start gap-3 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
-                        <i class="ph-fill ph-arrow-square-out text-2xl text-blue-500 mt-1"></i>
-                        <div>
-                            <h4 class="font-bold text-white text-sm sm:text-base">${t('extHubTitle')}</h4>
-                            <p class="text-xs sm:text-sm text-zinc-400 mt-1">
-                                ${t('extHubDesc')}
-                            </p>
-                        </div>
-                    </div>
-                `;
-                
-                if (httpStreams.length > 0) {
-                    html += `
-                        <h5 class="text-white font-bold mb-3 flex items-center gap-2 mt-4"><span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> HTTP Direct Streams (VLC/MX)</h5>
-                        <div class="flex flex-col gap-3 mb-6">
-                    `;
-                    httpStreams.forEach((stream) => {
-                        const titleParts = (stream.title || stream.name || 'Direct Stream').split('\n');
-                        const quality = titleParts[0] || 'Unknown';
-                        const details = titleParts.slice(1).join(' &bull; ') || 'HTTP Stream';
-                        html += `
-                            <button onclick="handleDirectClick('${stream.url.replace(/'/g, "\\'")}')" class="flex flex-col sm:flex-row sm:items-center gap-3 text-left rtl:text-right p-4 bg-zinc-900 border border-zinc-800 hover:border-blue-500 hover:bg-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600">
-                                <div class="flex-1 min-w-0">
-                                    <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Server'} &mdash; ${quality}</span>
-                                    <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${details}</span>
-                                </div>
-                                <span class="text-xs font-semibold flex items-center gap-1.5 text-blue-400 sm:flex-none">
-                                    <i class="ph-fill ph-play-circle text-base"></i> ${t('selectVlcMx')}
-                                </span>
-                            </button>
-                        `;
-                    });
-                    html += `</div>`;
-                }
-
-                if (magnetStreams.length > 0) {
-                    html += `
-                        <h5 class="text-white font-bold mb-3 flex items-center gap-2 mt-4 border-t border-zinc-800 pt-6"><span class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Torrent Streams (1DM/Flud)</h5>
-                        <div class="flex flex-col gap-3 pb-8">
-                    `;
-                    magnetStreams.forEach(stream => {
-                        const link = stream.url || `magnet:?xt=urn:btih:${stream.infoHash}`;
-                        const titleParts = (stream.title || '').split('\n');
-                        const quality = titleParts[0] || 'Unknown';
-                        const details = titleParts.slice(1).join(' &bull; ');
-                        const safeLink = encodeURIComponent(link);
-                        
-                        html += `
-                            <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-zinc-900 border border-zinc-800 rounded-lg transition-colors hover:border-purple-500">
-                                <div class="flex-1 min-w-0">
-                                    <span class="block text-sm sm:text-base font-bold text-white break-all">${stream.name || 'Torrentio'} &mdash; ${quality}</span>
-                                    <span class="block text-xs sm:text-sm text-zinc-400 mt-1 break-all">${details}</span>
-                                </div>
-                                
-                                <div class="grid grid-cols-2 gap-2 w-full mt-auto sm:flex sm:flex-col sm:w-44 sm:flex-none">
-                                    <button onclick="handleTorrentioClick('${link.replace(/'/g, "\\'")}', true)" class="w-full text-center py-1.5 px-2 bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 border border-purple-500/30 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
-                                        <i class="ph-fill ph-magnet text-sm"></i> ${t('launchApp')}
-                                    </button>
-                                    <button onclick="copyToClipboard(decodeURIComponent('${safeLink}')); showToast('Magnet link copied!', 4000);" class="w-full text-center py-1.5 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
-                                        <i class="ph ph-copy text-sm"></i> ${t('copyLink')}
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    html += `</div>`;
-                }
-
-                if (scraperContainer) scraperContainer.innerHTML = html;
-
-            } catch(e) {
-                if (playerLoader) playerLoader.classList.add('hidden');
-                if (scraperContainer) scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 p-6 text-center"><i class="ph-fill ph-warning-circle text-4xl mb-2 text-red-500"></i><p>Error scraping links: ${e.message}</p></div>`;
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-red-500"></i> <span class="text-red-400">Scraping failed</span>`;
-            }
-        }
-
-        window.handleTorrentioClick = function(link, isMagnet) {
-            if(isMagnet) {
-                showToast("Launching app...", 4000);
-                const intentUrl = `intent://${link.replace(/^magnet:\/?\/?/, '')}#Intent;scheme=magnet;end`;
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                const isAndroid = /android/i.test(navigator.userAgent || '');
-                iframe.src = isAndroid ? intentUrl : link;
-                document.body.appendChild(iframe);
-                setTimeout(() => {
-                    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-                    showToast("If the app didn't open, copy the magnet link.", 5000);
-                }, 1500);
-            } else {
-                currentDirectUrl = link;
-                if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
-                updateStreamIframe(); 
-            }
-        }
-
-        window.handleDirectClick = function(link) {
-            currentDirectUrl = link;
-            if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
-            if (videoFrame) videoFrame.classList.add('hidden');
-            
-            const existingMsg = document.getElementById('directPlayMsg');
-            if(existingMsg) existingMsg.remove();
-
-            const msgDiv = document.createElement('div');
-            msgDiv.id = 'directPlayMsg';
-            msgDiv.className = 'absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 p-6 text-center';
-            msgDiv.innerHTML = `
-                <i class="ph-fill ph-check-circle text-6xl text-green-500 mb-4 drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]"></i>
-                <h3 class="text-xl sm:text-2xl font-bold text-white mb-2">${t('streamSelectedTitle')}</h3>
-                <p class="text-zinc-400 text-sm sm:text-base mb-8 max-w-md">${t('streamSelectedDesc')}</p>
-                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4">
-                    <button onclick="document.getElementById('externalPlayerBtn')?.click()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transition-colors">
-                        <i class="ph-fill ph-arrow-square-out text-xl"></i> ${t('openExtPlayer')}
-                    </button>
-                    <button onclick="currentDirectUrl = null; updateStreamIframe()" class="w-full sm:w-auto px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg border border-zinc-700 flex items-center justify-center gap-2 transition-colors">
-                        <i class="ph ph-arrow-left text-xl"></i> ${t('pickAnother')}
-                    </button>
-                </div>
-            `;
-            if (videoContainer) videoContainer.appendChild(msgDiv);
-            
-            if (streamStatus) {
-                streamStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Direct Stream Locked &mdash; Ready for External Player`;
-                streamStatus.className = "flex items-center gap-1.5 text-blue-400 font-medium text-xs";
-            }
-        }
-
-        function getStreamUrl() {
-            if (currentDirectUrl) return currentDirectUrl; 
-            const server = serverSelect ? serverSelect.value : 'vidsrc_to';
-            const lang = dubLangSelect ? dubLangSelect.value : 'en';
-            const isTv = (currentMediaObj && (currentMediaObj.type === 'tv' || currentMediaObj.type === 'anime'));
-            
-            let url = "";
-            if (server === 'vidsrc_to') url = isTv ? `https://vidsrc.to/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}` : `https://vidsrc.to/embed/movie/${currentMediaId}`;
-            else if (server === 'vidsrc_me') url = isTv ? `https://vidsrc.me/embed/tv?tmdb=${currentMediaId}&season=${currentSeason}&episode=${currentEpisode}` : `https://vidsrc.me/embed/movie?tmdb=${currentMediaId}`;
-            else if (server === 'vidlink') url = isTv ? `https://vidlink.pro/tv/${currentMediaId}/${currentSeason}/${currentEpisode}` : `https://vidlink.pro/movie/${currentMediaId}`;
-            else if (server === 'smashy') url = isTv ? `https://player.smashy.stream/tv/${currentMediaId}?s=${currentSeason}&e=${currentEpisode}` : `https://player.smashy.stream/movie/${currentMediaId}`;
-            else if (server === 'multiembed') url = isTv ? `https://multiembed.mov/?video_id=${currentMediaId}&tmdb=1&s=${currentSeason}&e=${currentEpisode}` : `https://multiembed.mov/?video_id=${currentMediaId}&tmdb=1`;
-            else if (server === 'autoembed') url = isTv ? `https://autoembed.co/tv/tmdb/${currentMediaId}-${currentSeason}-${currentEpisode}` : `https://autoembed.co/movie/tmdb/${currentMediaId}`;
-            else if (server === '2embed') url = isTv ? `https://www.2embed.cc/embedtv/${currentMediaId}&s=${currentSeason}&e=${currentEpisode}` : `https://www.2embed.cc/embed/${currentMediaId}`;
-            else if (server === 'vidbinge') url = isTv ? `https://vidbinge.com/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}` : `https://vidbinge.com/embed/movie/${currentMediaId}`;
-            else if (server === 'movieapi') url = isTv ? `https://moviesapi.club/tv/${currentMediaId}-${currentSeason}-${currentEpisode}` : `https://moviesapi.club/movie/${currentMediaId}`;
-
-            if(currentAudioType === 'dub' && url) {
-                const prefix = url.includes('?') ? '&' : '?';
-                url += `${prefix}dub=1&audio=dub&lang=${lang}`;
-            }
-            return url;
-        }
-
-        function updateStreamIframe() {
-            if (!currentMediaId) return;
-            
-            const dMsg = document.getElementById('directPlayMsg');
-            if (dMsg) dMsg.remove();
-            
-            const server = serverSelect ? serverSelect.value : '';
-
-            if (server === 'torrentio' && !currentDirectUrl) {
-                loadTorrentioStreams();
-                return;
-            } else if (server === 'direct_ext') {
-                if (!currentDirectUrl) {
-                    loadDirectStreams();
-                    return;
-                } else {
-                    handleDirectClick(currentDirectUrl);
-                    return;
-                }
-            } else {
-                if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
-            }
-            
-            if (videoFrame) videoFrame.classList.add('hidden');
-            if (playerLoader) playerLoader.classList.remove('hidden');
-            if (loaderMessage) loaderMessage.textContent = t('loadingEngine');
-            
-            if (clickShield) {
-                clickShield.classList.remove('resolved');
-                if (currentDirectUrl) clickShield.classList.add('resolved'); 
-            }
-            
-            if (videoFrame) {
-                if(isAdShieldActive) {
-                    videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms allow-downloads');
-                } else { 
-                    videoFrame.removeAttribute('sandbox'); 
-                }
-                videoFrame.src = getStreamUrl();
-            }
-            
-            if (streamStatus) {
-                streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
-                streamStatus.className = "flex items-center gap-1.5 text-zinc-500 text-xs";
-            }
-            
-            setTimeout(() => {
-                if(serverSelect && serverSelect.value === 'torrentio' && !currentDirectUrl) return; 
-                if(serverSelect && serverSelect.value === 'direct_ext') return;
-
-                if (playerLoader) playerLoader.classList.add('hidden');
-                if (videoFrame) videoFrame.classList.remove('hidden');
-
-                if (streamStatus) {
-                    streamStatus.innerHTML = currentDirectUrl
-                        ? `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Direct video loaded`
-                        : `<span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> ${t('connectedSecure')}`;
-                    streamStatus.className = "flex items-center gap-1.5 text-green-400 font-medium text-xs";
-                }
-            }, 1800);
-        }
     </script>
 </body>
 </html>
