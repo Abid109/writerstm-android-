@@ -104,7 +104,7 @@
             --theme-accent: 168 85 247; /* purple-500 */
         }
 
-        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: rgb(var(--theme-bg)); color: rgb(var(--theme-text)); }
+        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: rgb(var(--theme-bg)); color: rgb(var(--theme-text)); padding-bottom: 80px; }
         .hidden { display: none !important; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgb(var(--theme-bg)); }
@@ -186,12 +186,11 @@
         #desktopSearchWrap input:focus, #mobileSearchBar input:focus { border-color: rgb(var(--theme-accent)); }
         #desktopSearchWrap input::placeholder, #mobileSearchBar input::placeholder { color: rgb(var(--theme-muted)); }
         
-        .safe-top-nav { padding-top: max(env(safe-area-inset-top), 32px) !important; }
+        .safe-top-nav { padding-top: max(env(safe-area-inset-top), 16px) !important; }
         
         @media (min-width: 768px) {
             #desktopSearchWrap { display: block !important; }
             #mobileSearchBar { display: none !important; }
-            .safe-top-nav { padding-top: max(env(safe-area-inset-top), 16px) !important; }
         }
         @media (max-width: 767.98px) {
             #desktopSearchWrap { display: none !important; }
@@ -217,6 +216,77 @@
         [dir="ltr"] .showcase-horizontal-gradient {
             background: linear-gradient(90deg, rgb(var(--theme-bg)) 0%, rgba(var(--theme-bg), 0.5) 50%, transparent 100%);
         }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgb(var(--theme-panel));
+            border-top: 1px solid rgb(var(--theme-border));
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 70px;
+            z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgb(var(--theme-muted));
+            text-decoration: none;
+            width: 20%;
+            height: 100%;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: rgb(var(--theme-accent));
+        }
+
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .nav-item.center-btn {
+            transform: translateY(-20px);
+        }
+        
+        .nav-item.center-btn .icon-bg {
+            background-color: rgb(var(--theme-accent));
+            color: #fff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 4px solid rgb(var(--theme-bg));
+            transition: transform 0.2s ease;
+        }
+
+        .nav-item.center-btn:hover .icon-bg {
+            transform: scale(1.05);
+        }
+        
+        .nav-item.center-btn span {
+            margin-top: 8px;
+            position: absolute;
+            bottom: -20px;
+        }
+
     </style>
 </head>
 <body class="bg-theme-bg text-theme-text min-h-screen transition-colors duration-300">
@@ -253,21 +323,30 @@
                     <div id="desktopSearchWrap" class="hidden md:block flex-1 max-w-md mx-8">
                         <div class="relative">
                             <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-muted"></i>
-                            <input type="text" id="searchInput" placeholder="Search movies..." class="w-full bg-theme-panel border border-theme-border text-theme-text text-sm rounded-full focus:ring-2 focus:ring-theme-accent focus:border-theme-accent block pl-10 p-2 transition-all outline-none placeholder-theme-muted">
+                            <input type="text" id="searchInput" placeholder="Search movies, tv shows, anime..." class="w-full bg-theme-panel border border-theme-border text-theme-text text-sm rounded-full focus:ring-2 focus:ring-theme-accent focus:border-theme-accent block pl-10 p-2 transition-all outline-none placeholder-theme-muted">
                         </div>
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <!-- Settings / Theme & Language Switcher -->
                         <div class="relative flex items-center z-50">
-                            <button id="settingsBtn" class="flex items-center justify-center w-9 h-9 rounded-full bg-theme-panel text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-colors border border-theme-border focus:outline-none focus:ring-2 focus:ring-theme-accent" title="Settings">
-                                <i class="ph ph-gear text-xl"></i>
+                            <button id="profileBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-theme-panel text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-colors border border-theme-border focus:outline-none focus:ring-2 focus:ring-theme-accent" title="Profile">
+                                <img id="profileImage" src="https://placehold.co/32x32/1e1e1e/ffffff?text=U" alt="Profile" class="w-7 h-7 rounded-full object-cover">
+                                <span id="profileName" class="text-sm font-medium hidden sm:block">Guest</span>
+                                <i class="ph ph-caret-down text-sm"></i>
                             </button>
 
-                            <div id="settingsDropdown" class="hidden absolute top-full right-0 rtl:right-auto rtl:left-0 mt-2 w-72 bg-theme-panel border border-theme-border rounded-xl shadow-2xl p-4 z-50 transform origin-top-right rtl:origin-top-left transition-all">
-                                <div class="flex items-center justify-between mb-4 pb-2 border-b border-theme-border">
-                                    <h3 class="text-theme-text font-bold text-sm" data-i18n="settings">Settings</h3>
-                                    <button id="closeSettingsBtn" class="text-theme-muted hover:text-theme-text transition-colors"><i class="ph ph-x"></i></button>
+                            <div id="profileDropdown" class="hidden absolute top-full right-0 rtl:right-auto rtl:left-0 mt-2 w-72 bg-theme-panel border border-theme-border rounded-xl shadow-2xl p-4 z-50 transform origin-top-right rtl:origin-top-left transition-all">
+                                <div class="flex flex-col items-center mb-4 pb-4 border-b border-theme-border">
+                                    <div class="relative cursor-pointer group" id="changeProfileImgBtn">
+                                        <img id="dropdownProfileImg" src="https://placehold.co/64x64/1e1e1e/ffffff?text=U" alt="Profile" class="w-16 h-16 rounded-full object-cover border-2 border-theme-accent">
+                                        <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <i class="ph ph-camera text-white text-xl"></i>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="profileImageInput" accept="image/*" class="hidden">
+                                    <div class="mt-2 text-center w-full">
+                                        <input type="text" id="editProfileName" class="w-full text-center bg-transparent border-b border-transparent hover:border-theme-border focus:border-theme-accent outline-none text-theme-text font-bold transition-colors" value="Guest" placeholder="Enter name">
+                                    </div>
                                 </div>
                                 
                                 <div class="mb-5">
@@ -292,7 +371,7 @@
                                     </div>
                                 </div>
                                 
-                                <div>
+                                <div class="mb-4">
                                     <label class="text-theme-muted text-[10px] uppercase font-bold tracking-wider mb-2 block" data-i18n="language">Language</label>
                                     <div class="relative">
                                         <i class="ph ph-globe text-theme-muted text-lg absolute left-2.5 rtl:left-auto rtl:right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
@@ -306,13 +385,15 @@
                                         </select>
                                     </div>
                                 </div>
+                                
+                                <div class="border-t border-theme-border pt-3">
+                                    <button class="w-full text-left px-3 py-2 text-sm text-theme-muted hover:text-theme-text hover:bg-theme-hover rounded-md transition-colors flex items-center gap-2">
+                                        <i class="ph ph-shield-check"></i> Privacy Policy
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <button id="viewWatchlistBtn" class="flex items-center gap-2 text-theme-muted hover:text-theme-text transition-colors">
-                            <i class="ph ph-bookmarks text-xl"></i>
-                            <span id="watchlistLabel" class="hidden sm:inline text-sm font-medium" data-i18n="watchlist">Watchlist</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -321,30 +402,13 @@
         <div id="mobileSearchBar" class="md:hidden p-4 bg-theme-bg border-b border-theme-border transition-colors duration-300">
             <div class="relative">
                 <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-muted"></i>
-                <input type="text" id="mobileSearchInput" placeholder="Search movies..." class="w-full bg-theme-panel border border-theme-border text-theme-text text-sm rounded-full focus:ring-2 focus:ring-theme-accent focus:border-theme-accent block pl-10 p-2 transition-all outline-none placeholder-theme-muted">
+                <input type="text" id="mobileSearchInput" placeholder="Search movies, tv shows, anime..." class="w-full bg-theme-panel border border-theme-border text-theme-text text-sm rounded-full focus:ring-2 focus:ring-theme-accent focus:border-theme-accent block pl-10 p-2 transition-all outline-none placeholder-theme-muted">
             </div>
         </div>
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <div class="flex space-x-1 rtl:space-x-reverse bg-theme-panel p-1 rounded-lg border border-theme-border overflow-x-auto hide-scrollbar max-w-full transition-colors duration-300" id="typeTabs">
-                    <button data-type="movie" data-i18n="tabMovies" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md bg-theme-accent text-theme-accent-text shadow-sm transition-all focus:outline-none">Movies</button>
-                    <button data-type="tv" data-i18n="tabTv" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-all focus:outline-none">TV Series</button>
-                    <button data-type="anime" data-i18n="tabAnime" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-all focus:outline-none">Anime</button>
-                    <button data-type="archive" data-i18n="tabArchive" class="tab-btn whitespace-nowrap px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-medium rounded-md text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-all focus:outline-none">Public Domain</button>
-                </div>
-
-                <div class="flex flex-wrap gap-3 w-full sm:w-auto">
-                    <select id="genreFilter" class="flex-1 sm:flex-none bg-theme-panel border border-theme-border text-theme-text text-sm sm:text-base rounded-lg focus:ring-theme-accent focus:border-theme-accent block p-2.5 sm:p-3 outline-none cursor-pointer transition-colors duration-300">
-                        <option value="" data-i18n="allGenres">All Genres</option>
-                    </select>
-
-                    <select id="categoryFilter" class="flex-1 sm:flex-none bg-theme-panel border border-theme-border text-theme-text text-sm sm:text-base rounded-lg focus:ring-theme-accent focus:border-theme-accent block p-2.5 sm:p-3 outline-none cursor-pointer transition-colors duration-300">
-                        <option value="trending" data-i18n="catTrending">Trending Now</option>
-                        <option value="popular" data-i18n="catPopular">Most Popular</option>
-                        <option value="top_rated" data-i18n="catTopRated">Top Rated</option>
-                    </select>
-                </div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 hidden" id="filterControls">
+                <!-- Tabs are now driven by bottom navigation, so we hide these original tabs -->
             </div>
             
             <!-- SHOWCASE / HERO SECTION -->
@@ -382,8 +446,18 @@
                 </div>
             </div>
 
+            <div id="informationSection" class="hidden mb-10">
+                <h2 class="text-2xl font-bold text-theme-text mb-4"><i class="ph ph-info text-theme-accent"></i> Release Information</h2>
+                <div id="infoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Info cards will be injected here -->
+                </div>
+                <div id="infoLoader" class="flex justify-center items-center py-6 hidden">
+                    <i class="ph ph-spinner animate-spin text-2xl text-theme-accent"></i>
+                </div>
+            </div>
+
             <div class="mb-4 flex justify-between items-end">
-                <h2 id="sectionTitle" class="text-2xl font-bold text-theme-text">Trending Movies</h2>
+                <h2 id="sectionTitle" class="text-2xl font-bold text-theme-text">Home (Mixed Content)</h2>
                 <button id="clearWatchlistBtn" data-i18n="clearAll" class="hidden text-xs text-theme-accent hover:opacity-80 font-medium bg-theme-accent/10 px-2 py-1 rounded transition-colors">Clear All</button>
             </div>
 
@@ -400,7 +474,7 @@
             </div>
         </main>
 
-        <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-start sm:items-center justify-center p-3 sm:p-6">
+        <div id="playerModal" class="fixed inset-0 z-[100] hidden bg-black/90 backdrop-blur-md flex items-start sm:items-center justify-center p-3 sm:p-6">
             <div class="w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col bg-theme-bg rounded-2xl border border-theme-border shadow-2xl transition-colors duration-300">
                 <div class="flex justify-between items-center gap-2 p-3 border-b border-theme-border bg-theme-bg safe-top-nav">
                     <h2 id="modalTitle" class="text-base sm:text-lg font-bold text-theme-text truncate">Movie Title</h2>
@@ -420,51 +494,19 @@
                         <div class="flex items-center gap-1.5 flex-none">
                                 <i class="ph ph-hard-drives text-theme-accent text-base flex-none"></i>
                                 <select id="serverSelect" class="w-32 sm:w-40 shrink-0 bg-theme-panel text-theme-text text-xs sm:text-sm rounded-lg pl-2 pr-6 py-1.5 border border-theme-border outline-none cursor-pointer hover:bg-theme-hover transition-colors focus:border-theme-accent">
-                                    <option value="direct_ext" class="bg-blue-900 text-blue-400 font-bold">Server 11 (External PRO - All Streams)</option>
-                                    <option value="torrentio" class="bg-zinc-800 text-green-400 font-bold">Server 10 (Torrentio / 1DM Manager)</option>
+                                    <option value="direct_ext" class="bg-blue-900 text-blue-400 font-bold">Server 11 (External PRO)</option>
                                     <option value="vidsrc_to">Server 1 (VidSrc To)</option>
-                                    <option value="vidsrc_me">Server 2 (VidSrc Fast)</option>
-                                    <option value="vidlink">Server 3 (VidLink Pro)</option>
-                                    <option value="smashy">Server 4 (SmashyStream)</option>
-                                    <option value="multiembed">Server 5 (MultiEmbed)</option>
-                                    <option value="autoembed">Server 6 (AutoEmbed Ultra)</option>
-                                    <option value="2embed">Server 7 (Backup 2Embed)</option>
-                                    <option value="vidbinge">Server 8 (VidBinge - Good for Anime)</option>
-                                    <option value="movieapi">Server 9 (MovieAPI)</option>
                                 </select>
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <button id="adBlockToggle" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-theme-hover text-theme-muted border border-theme-border rounded-md text-xs font-semibold uppercase tracking-wider hover:brightness-110 transition-colors" title="Enable Malware, Redirect & Popup Protection">
-                                    <i class="ph ph-shield text-base"></i> <span id="adShieldLabel" class="hidden sm:inline" data-i18n="adShieldOff">Ad-Shield Off</span>
-                                </button>
-                                
-                                <button id="externalPlayerBtn" class="flex items-center gap-1 px-2 py-1.5 bg-blue-900/40 text-blue-400 border border-blue-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-blue-900/60 transition-colors" title="Open stream in VLC / MX Player">
-                                    <i class="ph ph-arrow-square-out text-base"></i> <span class="hidden sm:inline" data-i18n="external">External</span>
-                                </button>
-
                                 <button id="fullscreenBtn" class="flex items-center gap-1 px-2 py-1.5 bg-theme-hover text-theme-text border border-theme-border rounded-md text-xs font-semibold uppercase tracking-wider transition-colors hover:brightness-110">
                                     <i class="ph ph-corners-out text-base"></i> <span id="fullscreenLabel" class="hidden sm:inline" data-i18n="fullscreen">Fullscreen</span>
                                 </button>
                             </div>
-                            
-                            <div class="flex items-center gap-1 bg-theme-panel rounded-lg p-0.5 border border-theme-border">
-                                <button id="audio-sub" data-i18n="sub" class="audio-toggle-btn active px-2 py-1 text-xs uppercase tracking-wider font-bold rounded-md text-theme-accent-text bg-theme-accent focus:outline-none transition-colors">Sub</button>
-                                <button id="audio-dub" data-i18n="dub" class="audio-toggle-btn px-2 py-1 text-xs uppercase tracking-wider font-bold rounded-md text-theme-muted hover:text-theme-text focus:outline-none transition-colors">Dub</button>
-                                <select id="dub-lang-select" class="hidden bg-theme-panel text-theme-text text-xs sm:text-sm rounded-md ml-1 px-2 py-1.5 border border-theme-border outline-none cursor-pointer hover:bg-theme-hover transition-colors focus:outline-none">
-                                    <option value="en">English</option>
-                                    <option value="es">Spanish</option>
-                                    <option value="fr">French</option>
-                                    <option value="de">German</option>
-                                    <option value="it">Italian</option>
-                                    <option value="hi">Hindi</option>
-                                    <option value="bn">Bangla</option>
-                                    <option value="ja">Japanese</option>
-                                </select>
-                            </div>
 
                         <div id="streamStatus" class="flex items-center gap-1.5 text-theme-muted text-[11px] pl-1 min-w-0">
-                            <i class="ph ph-spinner animate-spin"></i> <span data-i18n="connectingStream">Connecting to stream...</span>
+                            <i class="ph ph-spinner animate-spin"></i> <span data-i18n="connectingStream">Connecting...</span>
                         </div>
                     </div>
 
@@ -475,7 +517,7 @@
 
                         <div id="clickShield" class="click-shield flex flex-col gap-2">
                              <i class="ph-fill ph-play-circle text-6xl text-white/80 transition-transform duration-300"></i>
-                             <p data-i18n="clickToPlay" class="text-white/80 text-sm font-medium bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">Click to bypass initial ads & play</p>
+                             <p data-i18n="clickToPlay" class="text-white/80 text-sm font-medium bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">Click to play</p>
                         </div>
 
                         <iframe id="videoFrame" class="absolute inset-0 w-full h-full hidden border-0" allowfullscreen allow="autoplay; fullscreen"></iframe>
@@ -500,23 +542,45 @@
             </div>
             </div>
         </div>
+        
+        <div class="bottom-nav">
+            <a href="#" class="nav-item nav-btn" data-type="save">
+                <i class="ph ph-bookmark-simple"></i>
+                <span>Save</span>
+            </a>
+            <a href="#" class="nav-item nav-btn" data-type="info">
+                <i class="ph ph-info"></i>
+                <span>Information</span>
+            </a>
+            <a href="#" class="nav-item active center-btn nav-btn" data-type="home">
+                <div class="icon-bg">
+                    <i class="ph ph-house"></i>
+                </div>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item nav-btn" data-type="movie">
+                <i class="ph ph-film-strip"></i>
+                <span>Movie</span>
+            </a>
+            <a href="#" class="nav-item nav-btn" data-type="tv_anime">
+                <i class="ph ph-television"></i>
+                <span>TV/Anime</span>
+            </a>
+        </div>
 
-        <footer class="border-t border-theme-border mt-12 bg-theme-bg py-8 text-center text-theme-muted text-sm transition-colors duration-300">
-            <p>&copy; 2026 Writerstm.stream</p>
-        </footer>
     </div>
 
     <script>
         const TMDB_API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c'; 
 
-        // Multi-Language Translation System (i18n)
+        // Minimal Translation System for demo
         const translations = {
             en: {
                 secSubtitle: "Please complete the security check to access the streaming library securely.",
                 secSecured: "Secured by Cloudflare",
                 watchlist: "Watchlist",
                 myWatchlist: "My Watchlist",
-                searchMovies: "Search movies...",
+                searchMovies: "Search movies, tv, anime...",
                 searchTv: "Search TV series...",
                 searchAnime: "Search anime...",
                 searchArchive: "Search public domain films...",
@@ -536,346 +600,17 @@
                 prev: "Previous",
                 next: "Next",
                 pageOf: "Page {page} of {total}",
-                adShieldOff: "Ad-Shield Off",
-                adShieldOn: "Ad-Shield On",
-                external: "External",
                 fullscreen: "Fullscreen",
-                exitFullscreen: "Exit",
-                sub: "Sub",
-                dub: "Dub",
                 connectingStream: "Connecting to stream...",
-                connectedSecure: "Connected & Secure",
-                clickToPlay: "Click to bypass initial ads & play",
+                clickToPlay: "Click to play",
                 loadingEngine: "Loading media engine...",
                 episodes: "Episodes",
                 season: "Season",
-                episode: "Episode",
                 movie: "Movie",
                 publicDomain: "Public Domain",
                 noResults: "No results found.",
-                torrentioTitle: "Torrentio (1DM Compatible)",
-                torrentioDesc: "<strong>Magnet Links (Blue):</strong> Tap to open in 1DM/Flud. If the app shows an error page, use the <strong>Copy Magnet</strong> button.",
-                extHubTitle: "External Player PRO Hub",
-                extHubDesc: "<strong>HTTP Links (Blue):</strong> Standard video files. Tap to send directly to VLC or MX Player.<br><strong>Torrent Links (Purple):</strong> Tap to stream using 1DM, Flud, or TorrSE.",
-                launchApp: "Launch App (1DM)",
-                copyMagnet: "Copy Magnet Link",
-                copyLink: "Copy Link",
-                directPlay: "Direct Play Stream",
-                selectVlcMx: "Select for VLC/MX",
-                streamSelectedTitle: "Stream Selected Successfully!",
-                streamSelectedDesc: "Click the <strong>External</strong> button below to open this video natively in VLC or MX Player.",
-                openExtPlayer: "Open External Player",
-                pickAnother: "Pick Another Link",
-                toastShieldOn: "🛡️ Strict Sandbox Enabled: Blocking popups and downloads",
-                toastShieldOff: "⚠️ Security reduced. Popups may occur.",
-                mainPageMsg: "You are on the main page of Writerstm.stream",
-                settings: "Settings", theme: "Theme", language: "Language",
+                theme: "Theme", language: "Language",
                 themeDark: "Dark", themeLight: "Light", themeBlue: "Blue", themePurple: "Purple"
-            },
-            bn: {
-                secSubtitle: "স্ট্রিম লাইব্রেরি নিরাপদে অ্যাক্সেস করতে অনুগ্রহ করে সিকিউরিটি যাচাই সম্পূর্ণ করুন।",
-                secSecured: "Cloudflare দ্বারা সুরক্ষিত",
-                watchlist: "ওয়াচলিস্ট",
-                myWatchlist: "আমার ওয়াচলিস্ট",
-                searchMovies: "সিনেমা খুঁজুন...",
-                searchTv: "টিভি সিরিজ খুঁজুন...",
-                searchAnime: "অ্যানিমে খুঁজুন...",
-                searchArchive: "পাবলিক ডোমেইন ফিল্ম খুঁজুন...",
-                tabMovies: "সিনেমা",
-                tabTv: "টিভি সিরিজ",
-                tabAnime: "অ্যানিমে",
-                tabArchive: "পাবলিক ডোমেইন",
-                allGenres: "সকল ক্যাটাগরি",
-                catTrending: "ট্রেন্ডিং",
-                catPopular: "জনপ্রিয়",
-                catTopRated: "শীর্ষ রেটেড",
-                playNow: "এখনই দেখুন",
-                continueWatching: "দেখা চালিয়ে যান",
-                clearHistory: "হিস্ট্রি মুছুন",
-                confirmClear: "নিশ্চিত মুছবেন?",
-                clearAll: "সব মুছুন",
-                prev: "পূর্ববর্তী",
-                next: "পরবর্তী",
-                pageOf: "পৃষ্ঠা {page} / {total}",
-                adShieldOff: "অ্যাড-শিল্ড বন্ধ",
-                adShieldOn: "অ্যাড-শিল্ড চালু",
-                external: "এক্সটার্নাল",
-                fullscreen: "ফুলস্ক্রিন",
-                exitFullscreen: "প্রস্থান",
-                sub: "সাবটাইটেল",
-                dub: "ডাবিং",
-                connectingStream: "স্ট্রিমে সংযোগ করা হচ্ছে...",
-                connectedSecure: "সংযুক্ত ও সুরক্ষিত",
-                clickToPlay: "বিজ্ঞাপন এড়িয়ে প্লে করতে ক্লিক করুন",
-                loadingEngine: "মিডিয়া ইঞ্জিন লোড হচ্ছে...",
-                episodes: "পর্বসমূহ",
-                season: "সিজন",
-                episode: "পর্ব",
-                movie: "সিনেমা",
-                publicDomain: "পাবলিক ডোমেইন",
-                noResults: "কোন ফলাফল পাওয়া যায়নি।",
-                torrentioTitle: "টোরেন্টিও (1DM সমর্থিত)",
-                torrentioDesc: "<strong>ম্যাগনেট লিঙ্ক:</strong> 1DM/Flud-এ খুলতে আলতো চাপুন। ত্রুটি দেখা দিলে <strong>কপি ম্যাগনেট</strong> বোতাম ব্যবহার করুন।",
-                extHubTitle: "এক্সটার্নাল প্লেয়ার হাব",
-                extHubDesc: "<strong>HTTP লিঙ্ক:</strong> ফাইল সরাসরি VLC বা MX Player-এ প্লে করুন।<br><strong>টোরেন্ট লিঙ্ক:</strong> 1DM বা Flud ব্যবহার করুন।",
-                launchApp: "অ্যাপ খুলুন (1DM)",
-                copyMagnet: "ম্যাগনেট লিঙ্ক কপি করুন",
-                copyLink: "লিঙ্ক কপি করুন",
-                directPlay: "ডাইরেক্ট প্লে স্ট্রিম",
-                selectVlcMx: "VLC/MX এর জন্য সিলেক্ট করুন",
-                streamSelectedTitle: "স্ট্রিম সফলভাবে সিলেক্ট হয়েছে!",
-                streamSelectedDesc: "VLC বা MX Player-এ ভিডিওটি চালাতে নিচের <strong>এক্সটার্নাল</strong> বোতামে ক্লিক করুন।",
-                openExtPlayer: "এক্সটার্নাল প্লেয়ার খুলুন",
-                pickAnother: "অন্য লিঙ্ক বাছুন",
-                toastShieldOn: "🛡️ সুরক্ষা চালুকৃত: পপআপ ও ডাউনলোড ব্লক করা হয়েছে",
-                toastShieldOff: "⚠️ সুরক্ষা কমানো হয়েছে। পপআপ আসতে পারে।",
-                mainPageMsg: "আপনি Writerstm.stream এর প্রধান পৃষ্ঠায় আছেন",
-                settings: "সেটিংস", theme: "থিম", language: "ভাষা",
-                themeDark: "ডার্ক", themeLight: "লাইট", themeBlue: "নীল", themePurple: "বেগুনি"
-            },
-            ar: {
-                secSubtitle: "يرجى إكمال التحقق الأمني للوصول إلى مكتبة البث بأمان.",
-                secSecured: "محمي بواسطة Cloudflare",
-                watchlist: "قائمة المشاهدة",
-                myWatchlist: "قائمة المشاهدة الخاصة بي",
-                searchMovies: "ابحث عن أفلام...",
-                searchTv: "ابحث عن مسلسلات...",
-                searchAnime: "ابحث عن أنمي...",
-                searchArchive: "ابحث عن أفلام المجال العام...",
-                tabMovies: "أفلام",
-                tabTv: "مسلسلات",
-                tabAnime: "أنمي",
-                tabArchive: "المجال العام",
-                allGenres: "جميع التصنيفات",
-                catTrending: "الأكثر تداولاً",
-                catPopular: "الأكثر شعبية",
-                catTopRated: "الأعلى تقييماً",
-                playNow: "العب الان",
-                continueWatching: "متابعة المشاهدة",
-                clearHistory: "مسح السجل",
-                confirmClear: "تأكيد المسح؟",
-                clearAll: "مسح الكل",
-                prev: "السابق",
-                next: "التالي",
-                pageOf: "صفحة {page} من {total}",
-                adShieldOff: "حماية الإعلانات معطلة",
-                adShieldOn: "حماية الإعلانات مفعلة",
-                external: "خارجي",
-                fullscreen: "ملء الشاشة",
-                exitFullscreen: "خروج",
-                sub: "ترجمة",
-                dub: "دبلجة",
-                connectingStream: "جاري الاتصال بالبث...",
-                connectedSecure: "متصل وآمن",
-                clickToPlay: "انقر لتخطي الإعلانات والتشغيل",
-                loadingEngine: "جاري تحميل محرك الوسائط...",
-                episodes: "الحلقات",
-                season: "الموسم",
-                episode: "الحلقة",
-                movie: "فيلم",
-                publicDomain: "مجال عام",
-                noResults: "لم يتم العثور على نتائج.",
-                torrentioTitle: "Torrentio (متوافق مع 1DM)",
-                torrentioDesc: "<strong>روابط المغناطيس:</strong> انقر للفتح في 1DM. إذا ظهرت مشكلة استخدم زر <strong>نسخ المغناطيس</strong>.",
-                extHubTitle: "مركز المشغل الخارجي",
-                extHubDesc: "<strong>روابط HTTP:</strong> تشغيل مباشر في VLC أو MX Player.<br><strong>روابط التورنت:</strong> استخدم 1DM أو Flud.",
-                launchApp: "فتح التطبيق (1DM)",
-                copyMagnet: "نسخ رابط المغناطيس",
-                copyLink: "نسخ الرابط",
-                directPlay: "تشغيل مباشر",
-                selectVlcMx: "اختر لـ VLC/MX",
-                streamSelectedTitle: "تم تحديد البث بنجاح!",
-                streamSelectedDesc: "انقر على زر <strong>خارجي</strong> أدناه لفتح الفيديو في VLC أو MX Player.",
-                openExtPlayer: "فتح المشغل الخارجي",
-                pickAnother: "اختر رابطاً آخر",
-                toastShieldOn: "🛡️ تم تفعيل الحماية الفائقة: حظر الإعلانات والمنبثقات",
-                toastShieldOff: "⚠️ تم تقليل الحماية. قد تظهر نوافذ منبثقة.",
-                mainPageMsg: "أنت في الصفحة الرئيسية لـ Writerstm.stream",
-                settings: "الإعدادات", theme: "المظهر", language: "اللغة",
-                themeDark: "داكن", themeLight: "فاتح", themeBlue: "أزرق", themePurple: "أرجواني"
-            },
-            es: {
-                secSubtitle: "Por favor complete la verificación de seguridad para acceder a la biblioteca.",
-                secSecured: "Protegido por Cloudflare",
-                watchlist: "Mi Lista",
-                myWatchlist: "Mi Lista de Seguimiento",
-                searchMovies: "Buscar películas...",
-                searchTv: "Buscar series...",
-                searchAnime: "Buscar anime...",
-                searchArchive: "Buscar películas de dominio público...",
-                tabMovies: "Películas",
-                tabTv: "Series TV",
-                tabAnime: "Anime",
-                tabArchive: "Dominio Público",
-                allGenres: "Todos los géneros",
-                catTrending: "En Tendencia",
-                catPopular: "Más Populares",
-                catTopRated: "Mejor Valoradas",
-                playNow: "Reproducir",
-                continueWatching: "Continuar Viendo",
-                clearHistory: "Borrar Historial",
-                confirmClear: "¿Confirmar borrado?",
-                clearAll: "Borrar Todo",
-                prev: "Anterior",
-                next: "Siguiente",
-                pageOf: "Página {page} de {total}",
-                adShieldOff: "Escudo Desactivado",
-                adShieldOn: "Escudo Activado",
-                external: "Externo",
-                fullscreen: "Pantalla Completa",
-                exitFullscreen: "Salir",
-                sub: "Sub",
-                dub: "Dob",
-                connectingStream: "Conectando al stream...",
-                connectedSecure: "Conectado y Seguro",
-                clickToPlay: "Haz clic para omitir anuncios y reproducir",
-                loadingEngine: "Cargando motor de reproducción...",
-                episodes: "Episodios",
-                season: "Temporada",
-                episode: "Episodio",
-                movie: "Película",
-                publicDomain: "Dominio Público",
-                noResults: "No se encontraron resultados.",
-                torrentioTitle: "Torrentio (Compatible con 1DM)",
-                torrentioDesc: "<strong>Enlaces Magnet:</strong> Toca para abrir en 1DM/Flud.",
-                extHubTitle: "Centro de Reproductor Externo",
-                extHubDesc: "<strong>Enlaces HTTP:</strong> Enviar directamente a VLC o MX Player.",
-                launchApp: "Abrir App (1DM)",
-                copyMagnet: "Copiar Enlace Magnet",
-                copyLink: "Copiar Enlace",
-                directPlay: "Reproducción Directa",
-                selectVlcMx: "Seleccionar para VLC/MX",
-                streamSelectedTitle: "¡Stream Seleccionado con Éxito!",
-                streamSelectedDesc: "Haz clic en el botón <strong>Externo</strong> para reproducir nativamente.",
-                openExtPlayer: "Abrir Reproductor Externo",
-                pickAnother: "Elegir Otro Enlace",
-                toastShieldOn: "🛡️ Protección Estricta Activada",
-                toastShieldOff: "⚠️ Seguridad reducida.",
-                mainPageMsg: "Estás en la página principal de Writerstm.stream",
-                settings: "Ajustes", theme: "Tema", language: "Idioma",
-                themeDark: "Oscuro", themeLight: "Claro", themeBlue: "Azul", themePurple: "Púrpura"
-            },
-            fr: {
-                secSubtitle: "Veuillez effectuer le contrôle de sécurité pour accéder au contenu.",
-                secSecured: "Sécurisé par Cloudflare",
-                watchlist: "Ma Liste",
-                myWatchlist: "Ma Liste de Lecture",
-                searchMovies: "Rechercher des films...",
-                searchTv: "Rechercher des séries...",
-                searchAnime: "Rechercher des animes...",
-                searchArchive: "Rechercher du domaine public...",
-                tabMovies: "Films",
-                tabTv: "Séries TV",
-                tabAnime: "Animes",
-                tabArchive: "Domaine Public",
-                allGenres: "Tous les genres",
-                catTrending: "Tendances",
-                catPopular: "Plus Populaires",
-                catTopRated: "Les Mieux Notés",
-                playNow: "Regarder",
-                continueWatching: "Reprendre la lecture",
-                clearHistory: "Effacer l'historique",
-                confirmClear: "Confirmer ?",
-                clearAll: "Tout Effacer",
-                prev: "Précédent",
-                next: "Suivant",
-                pageOf: "Page {page} sur {total}",
-                adShieldOff: "Ad-Shield Désactivé",
-                adShieldOn: "Ad-Shield Activé",
-                external: "Externe",
-                fullscreen: "Plein écran",
-                exitFullscreen: "Quitter",
-                sub: "VOSTFR",
-                dub: "VF",
-                connectingStream: "Connexion au flux...",
-                connectedSecure: "Connecté et Sécurisé",
-                clickToPlay: "Cliquez pour ignorer les pubs et lancer",
-                loadingEngine: "Chargement du lecteur...",
-                episodes: "Épisodes",
-                season: "Saison",
-                episode: "Épisode",
-                movie: "Film",
-                publicDomain: "Domaine Public",
-                noResults: "Aucun résultat trouvé.",
-                torrentioTitle: "Torrentio (Compatible 1DM)",
-                torrentioDesc: "<strong>Liens Magnet:</strong> Cliquez pour ouvrir dans 1DM.",
-                extHubTitle: "Lecteur Externe PRO",
-                extHubDesc: "<strong>Liens HTTP:</strong> Ouvrir dans VLC ou MX Player.",
-                launchApp: "Lancer 1DM",
-                copyMagnet: "Copier le Magnet",
-                copyLink: "Copier le Lien",
-                directPlay: "Lecture Directe",
-                selectVlcMx: "Sélectionner pour VLC/MX",
-                streamSelectedTitle: "Flux sélectionné avec succès !",
-                streamSelectedDesc: "Cliquez sur le bouton <strong>Externe</strong> ci-dessous.",
-                openExtPlayer: "Ouvrir dans le Lecteur Externe",
-                pickAnother: "Choisir un autre lien",
-                toastShieldOn: "🛡️ Shield Activé : Popups bloquées",
-                toastShieldOff: "⚠️ Sécurité réduite.",
-                mainPageMsg: "Vous êtes sur la page d'accueil de Writerstm.stream",
-                settings: "Paramètres", theme: "Thème", language: "Langue",
-                themeDark: "Sombre", themeLight: "Clair", themeBlue: "Bleu", themePurple: "Violet"
-            },
-            hi: {
-                secSubtitle: "सुरक्षित रूप से स्ट्रीम लाइब्रेरी तक पहुँचने के लिए कृपया सुरक्षा जाँच पूरी करें।",
-                secSecured: "Cloudflare द्वारा सुरक्षित",
-                watchlist: "वॉचलिस्ट",
-                myWatchlist: "मेरी वॉचलिस्ट",
-                searchMovies: "फिल्में खोजें...",
-                searchTv: "टीवी शो खोजें...",
-                searchAnime: "एनीमे खोजें...",
-                searchArchive: "पब्लिक डोमेन फिल्में खोजें...",
-                tabMovies: "फिल्में",
-                tabTv: "टीवी शो",
-                tabAnime: "एनीमे",
-                tabArchive: "पब्लिक डोमेन",
-                allGenres: "सभी शैलियाँ",
-                catTrending: "ट्रेंडिंग",
-                catPopular: "सबसे लोकप्रिय",
-                catTopRated: "टॉप रेटेड",
-                playNow: "अभी चलाएं",
-                continueWatching: "देखना जारी रखें",
-                clearHistory: "इतिहास साफ़ करें",
-                confirmClear: "क्या साफ़ करें?",
-                clearAll: "सभी साफ़ करें",
-                prev: "पिछला",
-                next: "अगला",
-                pageOf: "पृष्ठ {page} / {total}",
-                adShieldOff: "एड-शील्ड बंद",
-                adShieldOn: "एड-शील्ड चालू",
-                external: "एक्सटर्नल",
-                fullscreen: "फुलस्क्रीन",
-                exitFullscreen: "बाहर निकलें",
-                sub: "सबटाइटल",
-                dub: "डब",
-                connectingStream: "स्ट्रीम से जुड़ रहा है...",
-                connectedSecure: "कनेक्टेड और सुरक्षित",
-                clickToPlay: "विज्ञापन हटाने और प्ले करने के लिए क्लिक करें",
-                loadingEngine: "मीडिया इंजन लोड हो रहा है...",
-                episodes: "एपिसोड",
-                season: "सीज़न",
-                episode: "एपिसोड",
-                movie: "फिल्म",
-                publicDomain: "पब्लिक डोमेन",
-                noResults: "कोई परिणाम नहीं मिला।",
-                torrentioTitle: "टोरेंटियो (1DM समर्थित)",
-                torrentioDesc: "<strong>मैग्नेट लिंक:</strong> 1DM या Flud में खोलने के लिए टैप करें।",
-                extHubTitle: "एक्सटर्नल प्लेयर हब",
-                extHubDesc: "<strong>HTTP लिंक:</strong> सीधे VLC या MX Player में चलाएं।",
-                launchApp: "ऐप खोलें (1DM)",
-                copyMagnet: "मैग्नेट लिंक कॉपी करें",
-                copyLink: "लिंक कॉपी करें",
-                directPlay: "डायरेक्ट प्ले स्ट्रीम",
-                selectVlcMx: "VLC/MX के लिए चुनें",
-                streamSelectedTitle: "स्ट्रीम सफलतापूर्वक चुनी गई!",
-                streamSelectedDesc: "VLC या MX Player में चलाने के लिए नीचे <strong>एक्सटर्नल</strong> बटन पर क्लिक करें।",
-                openExtPlayer: "एक्सटर्नल प्लेयर खोलें",
-                pickAnother: "दूसरा लिंक चुनें",
-                toastShieldOn: "🛡️ सुरक्षा चालू: पॉपअप और डाउनलोड ब्लॉक किए गए",
-                toastShieldOff: "⚠️ सुरक्षा घटाई गई। पॉपअप आ सकते हैं।",
-                mainPageMsg: "आप Writerstm.stream के मुख्य पृष्ठ पर हैं",
-                settings: "सेटिंग्स", theme: "थीम", language: "भाषा",
-                themeDark: "डार्क", themeLight: "लाइट", themeBlue: "नीला", themePurple: "बैंगनी"
             }
         };
 
@@ -891,55 +626,19 @@
         }
 
         function setLanguage(langCode) {
-            if (!translations[langCode]) langCode = 'en';
-            currentLang = langCode;
-
-            if (safeStorageAccess()) {
-                localStorage.setItem('writerstm_language', langCode);
-            }
-
-            document.documentElement.lang = langCode;
-            document.documentElement.dir = (langCode === 'ar') ? 'rtl' : 'ltr';
-
-            const langSelect = $('langSelect');
-            if (langSelect && langSelect.value !== langCode) {
-                langSelect.value = langCode;
-            }
-
+            currentLang = 'en'; // Force EN for this demo snippet
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (key) {
                     if (el.tagName === 'INPUT') el.placeholder = t(key);
-                    else el.innerHTML = t(key); // Use innerHTML for icons and spans if any
+                    else el.innerHTML = t(key); 
                 }
             });
-
-            let searchKey = "searchMovies";
-            if (currentType === 'tv') searchKey = "searchTv";
-            else if (currentType === 'anime') searchKey = "searchAnime";
-            else if (currentType === 'archive') searchKey = "searchArchive";
-
-            if (searchInput) searchInput.placeholder = t(searchKey);
-            if (mobileSearchInput) mobileSearchInput.placeholder = t(searchKey);
-
-            updateWatchlistUI();
-            updateSectionTitle();
-            renderWatchHistory();
-
-            if (isWatchlistView) {
-                renderGrid(watchlist);
-            } else if (currentShowcaseItem) {
-                updateShowcase(currentShowcaseItem, true); // Re-translate showcase labels
-            }
         }
         
         function applyTheme(themeName) {
             currentTheme = themeName;
             document.documentElement.setAttribute('data-theme', themeName);
-            if (safeStorageAccess()) {
-                localStorage.setItem('writerstm_theme', themeName);
-            }
-            
             document.querySelectorAll('.theme-select-btn').forEach(btn => {
                 if(btn.dataset.themeValue === themeName) {
                     btn.classList.add('active');
@@ -949,7 +648,8 @@
             });
         }
         
-        let currentType = 'movie'; 
+        let currentNavType = 'home'; // home, save, info, movie, tv_anime
+        let currentType = 'home'; // For fetching: home = mixed, movie = movie, tv_anime = tv/anime
         let currentCategory = 'trending';
         let currentGenre = '';
         let currentQuery = '';
@@ -957,37 +657,38 @@
         let isWatchlistView = false;
         let watchlist = [];
         let watchHistory = []; 
+        let upcomingInfo = [];
         
         let currentMediaId = null;
         let currentMediaObj = null; 
         let currentSeason = 1;
         let currentEpisode = 1;
-        let currentAudioType = 'sub';
-        let currentDirectUrl = null; 
-        let currentShowcaseItem = null;
 
         const $ = (id) => document.getElementById(id);
         const mediaGrid = $('mediaGrid');
         const mainLoader = $('mainLoader');
         const searchInput = $('searchInput');
         const mobileSearchInput = $('mobileSearchInput');
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const categoryFilter = $('categoryFilter');
-        const genreFilter = $('genreFilter');
         const sectionTitle = $('sectionTitle');
-        const viewWatchlistBtn = $('viewWatchlistBtn');
         const clearWatchlistBtn = $('clearWatchlistBtn');
-        const langSelect = $('langSelect');
         
-        const settingsBtn = $('settingsBtn');
-        const settingsDropdown = $('settingsDropdown');
-        const closeSettingsBtn = $('closeSettingsBtn');
+        const profileBtn = $('profileBtn');
+        const profileDropdown = $('profileDropdown');
+        const profileName = $('profileName');
+        const editProfileName = $('editProfileName');
+        const profileImage = $('profileImage');
+        const dropdownProfileImg = $('dropdownProfileImg');
+        const changeProfileImgBtn = $('changeProfileImgBtn');
+        const profileImageInput = $('profileImageInput');
         const themeSelectBtns = document.querySelectorAll('.theme-select-btn');
         
         const showcaseSection = $('showcaseSection');
         const continueWatchingSection = $('continueWatchingSection');
         const continueWatchingList = $('continueWatchingList');
         const clearHistoryBtn = $('clearHistoryBtn');
+        const informationSection = $('informationSection');
+        const infoGrid = $('infoGrid');
+        const infoLoader = $('infoLoader');
 
         const pagination = $('pagination');
         const prevPageBtn = $('prevPageBtn');
@@ -1006,166 +707,68 @@
         
         const videoContainer = $('videoContainer');
         const clickShield = $('clickShield');
-        const adBlockToggle = $('adBlockToggle');
         const fullscreenBtn = $('fullscreenBtn');
-        const externalPlayerBtn = $('externalPlayerBtn');
         const floatingExitBtn = $('floatingExitBtn');
         
-        let isAdShieldActive = false; 
-        let isAppInitialized = false;
-
-        function getAppState() {
-            return { 
-                type: currentType, 
-                category: currentCategory, 
-                genre: currentGenre || '', 
-                query: currentQuery || '', 
-                page: currentPage || 1, 
-                watchlist: !!isWatchlistView 
-            };
-        }
-
-        function initHistory() {
-            if (isAppInitialized) return;
-            isAppInitialized = true;
-            try {
-                history.replaceState({ writerstm: 'app', app: getAppState() }, '');
-            } catch(e) {}
-        }
-
-        function pushStateChange() {
-            if (!isAppInitialized) return;
-            try {
-                history.pushState({ writerstm: 'app', app: getAppState() }, '');
-            } catch (err) {}
-        }
-
-        async function applyAppState(s) {
-            currentType = s.type; 
-            currentCategory = s.category; 
-            currentGenre = s.genre || '';
-            currentQuery = s.query || ''; 
-            currentPage = s.page || 1; 
-            isWatchlistView = !!s.watchlist;
-
-            tabBtns.forEach(b => {
-                if (b.dataset.type === currentType) {
-                    b.classList.add('bg-theme-accent', 'text-theme-accent-text', 'shadow-sm'); 
-                    b.classList.remove('text-theme-muted', 'hover:bg-theme-hover', 'hover:text-theme-text');
-                } else {
-                    b.classList.remove('bg-theme-accent', 'text-theme-accent-text', 'shadow-sm'); 
-                    b.classList.add('text-theme-muted', 'hover:bg-theme-hover', 'hover:text-theme-text');
-                }
-            });
-
-            let phKey = "searchMovies";
-            if(currentType === 'tv') phKey = "searchTv";
-            if(currentType === 'anime') phKey = "searchAnime";
-            if(currentType === 'archive') phKey = "searchArchive";
-            if (searchInput) { searchInput.placeholder = t(phKey); searchInput.value = currentQuery; }
-            if (mobileSearchInput) { mobileSearchInput.placeholder = t(phKey); mobileSearchInput.value = currentQuery; }
-
-            if (categoryFilter) { 
-                categoryFilter.value = currentCategory; 
-                categoryFilter.disabled = isWatchlistView; 
-                categoryFilter.classList.toggle('opacity-50', isWatchlistView); 
-            }
-            if (genreFilter) { 
-                genreFilter.disabled = isWatchlistView; 
-                genreFilter.classList.toggle('opacity-50', isWatchlistView); 
-            }
-            if (clearWatchlistBtn) clearWatchlistBtn.classList.toggle('hidden', !isWatchlistView);
-            if (pagination) pagination.classList.toggle('hidden', isWatchlistView);
-            if (sectionTitle && isWatchlistView) sectionTitle.textContent = t('myWatchlist');
-
-            await loadGenres();
-            if (genreFilter) genreFilter.value = currentGenre;
-
-            updateWatchlistUI();
-            if (isWatchlistView) {
-                renderGrid(watchlist);
-                renderWatchHistory(); 
-                if (showcaseSection) showcaseSection.classList.add('hidden');
-            } else {
-                fetchMedia();
-            }
-        }
-
-        function navigateApp() {
-            applyAppState(getAppState());
-            pushStateChange();
-        }
-        
-        const serverSelect = $('serverSelect');
-        const audioSubBtn = $('audio-sub');
-        const audioDubBtn = $('audio-dub');
-        const dubLangSelect = $('dub-lang-select');
-        
-        const tvSidebar = $('tvSidebar');
-        const seasonSelect = $('seasonSelect');
-        const episodeList = $('episodeList');
-
-        function safeStorageAccess() {
-            try {
-                localStorage.setItem('__test__', '__test__');
-                localStorage.removeItem('__test__');
-                return true;
-            } catch(e) { return false; }
-        }
+        const navBtns = document.querySelectorAll('.nav-btn');
 
         document.addEventListener('DOMContentLoaded', () => {
-            try {
-                if(safeStorageAccess()) {
-                    const savedLang = localStorage.getItem('writerstm_language');
-                    if(savedLang && translations[savedLang]) {
-                        currentLang = savedLang;
-                    }
-                    const savedTheme = localStorage.getItem('writerstm_theme');
-                    if(savedTheme) {
-                        applyTheme(savedTheme);
-                    } else {
-                        applyTheme('dark');
-                    }
-                }
-                setLanguage(currentLang);
-
-                loadWatchlist();
-                loadWatchHistory(); 
-                loadGenres();
-                fetchMedia();
-                initHistory();
-                
-                if(safeStorageAccess()) {
-                    const pref = localStorage.getItem('writerstm_preferred_server');
-                    if (pref && serverSelect) {
-                        serverSelect.value = pref;
-                    }
-                }
-            } catch (err) {
-                console.error("Initialization Error:", err);
-                if (mediaGrid) {
-                    mediaGrid.innerHTML = `<div class="col-span-full text-center text-theme-accent py-10 bg-theme-accent/10 rounded-xl border border-theme-accent/20"><i class="ph-fill ph-warning-circle text-4xl mb-3 block mx-auto"></i><p class="font-semibold text-lg">Failed to initialize application.</p><p class="text-sm mt-2 opacity-80">This might be due to strict browser privacy settings or a blocked script.</p></div>`;
-                }
-            }
+            setLanguage(currentLang);
+            applyTheme('dark');
+            loadProfile();
+            loadWatchlist();
+            loadWatchHistory(); 
+            navigateApp();
         });
 
-        if (langSelect) {
-            langSelect.addEventListener('change', (e) => {
-                setLanguage(e.target.value);
-            });
+        // Profile Handling
+        function loadProfile() {
+            try {
+                const storedName = localStorage.getItem('writerstm_profile_name');
+                const storedImg = localStorage.getItem('writerstm_profile_img');
+                if(storedName) {
+                    profileName.textContent = storedName;
+                    editProfileName.value = storedName;
+                }
+                if(storedImg) {
+                    profileImage.src = storedImg;
+                    dropdownProfileImg.src = storedImg;
+                }
+            } catch(e){}
         }
-        
-        if (settingsBtn && settingsDropdown) {
-            settingsBtn.addEventListener('click', (e) => {
+
+        if (profileBtn && profileDropdown) {
+            profileBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                settingsDropdown.classList.toggle('hidden');
+                profileDropdown.classList.toggle('hidden');
             });
-            if (closeSettingsBtn) {
-                closeSettingsBtn.addEventListener('click', () => settingsDropdown.classList.add('hidden'));
-            }
             document.addEventListener('click', (e) => {
-                if (!settingsDropdown.contains(e.target) && e.target !== settingsBtn) {
-                    settingsDropdown.classList.add('hidden');
+                if (!profileDropdown.contains(e.target) && e.target !== profileBtn) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+            
+            editProfileName.addEventListener('change', (e) => {
+                const newName = e.target.value || 'Guest';
+                profileName.textContent = newName;
+                try { localStorage.setItem('writerstm_profile_name', newName); } catch(err){}
+            });
+
+            changeProfileImgBtn.addEventListener('click', () => {
+                profileImageInput.click();
+            });
+
+            profileImageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const res = e.target.result;
+                        profileImage.src = res;
+                        dropdownProfileImg.src = res;
+                        try { localStorage.setItem('writerstm_profile_img', res); } catch(err){}
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
         }
@@ -1175,262 +778,68 @@
                 applyTheme(btn.dataset.themeValue);
             });
         });
-        
-        if (serverSelect) {
-            serverSelect.addEventListener('change', (e) => {
-                if (safeStorageAccess()) {
-                    localStorage.setItem('writerstm_preferred_server', e.target.value);
-                }
-                currentDirectUrl = null; 
-                updateStreamIframe();
-            });
-        }
-        
-        function loadWatchlist() {
-            if (safeStorageAccess()) {
-                try {
-                    const stored = localStorage.getItem('writerstm_watchlist');
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if(Array.isArray(parsed)) watchlist = parsed;
-                    }
-                } catch(e) { watchlist = []; }
-            }
-            updateWatchlistUI();
-        }
 
-        function saveWatchlist() {
-            if (safeStorageAccess()) localStorage.setItem('writerstm_watchlist', JSON.stringify(watchlist));
-        }
-        
-        function loadWatchHistory() {
-            if (safeStorageAccess()) {
-                try {
-                    const stored = localStorage.getItem('writerstm_history');
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if(Array.isArray(parsed)) watchHistory = parsed;
-                    }
-                } catch(e) { watchHistory = []; }
-            }
-            renderWatchHistory();
-        }
-
-        function saveWatchHistory() {
-            if (safeStorageAccess()) localStorage.setItem('writerstm_history', JSON.stringify(watchHistory));
-        }
-
-        function addToHistory(item, season = null, episode = null) {
-            if(!item) return;
-            watchHistory = watchHistory.filter(h => h.id !== item.id);
-            
-            const historyItem = {
-                ...item,
-                resumeSeason: season,
-                resumeEpisode: episode,
-                lastWatched: Date.now()
-            };
-            
-            watchHistory.unshift(historyItem);
-            if(watchHistory.length > 20) watchHistory.pop(); 
-            
-            saveWatchHistory();
-            renderWatchHistory();
-        }
-
-        let historyClearTimeout;
-        if (clearHistoryBtn) {
-            clearHistoryBtn.addEventListener('click', () => {
-                const confirmMsg = t('confirmClear');
-                const defaultMsg = t('clearHistory');
-                if (clearHistoryBtn.textContent === confirmMsg) {
-                    watchHistory = [];
-                    saveWatchHistory();
-                    renderWatchHistory();
-                    clearHistoryBtn.textContent = defaultMsg;
-                    clearTimeout(historyClearTimeout);
-                } else {
-                    clearHistoryBtn.textContent = confirmMsg;
-                    historyClearTimeout = setTimeout(() => {
-                        clearHistoryBtn.textContent = defaultMsg;
-                    }, 3000);
-                }
-            });
-        }
-
-        function renderWatchHistory() {
-            if (!continueWatchingSection || !continueWatchingList) return;
-            
-            if (isWatchlistView || currentQuery !== '') {
-                continueWatchingSection.classList.add('hidden');
-                return;
-            }
-
-            const filteredHistory = watchHistory.filter(h => (h.originalType || h.type) === currentType);
-            
-            if (filteredHistory.length === 0) {
-                continueWatchingSection.classList.add('hidden');
-                return;
-            }
-            
-            continueWatchingSection.classList.remove('hidden');
-            continueWatchingList.innerHTML = '';
-
-            const fragment = document.createDocumentFragment();
-            filteredHistory.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "group cursor-pointer flex-none w-36 sm:w-44 flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-theme-accent snap-start transition-transform hover:-translate-y-1 duration-200";
-                card.tabIndex = 0;
-                
-                let progressText = t('movie');
-                if (item.type === 'archive') progressText = t('publicDomain');
-                else if (item.type === 'tv' || item.type === 'anime') progressText = `S${item.resumeSeason || 1} E${item.resumeEpisode || 1}`;
-
-                card.innerHTML = `
-                    <div class="relative aspect-[2/3] overflow-hidden rounded-xl bg-theme-panel border border-theme-border group-hover:border-theme-accent transition-colors">
-                        <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
-                        <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i class="ph-fill ph-play text-4xl sm:text-5xl text-theme-accent drop-shadow-[0_0_10px_rgb(var(--theme-accent))]"></i>
-                        </div>
-                        <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2 pt-6">
-                            <span class="text-[10px] sm:text-xs font-bold text-theme-accent-text bg-theme-accent px-1.5 py-0.5 rounded shadow-sm inline-block">${progressText}</span>
-                        </div>
-                    </div>
-                    <div class="px-1">
-                        <h3 class="font-semibold text-xs sm:text-sm text-theme-text line-clamp-1 group-hover:text-theme-accent">${item.title}</h3>
-                    </div>
-                `;
-                
-                card.onclick = () => openPlayer(item, true); 
-                card.addEventListener('keydown', (e) => { if(e.key === 'Enter') card.click(); });
-                
-                fragment.appendChild(card);
-            });
-            continueWatchingList.appendChild(fragment);
-        }
-
-        function toggleBookmark(mediaItem, event) {
-            if(event) event.stopPropagation();
-            const index = watchlist.findIndex(item => item.id === mediaItem.id && item.type === mediaItem.type);
-            if (index > -1) watchlist.splice(index, 1);
-            else watchlist.push(mediaItem);
-            
-            saveWatchlist();
-            if (isWatchlistView) renderGrid(watchlist);
-            else {
-                const gridBtn = document.querySelector(`.grid-bookmark[data-id="${mediaItem.id}"]`);
-                if(gridBtn) {
-                    if (index > -1) gridBtn.classList.remove('active');
-                    else gridBtn.classList.add('active');
-                }
-            }
-            updateWatchlistUI();
-            if(currentMediaObj && currentMediaObj.id === mediaItem.id) updateModalBookmarkBtn();
-            if(currentShowcaseItem && currentShowcaseItem.id === mediaItem.id) updateShowcaseBookmarkBtn(mediaItem);
-        }
-        
-        function updateShowcaseBookmarkBtn(item) {
-            const btn = $('showcaseBookmarkBtn');
-            if(!btn) return;
-            const isSaved = watchlist.some(w => w.id === item.id && w.type === item.type);
-            btn.innerHTML = isSaved ? `<i class="ph-fill ph-bookmark text-xl text-theme-accent"></i>` : `<i class="ph ph-bookmark text-xl"></i>`;
-        }
-        
-        function updateWatchlistUI() {
-            if (!viewWatchlistBtn) return;
-            const count = watchlist.length;
-            const labelText = t('watchlist');
-            viewWatchlistBtn.innerHTML = `
-                <i class="ph-fill ph-bookmarks text-xl ${isWatchlistView ? 'text-theme-accent drop-shadow-[0_0_5px_rgb(var(--theme-accent))]' : ''}"></i>
-                <span class="hidden sm:inline text-sm font-medium ${isWatchlistView ? 'text-theme-text' : ''}">${labelText} ${count > 0 ? `(${count})` : ''}</span>
-            `;
-        }
-        
-        if (viewWatchlistBtn) {
-            viewWatchlistBtn.addEventListener('click', () => {
-                isWatchlistView = !isWatchlistView;
-                currentPage = 1;
-                navigateApp();
-            });
-        }
-
-        let watchlistClearTimeout;
-        if (clearWatchlistBtn) {
-            clearWatchlistBtn.addEventListener('click', () => {
-                const confirmMsg = t('confirmClear');
-                const defaultMsg = t('clearAll');
-                if (clearWatchlistBtn.textContent === confirmMsg) {
-                    watchlist = []; 
-                    saveWatchlist(); 
-                    renderGrid(watchlist); 
-                    updateWatchlistUI();
-                    clearWatchlistBtn.textContent = defaultMsg;
-                    clearTimeout(watchlistClearTimeout);
-                } else {
-                    clearWatchlistBtn.textContent = confirmMsg;
-                    watchlistClearTimeout = setTimeout(() => {
-                        clearWatchlistBtn.textContent = defaultMsg;
-                    }, 3000);
-                }
-            });
-        }
-
-        async function loadGenres() {
-            if (!genreFilter) return;
-            if(currentType === 'archive') {
-                populateGenreSelect([
-                    {id: "collection:PublicDomainFilms", name: "Public Domain Films"},
-                    {id: "collection:feature_films", name: "Feature Films"},
-                    {id: "collection:Prelinger", name: "Prelinger Archive"},
-                    {id: "collection:classic_tv", name: "Classic TV"},
-                    {id: "collection:SciFi_Horror", name: "Sci-Fi & Horror"},
-                    {id: "collection:Comedy_Films", name: "Comedy Films"}
-                ]);
-                return;
-            }
-            if(currentType === 'anime') {
-                populateGenreSelect([
-                    {id: "Action", name: "Action"}, {id: "Adventure", name: "Adventure"}, 
-                    {id: "Comedy", name: "Comedy"}, {id: "Drama", name: "Drama"}, 
-                    {id: "Fantasy", name: "Fantasy"}, {id: "Horror", name: "Horror"},
-                    {id: "Romance", name: "Romance"}, {id: "Sci-Fi", name: "Sci-Fi"}
-                ]);
-            } else {
-                try {
-                    const res = await fetch(`https://api.themoviedb.org/3/genre/${currentType}/list?api_key=${TMDB_API_KEY}`);
-                    const data = await res.json();
-                    if(data && data.genres) populateGenreSelect(data.genres);
-                } catch(e) { console.error("Failed to load genres:", e); }
-            }
-        }
-        
-        function populateGenreSelect(genres) {
-            if (!genreFilter) return;
-            genreFilter.innerHTML = `<option value="">${t('allGenres')}</option>`;
-            genres.forEach(g => {
-                const opt = document.createElement('option');
-                opt.value = g.id || g.name; opt.textContent = g.name;
-                if(currentGenre == opt.value) opt.selected = true;
-                genreFilter.appendChild(opt);
-            });
-        }
-
-        tabBtns.forEach(btn => {
+        // Navigation Handling
+        navBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                currentType = e.target.dataset.type;
-                isWatchlistView = false;
+                e.preventDefault();
+                navBtns.forEach(b => b.classList.remove('active'));
+                
+                // Keep center button styled correctly
+                if(btn.classList.contains('center-btn')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.add('active');
+                }
+
+                currentNavType = btn.dataset.type;
+                isWatchlistView = (currentNavType === 'save');
                 currentQuery = '';
-                currentGenre = ''; currentPage = 1;
+                currentPage = 1;
+                
+                if (searchInput) searchInput.value = '';
+                if (mobileSearchInput) mobileSearchInput.value = '';
+
                 navigateApp();
             });
         });
 
-        if (categoryFilter) categoryFilter.addEventListener('change', (e) => { currentCategory = e.target.value; currentPage = 1; navigateApp(); });
-        if (genreFilter) genreFilter.addEventListener('change', (e) => { currentGenre = e.target.value; currentPage = 1; navigateApp(); });
+        function navigateApp() {
+            mediaGrid.classList.remove('hidden');
+            informationSection.classList.add('hidden');
+            showcaseSection.classList.add('hidden');
+            continueWatchingSection.classList.add('hidden');
+            pagination.classList.add('hidden');
+            clearWatchlistBtn.classList.add('hidden');
+
+            if (currentNavType === 'save') {
+                sectionTitle.textContent = "My Watchlist";
+                clearWatchlistBtn.classList.remove('hidden');
+                renderGrid(watchlist);
+            } else if (currentNavType === 'info') {
+                mediaGrid.classList.add('hidden');
+                sectionTitle.textContent = "Release Information";
+                informationSection.classList.remove('hidden');
+                fetchUpcomingInfo();
+            } else {
+                currentType = currentNavType;
+                let title = currentType === 'home' ? "Home (Mixed Content)" : currentType === 'movie' ? "Movies" : "TV Series & Anime";
+                if(currentQuery) title = `Search: "${currentQuery}"`;
+                sectionTitle.textContent = title;
+                fetchMedia();
+            }
+        }
 
         const handleSearch = (e) => {
             if(e.key === 'Enter') {
-                currentQuery = e.target.value; currentPage = 1; isWatchlistView = false;
+                currentQuery = e.target.value; 
+                currentPage = 1; 
+                if(currentNavType === 'save' || currentNavType === 'info') {
+                    // Force switch to home for global search if they are on save/info
+                    navBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelector('.nav-btn[data-type="home"]').classList.add('active');
+                    currentNavType = 'home';
+                }
                 navigateApp();
             }
         };
@@ -1440,169 +849,159 @@
         if (prevPageBtn) prevPageBtn.addEventListener('click', () => { if(currentPage > 1) { currentPage--; navigateApp(); } });
         if (nextPageBtn) nextPageBtn.addEventListener('click', () => { currentPage++; navigateApp(); });
 
-        function updateSectionTitle() {
-            if(isWatchlistView || !sectionTitle) return;
-            let title = '';
-            if(currentQuery) title = `${t('searchMovies').replace('...', '')}: "${currentQuery}"`;
-            else {
-                let catText = categoryFilter && categoryFilter.options.length > 0 ? categoryFilter.options[categoryFilter.selectedIndex].text : '';
-                let typeText = currentType === 'tv' ? t('tabTv') : currentType === 'anime' ? t('tabAnime') : currentType === 'archive' ? t('tabArchive') : t('tabMovies');
-                title = `${catText} ${typeText}`;
-                if(currentGenre && genreFilter && genreFilter.selectedIndex > 0) {
-                    let genText = genreFilter.options[genreFilter.selectedIndex].text;
-                    title = `${genText} ${typeText} - ${catText}`;
+        async function fetchUpcomingInfo() {
+            infoGrid.innerHTML = '';
+            infoLoader.classList.remove('hidden');
+            try {
+                // Fetch upcoming movies and TV
+                const mRes = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${TMDB_API_KEY}&page=1`);
+                const mData = await mRes.json();
+                
+                const tRes = await fetch(`https://api.themoviedb.org/3/tv/on_the_air?api_key=${TMDB_API_KEY}&page=1`);
+                const tData = await tRes.json();
+
+                // Fetch upcoming anime (Kitsu)
+                const aRes = await fetch(`https://kitsu.io/api/edge/anime?filter[status]=current&sort=-userCount&page[limit]=10`);
+                const aData = await aRes.json();
+
+                let combined = [];
+                if(mData.results) combined.push(...mData.results.map(r => ({...r, infoType: 'Movie', date: r.release_date})));
+                if(tData.results) combined.push(...tData.results.map(r => ({...r, infoType: 'TV Series', date: r.first_air_date})));
+                if(aData.data) {
+                    combined.push(...aData.data.map(r => ({
+                        title: r.attributes.canonicalTitle,
+                        overview: r.attributes.synopsis,
+                        poster_path: r.attributes.posterImage?.small,
+                        date: r.attributes.startDate,
+                        infoType: 'Anime',
+                        status: r.attributes.status
+                    })));
                 }
-            }
-            sectionTitle.textContent = title;
-        }
 
-        function updateShowcase(rawItem, isRefresh = false) {
-            if (!showcaseSection) return;
-            if (!rawItem) {
-                showcaseSection.classList.add('hidden');
-                currentShowcaseItem = null;
-                return;
-            }
-            
-            const item = formatMediaItem(rawItem);
-            currentShowcaseItem = item;
+                // Sort by date roughly
+                combined = combined.filter(c => c.date).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 30);
+                
+                infoLoader.classList.add('hidden');
+                
+                if(combined.length === 0) {
+                    infoGrid.innerHTML = `<p class="col-span-full text-theme-muted">No upcoming information available right now.</p>`;
+                    return;
+                }
 
-            // Enforce a valid image for hero section
-            if (!item.backdrop) {
-                showcaseSection.classList.add('hidden');
-                return;
-            }
+                combined.forEach(item => {
+                    const title = item.title || item.name;
+                    const poster = item.poster_path ? (item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w200${item.poster_path}`) : 'https://placehold.co/200x300/1e1e1e/ffffff?text=No+Image';
+                    
+                    const card = document.createElement('div');
+                    card.className = "bg-theme-panel border border-theme-border rounded-xl p-4 flex gap-4 hover:border-theme-accent transition-colors";
+                    card.innerHTML = `
+                        <img src="${poster}" alt="${title}" class="w-20 h-28 object-cover rounded-lg">
+                        <div class="flex-1 flex flex-col justify-center">
+                            <span class="text-[10px] uppercase font-bold text-theme-accent mb-1 tracking-wider">${item.infoType}</span>
+                            <h3 class="font-bold text-theme-text text-sm sm:text-base line-clamp-2">${title}</h3>
+                            <p class="text-xs text-theme-muted mt-2"><i class="ph ph-calendar-blank"></i> Release Date: <span class="text-theme-text font-medium">${item.date}</span></p>
+                            ${item.status === 'current' ? `<p class="text-xs text-green-400 mt-1">Currently Airing</p>` : ''}
+                        </div>
+                    `;
+                    infoGrid.appendChild(card);
+                });
 
-            showcaseSection.classList.remove('hidden');
-            
-            $('showcaseBackdrop').style.backgroundImage = `url('${item.backdrop}')`;
-            $('showcaseTitle').textContent = item.title;
-            $('showcaseOverview').textContent = item.overview;
-            $('showcaseRating').innerHTML = `<i class="ph-fill ph-star text-yellow-400"></i> ${item.rating}`;
-            
-            let itemTypeLabel = t('movie');
-            if (item.type === 'archive') itemTypeLabel = t('publicDomain');
-            else if (item.type === 'tv' || item.type === 'anime') itemTypeLabel = t('tabTv');
-            $('showcaseType').textContent = itemTypeLabel;
-
-            updateShowcaseBookmarkBtn(item);
-            
-            if(!isRefresh) {
-                $('showcasePlayBtn').onclick = () => openPlayer(item);
-                $('showcaseBookmarkBtn').onclick = (e) => toggleBookmark(item, e);
+            } catch(e) {
+                infoLoader.classList.add('hidden');
+                infoGrid.innerHTML = `<p class="col-span-full text-red-500">Failed to load information.</p>`;
             }
         }
 
         async function fetchMedia() {
-            if(isWatchlistView || !mediaGrid) return;
             mediaGrid.innerHTML = ''; 
-            if (mainLoader) mainLoader.classList.remove('hidden'); 
-            if (pagination) pagination.classList.add('hidden');
-            updateSectionTitle();
-            renderWatchHistory(); 
+            mainLoader.classList.remove('hidden'); 
             
-            let url = '';
-            if (currentType === 'archive') {
-                let q = currentQuery ? currentQuery : 'mediatype:movies AND collection:(feature_films OR PublicDomainFilms)';
-                if (currentGenre) q += ` AND ${currentGenre}`;
-                if (!currentQuery && currentCategory === 'top_rated') q = `mediatype:movies AND ${currentGenre ? currentGenre + ' AND ' : ''}subject:(classic OR award)`;
-                url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&fl[]=title&fl[]=year&fl[]=description&rows=21&page=${currentPage}&output=json`;
-            } else if (currentType === 'anime') {
-                let base = `https://kitsu.io/api/edge/anime?page[limit]=20&page[offset]=${(currentPage-1)*20}`;
-                if (currentQuery) url = `${base}&filter[text]=${encodeURIComponent(currentQuery)}`;
-                else {
-                    if (currentGenre) base += `&filter[categories]=${encodeURIComponent(currentGenre)}`;
-                    if (currentCategory === 'trending') url = currentGenre ? `${base}&sort=-userCount` : `https://kitsu.io/api/edge/trending/anime?page[limit]=20`;
-                    else if (currentCategory === 'popular') url = `${base}&sort=-userCount`;
-                    else url = `${base}&sort=-averageRating`;
-                }
-            } else {
-                if (currentQuery) url = `https://api.themoviedb.org/3/search/${currentType}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
-                else {
-                    let endpoint = currentCategory === 'trending' ? `trending/${currentType}/week` : currentCategory === 'popular' ? `${currentType}/popular` : `${currentType}/top_rated`;
-                    url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&page=${currentPage}`;
-                    if(currentGenre) url += `&with_genres=${currentGenre}`;
-                }
-            }
+            let results = [];
+            let totalPages = 1;
 
             try {
-                const response = await fetch(url);
-                const data = await response.json();
-                let results = [], totalPages = 1;
-                
-                if (currentType === 'archive') {
-                    results = (data.response && data.response.docs) || [];
-                    if(data.response && data.response.numFound) totalPages = Math.min(Math.ceil(data.response.numFound / 21), 100);
-                } else if (currentType === 'anime') {
-                    results = data.data || [];
-                    if(data.meta && data.meta.count) totalPages = Math.ceil(data.meta.count / 20);
-                } else {
-                    results = data.results || [];
-                    totalPages = data.total_pages || 1;
-                }
-                
-                if (mainLoader) mainLoader.classList.add('hidden');
-                
-                // Show hero / showcase if we're on page 1 without an active search query
-                if (currentPage === 1 && !isWatchlistView && !currentQuery && results.length > 0) {
-                    let showcaseItem = results[0];
-                    if(currentType !== 'archive' && currentType !== 'anime') {
-                        showcaseItem = results.find(r => r.backdrop_path) || results[0];
+                if (currentType === 'home' || currentType === 'movie' || currentType === 'tv_anime') {
+                    if (currentQuery) {
+                        // Global search
+                        const mRes = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`);
+                        const mData = await mRes.json();
+                        
+                        const tRes = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`);
+                        const tData = await tRes.json();
+
+                        if (currentType === 'home') {
+                            results = [...(mData.results||[]).map(r=>({...r, type:'movie'})), ...(tData.results||[]).map(r=>({...r, type:'tv'}))];
+                            // Interleave results
+                            results.sort(() => Math.random() - 0.5); 
+                            totalPages = Math.max(mData.total_pages || 1, tData.total_pages || 1);
+                        } else if (currentType === 'movie') {
+                            results = (mData.results||[]).map(r=>({...r, type:'movie'}));
+                            totalPages = mData.total_pages || 1;
+                        } else if (currentType === 'tv_anime') {
+                            results = (tData.results||[]).map(r=>({...r, type:'tv'}));
+                            totalPages = tData.total_pages || 1;
+                        }
+                    } else {
+                        // Trending/Popular
+                        if (currentType === 'home') {
+                            const mRes = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&page=${currentPage}`);
+                            const tRes = await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_API_KEY}&page=${currentPage}`);
+                            const mData = await mRes.json();
+                            const tData = await tRes.json();
+                            results = [...(mData.results||[]).map(r=>({...r, type:'movie'})), ...(tData.results||[]).map(r=>({...r, type:'tv'}))];
+                            results.sort(() => Math.random() - 0.5);
+                            totalPages = Math.max(mData.total_pages || 1, tData.total_pages || 1);
+                        } else if (currentType === 'movie') {
+                            const mRes = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_API_KEY}&page=${currentPage}`);
+                            const mData = await mRes.json();
+                            results = (mData.results||[]).map(r=>({...r, type:'movie'}));
+                            totalPages = mData.total_pages || 1;
+                        } else if (currentType === 'tv_anime') {
+                            const tRes = await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_API_KEY}&page=${currentPage}`);
+                            const tData = await tRes.json();
+                            results = (tData.results||[]).map(r=>({...r, type:'tv'}));
+                            totalPages = tData.total_pages || 1;
+                        }
                     }
+                }
+
+                mainLoader.classList.add('hidden');
+                
+                if (currentPage === 1 && !currentQuery && results.length > 0 && currentType === 'home') {
+                    let showcaseItem = results.find(r => r.backdrop_path) || results[0];
                     updateShowcase(showcaseItem);
                 } else {
-                    if (showcaseSection) showcaseSection.classList.add('hidden');
-                    currentShowcaseItem = null;
+                    showcaseSection.classList.add('hidden');
                 }
                 
                 renderGrid(results, true);
                 
-                if(totalPages > 1 && !isWatchlistView && pagination) {
+                if(totalPages > 1) {
                     pagination.classList.remove('hidden');
-                    if (pageIndicator) pageIndicator.textContent = t('pageOf', { page: currentPage, total: totalPages });
-                    if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-                    if (nextPageBtn) nextPageBtn.disabled = currentPage >= totalPages;
+                    pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+                    prevPageBtn.disabled = currentPage === 1;
+                    nextPageBtn.disabled = currentPage >= totalPages;
                 }
             } catch (error) {
-                console.error("Fetch error", error); 
-                if (mainLoader) mainLoader.classList.add('hidden');
-                mediaGrid.innerHTML = `<p class="col-span-full text-center text-theme-accent py-10"><i class="ph-fill ph-warning-circle text-2xl mb-2"></i><br>Error loading media. Please try again.</p>`;
-                if (showcaseSection) showcaseSection.classList.add('hidden');
+                mainLoader.classList.add('hidden');
+                mediaGrid.innerHTML = `<p class="col-span-full text-center text-theme-accent">Error loading media. Please try again.</p>`;
             }
         }
 
         function formatMediaItem(rawItem) {
-            let item = { ...rawItem, originalType: currentType };
-            if (rawItem.originalType) return rawItem;
-            if (currentType === 'archive') {
-                item.id = rawItem.identifier; item.type = 'archive'; item.originalType = 'archive';
-                item.title = rawItem.title || 'Untitled';
-                item.poster = `https://archive.org/services/img/${rawItem.identifier}`;
-                item.backdrop = item.poster; 
-                item.overview = rawItem.description || "Public domain media from the Internet Archive.";
-                item.year = rawItem.year || 'N/A'; item.rating = 'N/A';
-            } else if (currentType === 'anime') {
-                item.id = rawItem.id; item.type = 'anime';
-                item.title = rawItem?.attributes?.titles?.en || rawItem?.attributes?.titles?.en_jp || rawItem?.attributes?.canonicalTitle || "Unknown Anime";
-                item.poster = rawItem?.attributes?.posterImage?.large || '';
-                item.backdrop = rawItem?.attributes?.coverImage?.large || rawItem?.attributes?.coverImage?.original || item.poster;
-                item.overview = rawItem?.attributes?.synopsis || "No description available.";
-                item.year = rawItem?.attributes?.startDate ? rawItem.attributes.startDate.split('-')[0] : 'N/A';
-                item.rating = rawItem?.attributes?.averageRating ? (parseFloat(rawItem.attributes.averageRating) / 10).toFixed(1) : 'N/A';
-            } else {
-                item.id = rawItem.id; item.type = currentType;
-                item.title = rawItem.title || rawItem.name;
-                item.poster = rawItem.poster_path ? `https://image.tmdb.org/t/p/w500${rawItem.poster_path}` : '';
-                item.backdrop = rawItem.backdrop_path ? `https://image.tmdb.org/t/p/original${rawItem.backdrop_path}` : item.poster;
-                item.overview = rawItem.overview || "No description available.";
-                item.year = (rawItem.release_date || rawItem.first_air_date || 'N/A').split('-')[0];
-                item.rating = rawItem.vote_average ? rawItem.vote_average.toFixed(1) : 'N/A';
-            }
+            let item = { ...rawItem };
+            item.id = rawItem.id; 
+            item.type = rawItem.type || (rawItem.name ? 'tv' : 'movie'); // fallback
+            item.title = rawItem.title || rawItem.name;
+            item.poster = rawItem.poster_path ? `https://image.tmdb.org/t/p/w500${rawItem.poster_path}` : '';
+            item.backdrop = rawItem.backdrop_path ? `https://image.tmdb.org/t/p/original${rawItem.backdrop_path}` : item.poster;
+            item.overview = rawItem.overview || "No description available.";
+            item.year = (rawItem.release_date || rawItem.first_air_date || 'N/A').split('-')[0];
+            item.rating = rawItem.vote_average ? rawItem.vote_average.toFixed(1) : 'N/A';
             return item;
         }
 
         function renderGrid(items, needsFormatting = false) {
-            if (!mediaGrid) return;
             mediaGrid.innerHTML = '';
             if (!items || items.length === 0) { mediaGrid.innerHTML = `<p class="col-span-full text-center text-theme-muted py-10">${t('noResults')}</p>`; return; }
             
@@ -1613,512 +1012,190 @@
                 if(!item.poster) return;
                 const isSaved = watchlist.some(w => w.id === item.id && w.type === item.type);
                 const card = document.createElement('div');
-                card.className = "group cursor-pointer flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-theme-accent focus-visible:ring-offset-4 focus-visible:ring-offset-theme-bg transition-shadow";
-                card.tabIndex = 0; 
-                card.addEventListener('keydown', (e) => { if(e.key === 'Enter') openPlayer(item); });
+                card.className = "group cursor-pointer flex flex-col gap-2 relative rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-theme-accent transition-shadow";
                 card.onclick = () => openPlayer(item);
 
-                let itemTypeLabel = t('movie');
-                if (item.type === 'archive') itemTypeLabel = t('publicDomain');
-                else if (item.type === 'tv' || item.type === 'anime') itemTypeLabel = t('tabTv');
+                let itemTypeLabel = item.type === 'tv' ? 'TV Series' : 'Movie';
 
                 card.innerHTML = `
                     <div class="relative aspect-[2/3] overflow-hidden rounded-xl bg-theme-panel border border-theme-border group-hover:border-theme-accent transition-colors">
                         <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
-                            <i class="ph-fill ph-play-circle text-5xl sm:text-6xl text-theme-accent drop-shadow-[0_0_10px_rgb(var(--theme-accent))] mb-2"></i>
+                            <i class="ph-fill ph-play-circle text-5xl text-theme-accent mb-2"></i>
                         </div>
                         <div class="absolute top-2 w-full px-2 flex justify-between items-start pointer-events-none">
-                            <div class="bg-black/80 backdrop-blur border border-theme-border text-white text-xs sm:text-sm font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                            <div class="bg-black/80 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
                                 <i class="ph-fill ph-star text-theme-accent"></i> ${item.rating}
                             </div>
-                            <button class="grid-bookmark bookmark-btn pointer-events-auto p-2 sm:p-2.5 bg-black/80 border border-theme-border rounded-md text-gray-300 hover:text-white ${isSaved ? 'active' : ''}" data-id="${item.id}" tabindex="0">
-                                <i class="ph ph-bookmark text-sm sm:text-base"></i>
+                            <button class="grid-bookmark bookmark-btn pointer-events-auto p-2 bg-black/80 rounded-md text-gray-300 hover:text-white ${isSaved ? 'active' : ''}" data-id="${item.id}">
+                                <i class="ph ph-bookmark text-sm"></i>
                             </button>
                         </div>
-                        ${item.type === 'anime' ? `<div class="absolute bottom-2 left-2 bg-theme-accent text-theme-accent-text text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded uppercase">Anime</div>` : ''}
-                        ${item.type === 'archive' ? `<div class="absolute bottom-2 left-2 bg-green-600 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded uppercase">Direct</div>` : ''}
+                        <div class="absolute bottom-2 right-2 bg-theme-panel text-theme-muted text-[10px] font-bold px-1.5 py-0.5 rounded shadow-md border border-theme-border">${itemTypeLabel}</div>
                     </div>
                     <div class="px-1">
-                        <h3 class="font-semibold text-sm sm:text-base text-theme-text line-clamp-1 group-hover:text-theme-accent">${item.title}</h3>
-                        <p class="text-xs sm:text-sm text-theme-muted">${item.year} &bull; ${itemTypeLabel}</p>
+                        <h3 class="font-semibold text-sm text-theme-text line-clamp-1 group-hover:text-theme-accent">${item.title}</h3>
+                        <p class="text-xs text-theme-muted">${item.year}</p>
                     </div>
                 `;
                 const btn = card.querySelector('.grid-bookmark');
-                if (btn) {
-                    btn.onclick = (e) => toggleBookmark(item, e);
-                    btn.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.stopPropagation(); toggleBookmark(item, e); } });
-                }
+                if (btn) btn.onclick = (e) => toggleBookmark(item, e);
                 fragment.appendChild(card);
             });
             mediaGrid.appendChild(fragment);
         }
-        
-        function updateModalBookmarkBtn() {
-            if(!currentMediaObj || !modalBookmarkBtn) return;
-            if(watchlist.some(w => w.id === currentMediaObj.id && w.type === currentMediaObj.type)) modalBookmarkBtn.classList.add('active');
-            else modalBookmarkBtn.classList.remove('active');
-        }
-        if (modalBookmarkBtn) modalBookmarkBtn.onclick = () => { if(currentMediaObj) toggleBookmark(currentMediaObj); };
 
-        async function getTmdbIdForAnime(animeTitle) {
+        // Bookmark & History Logic
+        function loadWatchlist() {
             try {
-                const cleanTitle = animeTitle.split(':')[0].split('-')[0].trim();
-                const searchUrl = `https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanTitle)}`;
-                const res = await fetch(searchUrl);
-                const data = await res.json();
-                if(data.results && data.results.length > 0) return data.results[0].id; 
-            } catch (e) {} return null; 
-        }
-
-        async function playArchiveItem(item) {
-            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
-            try {
-                const res = await fetch(`https://archive.org/metadata/${encodeURIComponent(item.id)}`);
-                const meta = await res.json();
-                const vids = (meta.files || []).filter(f => !f.private && /\.(mp4|webm|m4v|mov|avi|mkv)$/i.test(f.name));
-                if (!vids.length) throw new Error('no video files');
-                vids.sort((x, y) => (parseInt(y.size) || 0) - (parseInt(x.size) || 0));
-                const pick = vids.find(f => /\.mp4$/i.test(f.name)) || vids[0];
-                currentDirectUrl = `https://archive.org/download/${item.id}/${encodeURIComponent(pick.name)}`;
-                currentMediaId = item.id;
-                updateStreamIframe();
-            } catch (e) {
-                if (playerLoader) playerLoader.classList.add('hidden');
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">No direct video found</span>`;
-            }
-        }
-
-        async function openPlayer(item, fromHistory = false) {
-            if (!playerModal) return;
-            currentMediaObj = item; updateModalBookmarkBtn(); currentDirectUrl = null;
-            
-            if (!fromHistory) {
-                const histItem = watchHistory.find(h => h.id === item.id);
-                if (histItem && (item.type === 'tv' || item.type === 'anime' || item.originalType === 'tv' || item.originalType === 'anime')) {
-                    currentSeason = histItem.resumeSeason || 1;
-                    currentEpisode = histItem.resumeEpisode || 1;
-                } else {
-                    currentSeason = 1;
-                    currentEpisode = 1;
-                }
-            }
-
-            if (modalTitle) modalTitle.textContent = item.title;
-            
-            playerModal.classList.remove('hidden'); 
-            
-            try {
-                history.pushState({ writerstm: 'player', modalOpen: true }, '');
+                const stored = localStorage.getItem('writerstm_watchlist');
+                if (stored) watchlist = JSON.parse(stored) || [];
             } catch(e) {}
-
-            if (videoFrame) videoFrame.classList.add('hidden');
-            if (scraperContainer) scraperContainer.classList.add('hidden'); if (videoContainer) videoContainer.classList.remove('scraper-open');
-            
-            const dMsg = document.getElementById('directPlayMsg');
-            if (dMsg) dMsg.remove();
-            
-            if (playerLoader) playerLoader.classList.remove('hidden'); 
-            if (tvSidebar) tvSidebar.classList.add('hidden');
-            if (loaderMessage) loaderMessage.textContent = t('loadingEngine');
-            if (streamStatus) {
-                streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${t('connectingStream')}`;
-                streamStatus.className = "flex items-center gap-1.5 text-theme-muted text-xs";
-            }
-
-            if (item.type === 'archive') { 
-                addToHistory(item); 
-                await playArchiveItem(item); 
-                return; 
-            }
-
-            currentMediaId = item.id;
-            let actualType = item.type;
-
-            if (item.type === 'anime') {
-                const tmdbId = await getTmdbIdForAnime(item.title);
-                if (tmdbId) { currentMediaId = tmdbId; actualType = 'tv'; } 
-                else {
-                    if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">Stream not found</span>`;
-                    if (playerLoader) playerLoader.classList.add('hidden'); return;
-                }
-            }
-
-            if (actualType === 'tv') {
-                if (tvSidebar) { tvSidebar.classList.remove('hidden'); tvSidebar.classList.add('flex'); }
-                await loadTvDetails(currentMediaId);
-            } else { 
-                addToHistory(item); 
-                updateStreamIframe(); 
-            }
         }
-
-        function closePlayerModal(fromPopState = false) {
-            if (!playerModal || playerModal.classList.contains('hidden')) return;
-            
-            playerModal.classList.add('hidden'); 
-            if (videoFrame) videoFrame.src = ''; 
-            currentMediaObj = null; 
-            currentDirectUrl = null;
-            
-            if (videoContainer) videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
-            if (fullscreenBtn) fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">${t('fullscreen')}</span>`;
-            
-            const dMsg = document.getElementById('directPlayMsg');
-            if (dMsg) dMsg.remove();
-
-            if (!fromPopState) {
-                try {
-                    if (history.state && history.state.writerstm === 'player') {
-                        history.back();
-                    }
-                } catch(e) {}
-            }
+        function saveWatchlist() {
+            try { localStorage.setItem('writerstm_watchlist', JSON.stringify(watchlist)); } catch(e){}
         }
-
-        if (closeModalBtn) {
-            closeModalBtn.addEventListener('click', () => {
-                closePlayerModal(false);
-            });
-        }
-
-        async function loadTvDetails(id) {
+        function loadWatchHistory() {
             try {
-                const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
-                const data = await res.json();
-                if (!seasonSelect) return;
-                seasonSelect.innerHTML = '';
-                
-                const seasons = data.seasons.filter(s => s.season_number > 0);
-                seasons.forEach(s => {
-                    const opt = document.createElement('option'); 
-                    opt.value = s.season_number; 
-                    opt.textContent = `${t('season')} ${s.season_number}`; 
-                    seasonSelect.appendChild(opt);
-                });
-                
-                if(seasons.length > 0) { 
-                    let seasonExists = seasons.some(s => s.season_number == currentSeason);
-                    if(!seasonExists) currentSeason = seasons[0].season_number;
-                    seasonSelect.value = currentSeason;
-                    await loadEpisodes(id, currentSeason); 
-                }
-            } catch (e) { console.error("Error loading TV details:", e); }
+                const stored = localStorage.getItem('writerstm_history');
+                if (stored) watchHistory = JSON.parse(stored) || [];
+            } catch(e) {}
         }
-
-        async function loadEpisodes(id, seasonNumber) {
-            try {
-                const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${seasonNumber}?api_key=${TMDB_API_KEY}`);
-                const data = await res.json();
-                if (!episodeList) return;
-                episodeList.innerHTML = '';
-                
-                let epExists = data.episodes.some(e => e.episode_number == currentEpisode);
-                if(!epExists) currentEpisode = data.episodes.length > 0 ? data.episodes[0].episode_number : 1;
-
-                data.episodes.forEach(ep => {
-                    const btn = document.createElement('button');
-                    btn.className = "w-full text-left rtl:text-right px-4 py-3 rounded-lg text-sm sm:text-base transition-colors border focus:outline-none focus:ring-2 focus:ring-theme-accent";
-                    
-                    if(ep.episode_number == currentEpisode) {
-                        btn.classList.add('bg-theme-accent', 'text-theme-accent-text', 'border-theme-accent'); 
-                    } else {
-                        btn.classList.add('text-theme-muted', 'border-transparent', 'hover:bg-theme-hover', 'hover:text-theme-text', 'hover:border-theme-border');
-                    }
-                    
-                    btn.innerHTML = `<span class="font-mono text-inherit opacity-75 mr-2 rtl:mr-0 rtl:ml-2">${ep.episode_number}.</span> ${ep.name}`;
-                    
-                    btn.onclick = () => {
-                        episodeList.querySelectorAll('button').forEach(b => {
-                            b.classList.remove('bg-theme-accent', 'text-theme-accent-text', 'border-theme-accent'); 
-                            b.classList.add('text-theme-muted', 'border-transparent', 'hover:bg-theme-hover', 'hover:text-theme-text', 'hover:border-theme-border');
-                        });
-                        btn.classList.add('bg-theme-accent', 'text-theme-accent-text', 'border-theme-accent'); 
-                        btn.classList.remove('text-theme-muted', 'border-transparent', 'hover:bg-theme-hover', 'hover:text-theme-text', 'hover:border-theme-border');
-
-                        currentEpisode = ep.episode_number;
-                        addToHistory(currentMediaObj, currentSeason, currentEpisode);
-                        currentDirectUrl = null; 
-                        updateStreamIframe();
-                    };
-                    episodeList.appendChild(btn);
-                });
-                
-                addToHistory(currentMediaObj, currentSeason, currentEpisode);
-                updateStreamIframe();
-            } catch (e) { console.error("Error loading episodes:", e); }
+        function toggleBookmark(mediaItem, event) {
+            if(event) event.stopPropagation();
+            const index = watchlist.findIndex(item => item.id === mediaItem.id && item.type === mediaItem.type);
+            if (index > -1) watchlist.splice(index, 1);
+            else watchlist.push(mediaItem);
+            saveWatchlist();
+            
+            if (currentNavType === 'save') renderGrid(watchlist);
+            else {
+                const gridBtn = document.querySelector(`.grid-bookmark[data-id="${mediaItem.id}"]`);
+                if(gridBtn) gridBtn.classList.toggle('active', index === -1);
+            }
         }
-
-        if (audioSubBtn && audioDubBtn && dubLangSelect) {
-            audioSubBtn.addEventListener('click', () => {
-                currentAudioType = 'sub';
-                audioSubBtn.classList.add('bg-theme-accent', 'text-theme-accent-text'); audioSubBtn.classList.remove('text-theme-muted');
-                audioDubBtn.classList.remove('bg-theme-accent', 'text-theme-accent-text'); audioDubBtn.classList.add('text-theme-muted');
-                dubLangSelect.classList.add('hidden'); updateStreamIframe();
-            });
-            audioDubBtn.addEventListener('click', () => {
-                currentAudioType = 'dub';
-                audioDubBtn.classList.add('bg-theme-accent', 'text-theme-accent-text'); audioDubBtn.classList.remove('text-theme-muted');
-                audioSubBtn.classList.remove('bg-theme-accent', 'text-theme-accent-text'); audioSubBtn.classList.add('text-theme-muted');
-                dubLangSelect.classList.remove('hidden'); updateStreamIframe();
-            });
-            dubLangSelect.addEventListener('change', () => { if(currentAudioType === 'dub') updateStreamIframe(); });
-        }
-        
-        if (seasonSelect) seasonSelect.addEventListener('change', (e) => { 
-            currentSeason = e.target.value; 
-            currentDirectUrl = null; 
-            loadEpisodes(currentMediaId, currentSeason); 
+        if(clearWatchlistBtn) clearWatchlistBtn.addEventListener('click', () => {
+            watchlist = []; saveWatchlist(); renderGrid(watchlist);
         });
 
-        if (clickShield && videoFrame) {
-            clickShield.addEventListener('click', (e) => {
-                e.preventDefault(); clickShield.classList.add('resolved');
-                setTimeout(() => { videoFrame.focus(); }, 100);
-            });
+        function updateShowcase(rawItem) {
+            if (!showcaseSection) return;
+            if (!rawItem) { showcaseSection.classList.add('hidden'); return; }
+            const item = formatMediaItem(rawItem);
+            if (!item.backdrop) { showcaseSection.classList.add('hidden'); return; }
+
+            showcaseSection.classList.remove('hidden');
+            $('showcaseBackdrop').style.backgroundImage = `url('${item.backdrop}')`;
+            $('showcaseTitle').textContent = item.title;
+            $('showcaseOverview').textContent = item.overview;
+            $('showcaseRating').innerHTML = `<i class="ph-fill ph-star text-yellow-400"></i> ${item.rating}`;
+            $('showcaseType').textContent = item.type === 'tv' ? 'TV Series' : 'Movie';
+            
+            $('showcasePlayBtn').onclick = () => openPlayer(item);
+            $('showcaseBookmarkBtn').onclick = (e) => toggleBookmark(item, e);
         }
 
-        if (adBlockToggle) {
-            adBlockToggle.addEventListener('click', () => {
-                isAdShieldActive = !isAdShieldActive;
-                const shieldLabel = $('adShieldLabel');
-                if(isAdShieldActive) {
-                    adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-green-900/30 text-green-500 border border-green-900 rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-green-900/50 transition-colors";
-                    adBlockToggle.innerHTML = `<i class="ph-fill ph-shield-check text-base"></i> <span id="adShieldLabel" class="hidden sm:inline">${t('adShieldOn')}</span>`;
-                    showToast(t('toastShieldOn'));
-                } else {
-                    adBlockToggle.className = "flex items-center gap-1.5 px-2.5 py-1.5 bg-theme-hover text-theme-muted border border-theme-border rounded-md text-xs font-semibold uppercase tracking-wider hover:brightness-110 transition-colors";
-                    adBlockToggle.innerHTML = `<i class="ph ph-shield text-base"></i> <span id="adShieldLabel" class="hidden sm:inline">${t('adShieldOff')}</span>`;
-                    showToast(t('toastShieldOff'), 3000);
-                }
+        async function openPlayer(item) {
+            if (!playerModal) return;
+            currentMediaObj = item; 
+            currentMediaId = item.id;
+
+            modalTitle.textContent = item.title;
+            playerModal.classList.remove('hidden'); 
+            videoFrame.classList.add('hidden');
+            playerLoader.classList.remove('hidden'); 
+            
+            if (item.type === 'tv') {
+                tvSidebar.classList.remove('hidden'); tvSidebar.classList.add('flex');
+                await loadTvDetails(currentMediaId);
+            } else { 
+                tvSidebar.classList.add('hidden');
                 updateStreamIframe(); 
-            });
+            }
         }
 
-        if (fullscreenBtn && videoContainer) {
-            fullscreenBtn.addEventListener('click', () => {
-                const isFullscreen = videoContainer.classList.contains('webview-fullscreen') || document.fullscreenElement;
-                if (!isFullscreen) {
-                    videoContainer.classList.add('webview-fullscreen', 'force-landscape');
-                    fullscreenBtn.innerHTML = `<i class="ph ph-corners-in text-base"></i> <span class="hidden sm:inline">${t('exitFullscreen')}</span>`;
-                    try {
-                        if (videoContainer.requestFullscreen) videoContainer.requestFullscreen().catch(err => console.warn(err));
-                        else if (videoContainer.webkitRequestFullscreen) videoContainer.webkitRequestFullscreen();
-                    } catch(e) {}
-                    if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
-                } else {
-                    videoContainer.classList.remove('webview-fullscreen', 'force-landscape');
-                    fullscreenBtn.innerHTML = `<i class="ph ph-corners-out text-base"></i> <span class="hidden sm:inline">${t('fullscreen')}</span>`;
-                    try {
-                        if (document.exitFullscreen) document.exitFullscreen().catch(err => console.warn(err));
-                        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                    } catch(e) {}
-                    if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
-                }
-            });
+        function closePlayerModal() {
+            playerModal.classList.add('hidden'); 
+            videoFrame.src = ''; 
         }
-
-        if (floatingExitBtn) {
-            floatingExitBtn.addEventListener('click', () => {
-                if (fullscreenBtn) fullscreenBtn.click();
-            });
-        }
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closePlayerModal);
+        
+        const serverSelect = $('serverSelect');
+        if(serverSelect) serverSelect.addEventListener('change', updateStreamIframe);
 
         function updateStreamIframe() {
-            if (!videoFrame) return;
-            const server = serverSelect ? serverSelect.value : 'vidsrc_to';
+            playerLoader.classList.add('hidden');
+            videoFrame.classList.remove('hidden');
+            clickShield.classList.remove('resolved');
+            clickShield.style.display = 'flex';
+            
+            const server = serverSelect.value;
             let url = '';
             
-            if (!currentDirectUrl && (server === 'torrentio' || server === 'direct_ext')) {
-                videoFrame.src = '';
-                videoFrame.classList.add('hidden');
-                if (clickShield) clickShield.classList.add('hidden');
-                if (scraperContainer) scraperContainer.classList.remove('hidden');
-                if (videoContainer) videoContainer.classList.add('scraper-open');
-                loadScraperData(server);
-                return;
+            if (currentMediaObj.type === 'movie') {
+                if(server === 'vidsrc_to') url = `https://vidsrc.to/embed/movie/${currentMediaId}`;
+                else url = `https://vidsrc.me/embed/movie?tmdb=${currentMediaId}`; // fallback
             } else {
-                if (scraperContainer) scraperContainer.classList.add('hidden');
-                if (videoContainer) videoContainer.classList.remove('scraper-open');
-                if (clickShield && !clickShield.classList.contains('resolved')) {
-                    clickShield.classList.remove('hidden');
-                }
-            }
-            
-            if (currentDirectUrl) {
-                url = currentDirectUrl;
-            } else {
-                let actualType = currentType === 'anime' ? 'tv' : currentType;
-                
-                if (actualType === 'movie') {
-                    switch (server) {
-                        case 'vidsrc_to': url = `https://vidsrc.to/embed/movie/${currentMediaId}`; break;
-                        case 'vidsrc_me': url = `https://vidsrc.me/embed/movie?tmdb=${currentMediaId}`; break;
-                        case 'vidlink': url = `https://vidlink.pro/movie/${currentMediaId}`; break;
-                        case 'smashy': url = `https://player.smashy.stream/movie/${currentMediaId}`; break;
-                        case 'multiembed': url = `https://multiembed.mov/?video_id=${currentMediaId}&tmdb=1`; break;
-                        case 'autoembed': url = `https://autoembed.co/movie/tmdb/${currentMediaId}`; break;
-                        case '2embed': url = `https://www.2embed.cc/embed/${currentMediaId}`; break;
-                        case 'vidbinge': url = `https://vidbinge.com/embed/movie/${currentMediaId}`; break;
-                        case 'movieapi': url = `https://movieapi.stream/movie/${currentMediaId}`; break;
-                        default: url = `https://vidsrc.to/embed/movie/${currentMediaId}`;
-                    }
-                } else {
-                    switch (server) {
-                        case 'vidsrc_to': url = `https://vidsrc.to/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`; break;
-                        case 'vidsrc_me': url = `https://vidsrc.me/embed/tv?tmdb=${currentMediaId}&season=${currentSeason}&episode=${currentEpisode}`; break;
-                        case 'vidlink': url = `https://vidlink.pro/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`; break;
-                        case 'smashy': url = `https://player.smashy.stream/tv/${currentMediaId}?s=${currentSeason}&e=${currentEpisode}`; break;
-                        case 'multiembed': url = `https://multiembed.mov/?video_id=${currentMediaId}&tmdb=1&s=${currentSeason}&e=${currentEpisode}`; break;
-                        case 'autoembed': url = `https://autoembed.co/tv/tmdb/${currentMediaId}-${currentSeason}-${currentEpisode}`; break;
-                        case '2embed': url = `https://www.2embed.cc/embedtv/${currentMediaId}&s=${currentSeason}&e=${currentEpisode}`; break;
-                        case 'vidbinge': url = `https://vidbinge.com/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`; break;
-                        case 'movieapi': url = `https://movieapi.stream/tv/${currentMediaId}-${currentSeason}-${currentEpisode}`; break;
-                        default: url = `https://vidsrc.to/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`;
-                    }
-                }
-            }
-
-            if (isAdShieldActive) {
-                videoFrame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
-            } else {
-                videoFrame.removeAttribute('sandbox');
+                if(server === 'vidsrc_to') url = `https://vidsrc.to/embed/tv/${currentMediaId}/${currentSeason}/${currentEpisode}`;
+                else url = `https://vidsrc.me/embed/tv?tmdb=${currentMediaId}&season=${currentSeason}&episode=${currentEpisode}`;
             }
 
             videoFrame.src = url;
-            videoFrame.classList.remove('hidden');
-            
-            if (playerLoader) playerLoader.classList.add('hidden');
-            if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-500">${t('connectedSecure')}</span>`;
+            streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-500">Connected</span>`;
         }
 
-        async function loadScraperData(server) {
-            scraperContainer.innerHTML = '';
-            if (playerLoader) {
-                playerLoader.classList.remove('hidden');
-                if (loaderMessage) loaderMessage.textContent = "Searching streams...";
-            }
-            if (streamStatus) streamStatus.innerHTML = `<i class="ph ph-spinner animate-spin"></i> <span class="text-theme-muted">Fetching sources...</span>`;
-            
-            try {
-                let imdbId = null;
-                let actualType = currentType === 'anime' ? 'tv' : currentType;
-                
-                // Fetch IMDB ID from TMDB
-                const extRes = await fetch(`https://api.themoviedb.org/3/${actualType}/${currentMediaId}/external_ids?api_key=${TMDB_API_KEY}`);
-                const extData = await extRes.json();
-                imdbId = extData.imdb_id;
-                
-                if (!imdbId) throw new Error("IMDB ID not found");
+        clickShield.addEventListener('click', () => {
+            clickShield.classList.add('resolved');
+        });
 
-                let urlType = actualType === 'movie' ? 'movie' : 'series';
-                let torrentioUrl = `https://torrentio.strem.fun/stream/${urlType}/${imdbId}`;
-                if (urlType === 'series') {
-                    torrentioUrl += `:${currentSeason}:${currentEpisode}`;
-                }
-                torrentioUrl += '.json';
-                
-                const torRes = await fetch(torrentioUrl);
-                const torData = await torRes.json();
-                
-                if (!torData.streams || torData.streams.length === 0) {
-                    throw new Error("No streams found");
-                }
-                
-                renderScraperStreams(torData.streams, server);
-                
-                if (playerLoader) playerLoader.classList.add('hidden');
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-check-circle text-green-500"></i> <span class="text-green-500">Links found</span>`;
-                
-            } catch (e) {
-                console.error("Scraper Error:", e);
-                if (playerLoader) playerLoader.classList.add('hidden');
-                if (streamStatus) streamStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-theme-accent"></i> <span class="text-theme-accent">No links found</span>`;
-                scraperContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-theme-muted p-6 text-center">
-                    <i class="ph-fill ph-empty text-4xl mb-2"></i>
-                    <p>No external streams found for this media.</p>
-                    <button onclick="serverSelect.value='vidsrc_to'; updateStreamIframe();" class="mt-4 px-4 py-2 bg-theme-accent text-theme-accent-text rounded-md font-medium transition-colors hover:brightness-110">Use Web Player</button>
-                </div>`;
-            }
+        // TV Seasons/Episodes Mock Logic
+        const seasonSelect = $('seasonSelect');
+        const episodeList = $('episodeList');
+        
+        async function loadTvDetails(id) {
+            seasonSelect.innerHTML = '<option value="1">Season 1</option><option value="2">Season 2</option>';
+            currentSeason = 1;
+            loadEpisodes(id, currentSeason);
         }
 
-        function renderScraperStreams(streams, server) {
-            let html = `<div class="mb-4 bg-theme-panel p-4 rounded-xl border border-theme-border">
-                <h3 class="text-lg font-bold text-theme-text mb-1">${server === 'torrentio' ? t('torrentioTitle') : t('extHubTitle')}</h3>
-                <p class="text-xs text-theme-muted">${server === 'torrentio' ? t('torrentioDesc') : t('extHubDesc')}</p>
-            </div>
-            <div class="space-y-2 overflow-y-auto pr-1 pb-4" style="max-height: calc(100% - 100px);">`;
-            
-            streams.forEach((stream) => {
-                let quality = "SD";
-                let size = "N/A";
-                let parsedTitle = stream.title || "";
-                
-                const resMatch = parsedTitle.match(/4k|2160p|1080p|720p|480p/i);
-                if (resMatch) quality = resMatch[0].toUpperCase();
-                
-                const sizeMatch = parsedTitle.match(/(\d+(?:\.\d+)?\s*(GB|MB))/i);
-                if (sizeMatch) size = sizeMatch[1];
-                
-                let link = stream.url || (stream.infoHash ? `magnet:?xt=urn:btih:${stream.infoHash}` : '#');
-                
-                let btnClass = server === 'torrentio' ? 'bg-blue-900/40 text-blue-400 border-blue-900 hover:bg-blue-900/60' : 'bg-purple-900/40 text-purple-400 border-purple-900 hover:bg-purple-900/60';
-                
-                html += `
-                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between p-3 rounded-lg bg-theme-panel border border-theme-border hover:border-theme-muted transition-colors group">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1 flex-wrap">
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-theme-hover text-theme-text uppercase">${quality}</span>
-                            <span class="text-[10px] text-theme-muted"><i class="ph ph-hard-drive"></i> ${size}</span>
-                        </div>
-                        <p class="text-xs sm:text-sm text-theme-text font-medium truncate" title="${stream.name || parsedTitle}">${stream.name || 'Stream'} ${parsedTitle ? `- ${parsedTitle.substring(0, 40)}...` : ''}</p>
-                    </div>
-                    
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <a href="${link}" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 border rounded-md text-xs font-bold uppercase tracking-wider transition-colors ${btnClass}" target="_blank">
-                            <i class="ph-fill ph-download-simple text-base"></i> ${t('launchApp')}
-                        </a>
-                        <button onclick="copyToClipboard('${link}', this)" class="p-2 border border-theme-border rounded-md text-theme-muted hover:text-theme-text hover:bg-theme-hover transition-colors" title="${t('copyLink')}">
-                            <i class="ph ph-copy text-base"></i>
-                        </button>
-                    </div>
-                </div>`;
-            });
-            
-            html += `</div>`;
-            scraperContainer.innerHTML = html;
+        function loadEpisodes(id, seasonNum) {
+            episodeList.innerHTML = '';
+            for(let i=1; i<=10; i++) {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-2 rounded-md text-sm ${i === currentEpisode ? 'bg-theme-accent text-white' : 'bg-theme-panel text-theme-text hover:bg-theme-hover'}`;
+                btn.textContent = `Episode ${i}`;
+                btn.onclick = () => {
+                    currentEpisode = i;
+                    updateStreamIframe();
+                    loadEpisodes(id, seasonNum); // Re-render to show active
+                };
+                episodeList.appendChild(btn);
+            }
+            updateStreamIframe();
         }
         
-        function copyToClipboard(text, btn) {
-            navigator.clipboard.writeText(text).then(() => {
-                const icon = btn.querySelector('i');
-                icon.className = 'ph-fill ph-check-circle text-green-500';
-                setTimeout(() => icon.className = 'ph ph-copy text-base', 2000);
-            });
-        }
-        
-        function showToast(message, duration = 4000) {
-            const toast = document.createElement('div');
-            toast.className = "fixed bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-medium border border-white/10 z-[999999] opacity-0 transition-opacity flex items-center gap-2 shadow-2xl";
-            toast.innerHTML = message;
-            document.body.appendChild(toast);
-            
-            requestAnimationFrame(() => toast.style.opacity = '1');
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
+        if(seasonSelect) seasonSelect.addEventListener('change', (e) => {
+            currentSeason = e.target.value;
+            currentEpisode = 1;
+            loadEpisodes(currentMediaId, currentSeason);
+        });
 
-        window.addEventListener('popstate', (e) => {
-            if (e.state && e.state.writerstm === 'app') {
-                if (playerModal && !playerModal.classList.contains('hidden')) {
-                    closePlayerModal(true);
-                }
-                applyAppState(e.state.app);
-            } else if (!e.state && playerModal && !playerModal.classList.contains('hidden')) {
-                closePlayerModal(true);
+        // Fullscreen Logic
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(err => {});
+                videoContainer.classList.add('webview-fullscreen');
+            } else {
+                document.exitFullscreen();
+                videoContainer.classList.remove('webview-fullscreen');
             }
+        });
+        floatingExitBtn.addEventListener('click', () => {
+            if(document.fullscreenElement) document.exitFullscreen();
+            videoContainer.classList.remove('webview-fullscreen');
+        });
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) videoContainer.classList.remove('webview-fullscreen');
         });
 
     </script>
